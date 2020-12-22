@@ -142,8 +142,10 @@ def lista_particolari(input_codice, db_particolari):
 
 
 def lista_fasi(particolari):
+    lf = []
     for pa in particolari:
-        print(pa.fase)
+        lf.append(pa.fase)
+    return lf
 
 
 def fase_compatibile(fs_macchina, fs_pezzo):
@@ -152,22 +154,30 @@ def fase_compatibile(fs_macchina, fs_pezzo):
     return False
 
 
+def compatibilita_generale(macchina, pezzo):
+    return diametro_compatibile(macchina.diametro, pezzo.diametro) and \
+            utensile_compatibile(pezzo.tipo_utensile, macchina.tipo_utensile) and \
+            diametro_utensile(pezzo.diametro_utensile, macchina.diametro_max_utensile) and \
+            tipo_lavorazione(pezzo.lavorazione, macchina.lavorazione) and \
+            modulo_compatibile(macchina.modulo_max, pezzo.modulo) and \
+            fascia_compatibile(pezzo.fascia, macchina.altezza_fascia_max) and \
+            attrezzatura_compatibile(pezzo.tipo_attrezzatura, macchina.tipo_attrezzatura) and \
+            inclinazione_elica_compatibile_dx(pezzo.incl_elica_max_dx, macchina.incl_elica_max_dx) and \
+            inclinazione_elica_compatibile_sx(pezzo.incl_elica_max_sx, macchina.incl_elica_max_sx) and \
+            inclinazione_compatibile(pezzo.inclinazione, macchina.inclinazione_tavola)
+
+
 # ls_macc= lista macchine; ls_part= lista particolari; fs= fase.
 def macchine_compatibili(ls_macc, ls_part, fs=None):
     for p in ls_part:
         for m in ls_macc:
-            if diametro_compatibile(m.diametro, p.diametro) and \
-                    utensile_compatibile(p.tipo_utensile, m.tipo_utensile) and \
-                    diametro_utensile(p.diametro_utensile, m.diametro_max_utensile) and \
-                    tipo_lavorazione(p.lavorazione, m.lavorazione) and \
-                    modulo_compatibile(m.modulo_max, p.modulo) and \
-                    fascia_compatibile(p.fascia, m.altezza_fascia_max) and \
-                    attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura) and \
-                    inclinazione_elica_compatibile_dx(p.incl_elica_max_dx, m.incl_elica_max_dx) and \
-                    inclinazione_elica_compatibile_sx(p.incl_elica_max_sx, m.incl_elica_max_sx) and \
-                    inclinazione_compatibile(p.inclinazione, m.inclinazione_tavola):
-                if fs is None or (fs is not None and tipo_lavorazione(p.lavorazione, m.lavorazione)):
+            if fs is None:
+                if compatibilita_generale(m, p):
                     print(m.nome)
+            else:
+                if p.fase == fs:
+                    if compatibilita_generale(m, p):
+                        print(m.nome)
 
 
 if __name__ == '__main__':
@@ -248,8 +258,11 @@ if __name__ == '__main__':
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista)
     elif len(mini_lista) > 1:
         print("Il codice presenta più fasi. Quale intendi scegliere?")
-        lista_fasi(mini_lista)
-        fase = input("Selezionare fase ")
+        lf = lista_fasi(mini_lista)
+        print(lf)
+        fase = input("Selezionare fase: ")
+        while fase not in lf:
+            fase = input("Fase non presente. Selezionare nuovamente la fase: ")
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista, fase)
     else:
         print("Particolare non presente nel database.")
