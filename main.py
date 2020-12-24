@@ -199,6 +199,26 @@ def stampa_valori(v):
     print(vars(v))
 
 
+def remove_macchina(nome_macchina):
+    x = get_macchina(nome_macchina)
+    if isinstance(x, Macchina):
+        Macchine_TFZ_Aprilia.remove(x)
+        print("Macchina eliminato con successo")
+    else:
+        print("Macchina non trovata")
+
+
+def remove_particolare(codice_particolare, fs=0):
+    x = get_particolare(codice_particolare, fs)
+    print(len(Particolari))
+    if isinstance(x, Particolare):
+        Particolari.remove(x)
+        print("Codice eliminato con successo")
+    else:
+        print("Codice non trovato")
+    print(len(Particolari))
+
+
 if __name__ == '__main__':
     m1 = Macchina("15_24", (120, 300), ["palo", "pinza"], ["creatore"], 200,
                   ["dentatura"],
@@ -286,8 +306,4 @@ if __name__ == '__main__':
     else:
         print("Particolare non presente nel database.")
 
-    x = get_particolare(input("Inserire codice particolare: "))
-    if x is None:
-        print("Codice non presente nel database")
-    else:
-        stampa_valori(x)
+
