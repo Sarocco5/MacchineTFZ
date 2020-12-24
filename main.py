@@ -142,10 +142,10 @@ def lista_particolari(input_codice, db_particolari):
 
 
 def lista_fasi(particolari):
-    lf = []
+    l_f = []
     for pa in particolari:
-        lf.append(pa.fase)
-    return lf
+        l_f.append(pa.fase)
+    return l_f
 
 
 def fase_compatibile(fs_macchina, fs_pezzo):
@@ -178,6 +178,25 @@ def macchine_compatibili(ls_macc, ls_part, fs=None):
                 if p.fase == fs:
                     if compatibilita_generale(m, p):
                         print(m.nome)
+
+
+def get_macchina(nome_macchina):
+    for m in Macchine_TFZ_Aprilia:
+        if m.nome == nome_macchina:
+            return m
+
+
+def get_particolare(codice_particolare, fs=0):
+    for p in Particolari:
+        if p.codice == codice_particolare:
+            if fs == 0:
+                return p
+            elif p.fase == fs:
+                return p
+
+
+def stampa_valori(v):
+    print(vars(v))
 
 
 if __name__ == '__main__':
@@ -258,11 +277,17 @@ if __name__ == '__main__':
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista)
     elif len(mini_lista) > 1:
         print("Il codice presenta più fasi. Quale intendi scegliere?")
-        lf = lista_fasi(mini_lista)
-        print(lf)
+        l_f = lista_fasi(mini_lista)
+        print(l_f)
         fase = input("Selezionare fase: ")
-        while fase not in lf:
+        while fase not in l_f:
             fase = input("Fase non presente. Selezionare nuovamente la fase: ")
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista, fase)
     else:
         print("Particolare non presente nel database.")
+
+    x = get_particolare(input("Inserire codice particolare: "))
+    if x is None:
+        print("Codice non presente nel database")
+    else:
+        stampa_valori(x)
