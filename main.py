@@ -210,13 +210,11 @@ def remove_macchina(nome_macchina):
 
 def remove_particolare(codice_particolare, fs=0):
     x = get_particolare(codice_particolare, fs)
-    print(len(Particolari))
     if isinstance(x, Particolare):
         Particolari.remove(x)
         print("Codice eliminato con successo")
     else:
         print("Codice non trovato")
-    print(len(Particolari))
 
 
 if __name__ == '__main__':
@@ -307,3 +305,4 @@ if __name__ == '__main__':
         print("Particolare non presente nel database.")
 
 
+remove_particolare(input("Inserire il codice del particolare che si vuole rimuovere: "))
