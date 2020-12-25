@@ -61,17 +61,13 @@ class Particolare:
 
 
 # Ritorna true, se il valore del diametro è contenuto nella tupla (min, max)
-def diametro_compatibile(tupla, valore):
-    if tupla[0] <= valore <= tupla[1]:
-        return True
-    return False
+def diametro_compatibile(valore, tupla):
+    return tupla[0] <= valore <= tupla[1]
 
 
 # Definisco che tipo ti lavorazione è
 def tipo_lavorazione(p_lav, m_lav):
-    if p_lav in m_lav:
-        return True
-    return False
+    return p_lav in m_lav
 
 
 def calcolo_interasse(diam_pezzo, diam_ute):
@@ -81,54 +77,16 @@ def calcolo_interasse(diam_pezzo, diam_ute):
 # Scorro una lista e vedo se l'oggetto è presente nella lista.
 def attrezzatura_compatibile(p_ta, m_ta):
     for attrezzatura in p_ta:
-        if attrezzatura in m_ta:
-            return True
-    return False
+        return attrezzatura in m_ta
 
 
 # Scorro una lista e vedo se l'oggetto è presente nella lista.
 def utensile_compatibile(p_tu, m_tu):
-    if p_tu in m_tu:
-        return True
-    return False
+    return p_tu in m_tu
 
 
-def diametro_utensile(d_max_ut, d_ut):
-    if d_ut >= d_max_ut:
-        return True
-    return False
-
-
-# Modulo
-def modulo_compatibile(mod_max, mod):
-    if mod <= mod_max:
-        return True
-    return False
-
-
-def fascia_compatibile(fascia, h_fascia_max):
-    if fascia <= h_fascia_max:
-        return True
-    return False
-
-
-# Il valore di un dato particolare è maggiore o uguale ad un dato macchina
-def inclinazione_elica_compatibile_dx(p_incl_elica_dx, m_incl_elica_dx):
-    if p_incl_elica_dx <= m_incl_elica_dx:
-        return True
-    return False
-
-
-def inclinazione_elica_compatibile_sx(p_incl_elica_sx, m_incl_elica_sx):
-    if p_incl_elica_sx <= m_incl_elica_sx:
-        return True
-    return False
-
-
-def inclinazione_compatibile(incl, incl_tav):
-    if incl <= incl_tav:
-        return True
-    return False
+def minore_uguale(a, b):
+    return a <= b
 
 
 # creo una lista vuota da riempire con il codice che metto tramite l'input, che mi servirà per vedere se il codice è
@@ -154,17 +112,16 @@ def fase_compatibile(fs_macchina, fs_pezzo):
     return False
 
 
-def compatibilita_generale(macchina, pezzo):
-    return diametro_compatibile(macchina.diametro, pezzo.diametro) and \
-            utensile_compatibile(pezzo.tipo_utensile, macchina.tipo_utensile) and \
-            diametro_utensile(pezzo.diametro_utensile, macchina.diametro_max_utensile) and \
-            tipo_lavorazione(pezzo.lavorazione, macchina.lavorazione) and \
-            modulo_compatibile(macchina.modulo_max, pezzo.modulo) and \
-            fascia_compatibile(pezzo.fascia, macchina.altezza_fascia_max) and \
-            attrezzatura_compatibile(pezzo.tipo_attrezzatura, macchina.tipo_attrezzatura) and \
-            inclinazione_elica_compatibile_dx(pezzo.incl_elica_max_dx, macchina.incl_elica_max_dx) and \
-            inclinazione_elica_compatibile_sx(pezzo.incl_elica_max_sx, macchina.incl_elica_max_sx) and \
-            inclinazione_compatibile(pezzo.inclinazione, macchina.inclinazione_tavola)
+def compatibilita_generale(m, p):
+    return diametro_compatibile(p.diametro, m.diametro) and \
+        utensile_compatibile(p.tipo_utensile, m.tipo_utensile) and \
+        tipo_lavorazione(p.lavorazione, m.lavorazione) and \
+        attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura) and \
+        minore_uguale(p.modulo, m.modulo_max) and \
+        minore_uguale(p.fascia, m.altezza_fascia_max) and \
+        minore_uguale(p.incl_elica_max_dx, m.incl_elica_max_dx) and \
+        minore_uguale(p.incl_elica_max_sx, m.incl_elica_max_sx) and \
+        minore_uguale(p.inclinazione, m.inclinazione_tavola)
 
 
 # ls_macc= lista macchine; ls_part= lista particolari; fs= fase.
@@ -208,7 +165,7 @@ def remove_macchina(nome_macchina):
         print("Macchina non trovata")
 
 
-def remove_particolare(codice_particolare, fs=0):
+def remove_particolare(codice_particolare, fs=None):
     x = get_particolare(codice_particolare, fs)
     if isinstance(x, Particolare):
         Particolari.remove(x)
@@ -303,6 +260,3 @@ if __name__ == '__main__':
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista, fase)
     else:
         print("Particolare non presente nel database.")
-
-
-remove_particolare(input("Inserire il codice del particolare che si vuole rimuovere: "))
