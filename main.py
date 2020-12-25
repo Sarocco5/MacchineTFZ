@@ -186,10 +186,10 @@ def get_macchina(nome_macchina):
             return m
 
 
-def get_particolare(codice_particolare, fs=0):
+def get_particolare(codice_particolare, fs=None):
     for p in Particolari:
         if p.codice == codice_particolare:
-            if fs == 0:
+            if fs is None:
                 return p
             elif p.fase == fs:
                 return p
