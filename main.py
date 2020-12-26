@@ -191,21 +191,15 @@ def insert_database(cod, tipo, fs=None):
             d = (d_min, d_max)
             print(lista_attrezzatura)
             att = input("Inserire il tipo di attrezzatura compatibile: ")
-            if att in lista_attrezzatura:
-                pass
             while att not in lista_attrezzatura:
                 att = input("Attrezzatura non disponibile.Inserire nuovamente il tipo di attrezzatura: ")
             print(lista_utensili)
             t_u = input("Inserire il tipo di utensile: ")
-            if t_u in lista_utensili:
-                pass
             while t_u not in lista_utensili:
                 t_u = input("Utensile non disponibile.Inserire nuovamente l'utensile: ")
             d_max_u = int(input("Inserire il diametro massimo dell'utensile: "))
             print(lista_lavorazioni)
             lav = input("Inserire tipo di lavorazioni: ")
-            if lav in lista_lavorazioni:
-                pass
             while lav not in lista_lavorazioni:
                 lav = input("Lavorazione non disponibile.Inserire nuovamente la lavorazione: ")
             mod_max = int(input("Inserire modulo massimo: "))
@@ -228,22 +222,16 @@ def insert_database(cod, tipo, fs=None):
             d = int(input("Inserire diametro pezzo: "))
             print(lista_attrezzatura)
             att = input("Inserire il tipo di attrezzatura compatibile: ")
-            if att in lista_attrezzatura:
-                pass
             while att not in lista_attrezzatura:
                 att = input("Attrezzatura non disponibile.Inserire nuovamente il tipo di attrezzatura: ")
             print(lista_utensili)
             t_u = input("Inserire il tipo di utensile: ")
-            if t_u in lista_utensili:
-                pass
             while t_u not in lista_utensili:
                 t_u = input("Utensile non disponibile.Inserire nuovamente l'utensile: ")
             d_u = int(input("Inserire diametro utensile: "))
             fs = input("Inserire fase: ")
             print(lista_lavorazioni)
             lav = input("Inserire tipo di lavorazioni: ")
-            if lav in lista_lavorazioni:
-                pass
             while lav not in lista_lavorazioni:
                 lav = input("Lavorazione non disponibile.Inserire nuovamente la lavorazione: ")
             m = int(input("Inserire modulo: "))
