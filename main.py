@@ -177,11 +177,11 @@ def remove_particolare(codice_particolare, fs=None):
 # mettere opzioni di scelta per tipo lavorazione e
 # attrezzatura
 def insert_database(cod, tipo, fs=None):
+    lista_attrezzatura = ["palo", "pinza", "manuale"]
+    lista_utensili = ["creatore", "coltello", "tazza", "gambo"]
+    lista_lavorazioni = ["dentatura", "stozza", "stozza elicoidale", "stozza elicoidale bombata"]
     if tipo == "m":
         x = get_macchina(cod)
-        lista_attrezzatura = ["palo", "pinza", "manuale"]
-        lista_utensili = ["creatore", "coltello", "tazza", "gambo"]
-        lista_lavorazioni = ["dentatura", "stozza", "stozza elicoidale", "stozza elicoidale bombata"]
         if isinstance(x, Macchina):
             print(f'La macchina "{cod}" è presente nel database.')
         else:
@@ -226,16 +226,31 @@ def insert_database(cod, tipo, fs=None):
         else:
             print(f'Inserire valori particolare "{cod}"')
             d = int(input("Inserire diametro pezzo: "))
-            att = input("Inserire tipo attrezzatura: ")
-            t_u = input("Inserire tipo utensile: ")
+            print(lista_attrezzatura)
+            att = input("Inserire il tipo di attrezzatura compatibile: ")
+            if att in lista_attrezzatura:
+                pass
+            while att not in lista_attrezzatura:
+                att = input("Attrezzatura non disponibile.Inserire nuovamente il tipo di attrezzatura: ")
+            print(lista_utensili)
+            t_u = input("Inserire il tipo di utensile: ")
+            if t_u in lista_utensili:
+                pass
+            while t_u not in lista_utensili:
+                t_u = input("Utensile non disponibile.Inserire nuovamente l'utensile: ")
             d_u = int(input("Inserire diametro utensile: "))
             fs = input("Inserire fase: ")
-            lav = input("Inserire tipo lavorazione: ")
-            m = input("Inserire modulo: ")
-            h = input("Inserire fascia: ")
-            inc_el_dx = input("Inserire elica pezzo: ")
-            inc_el_sx = input("Inserire elica pezzo: ")
-            inc = input("Inserire inclinazione pezzo:")
+            print(lista_lavorazioni)
+            lav = input("Inserire tipo di lavorazioni: ")
+            if lav in lista_lavorazioni:
+                pass
+            while lav not in lista_lavorazioni:
+                lav = input("Lavorazione non disponibile.Inserire nuovamente la lavorazione: ")
+            m = int(input("Inserire modulo: "))
+            h = int(input("Inserire fascia: "))
+            inc_el_dx = int(input("Inserire elica pezzo: "))
+            inc_el_sx = int(input("Inserire elica pezzo: "))
+            inc = int(input("Inserire inclinazione pezzo:"))
             print("Inserimento completato con successo")
             p = (d, att, t_u, d_u, fs, lav, m, h, inc_el_dx, inc_el_sx, inc)
             Particolari.append(p)
