@@ -35,12 +35,12 @@ class Particolare:
     tipo_attrezzatura = None
     tipo_utensile = []
     diametro_utensile = None
-    lavorazione = []
     fase = []
+    lavorazione = []
     modulo = ()
     fascia = None
-    incl_elica_max_dx = None
-    incl_elica_max_sx = None
+    incl_elica_dx = None
+    incl_elica_sx = None
     inclinazione = None
 
     def __init__(self, c, d, p_ta, p_tu, d_ut, p_f, p_lav, mod, fascia,
@@ -55,8 +55,8 @@ class Particolare:
         self.lavorazione = p_lav
         self.modulo = mod
         self.fascia = fascia
-        self.incl_elica_max_dx = p_incl_elica_dx
-        self.incl_elica_max_sx = p_incl_elica_sx
+        self.incl_elica_dx = p_incl_elica_dx
+        self.incl_elica_sx = p_incl_elica_sx
         self.inclinazione = incl
 
 
@@ -119,8 +119,8 @@ def compatibilita_generale(m, p):
         attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura) and \
         minore_uguale(p.modulo, m.modulo_max) and \
         minore_uguale(p.fascia, m.altezza_fascia_max) and \
-        minore_uguale(p.incl_elica_max_dx, m.incl_elica_max_dx) and \
-        minore_uguale(p.incl_elica_max_sx, m.incl_elica_max_sx) and \
+        minore_uguale(p.incl_elica_dx, m.incl_elica_max_dx) and \
+        minore_uguale(p.incl_elica_sx, m.incl_elica_max_sx) and \
         minore_uguale(p.inclinazione, m.inclinazione_tavola)
 
 
@@ -174,10 +174,59 @@ def remove_particolare(codice_particolare, fs=None):
         print("Codice non trovato")
 
 
+# mettere opzioni di scelta per tipo lavorazione e
+# attrezzatura
+def insert_database(cod, tipo, fs=None):
+    if tipo == "m":
+        x = get_macchina(cod)
+        if isinstance(x, Macchina):
+            print(f'La macchina "{cod}" è presente nel database.')
+        else:
+            print(f'Inserire valori macchina "{cod}"')
+            d_min = int(input("Inserire diametro minimo: "))
+            d_max = int(input("Inserire diametro massimo: "))
+            d = (d_min, d_max)
+            att = input("Inserire il tipo di attrezzatura compatibile: ")
+            t_u = input("Inserire il tipo di utensile: ")
+            d_max_u = int(input("Inserire il diametro massimo dell'utensile: "))
+            lav = input("Inserire tipo di lavorazioni: ")
+            mod_max = int(input("Inserire modulo massimo: "))
+            h_max = int(input("Inserire altezza massima: "))
+            int_min = int(input("Inserire interasse minimo: "))
+            inc_el_max_dx = int(input("Inserire inclinazione elica dx massima: "))
+            inc_el_max_sx = int(input("Inserire inclinazione elica sx massima: "))
+            inc_tav = int(input("Inserire inclinazione tavola: "))
+            print("Inserimento completato con successo")
+            m = Macchina(cod, d, att, t_u, d_max_u, lav, mod_max, h_max, int_min, inc_el_max_dx, inc_el_max_sx, inc_tav)
+            Macchine_TFZ_Aprilia.append(m)
+    else:
+        pass
+    if tipo == "p":
+        y = get_particolare(cod)
+        if isinstance(y, Particolare):
+            print(f'Il particolare "{cod}" è presente nel database.')
+        else:
+            print(f'Inserire valori particolare "{cod}"')
+            d = int(input("Inserire diametro pezzo: "))
+            att = input("Inserire tipo attrezzatura: ")
+            t_u = input("Inserire tipo utensile: ")
+            d_u = int(input("Inserire diametro utensile: "))
+            fs = input("Inserire fase: ")
+            lav = input("Inserire tipo lavorazione: ")
+            m = input("Inserire modulo: ")
+            h = input("Inserire fascia: ")
+            inc_el_dx = input("Inserire elica pezzo: ")
+            inc_el_sx = input("Inserire elica pezzo: ")
+            inc = input("Inserire inclinazione pezzo:")
+            print("Inserimento completato con successo")
+            p = (d, att, t_u, d_u, fs, lav, m, h, inc_el_dx, inc_el_sx, inc)
+            Particolari.append(p)
+
+
 if __name__ == '__main__':
     m1 = Macchina("15_24", (120, 300), ["palo", "pinza"], ["creatore"], 200,
                   ["dentatura"],
-                  6, 100, int_min=100, m_incl_elica_dx=30, m_incl_elica_sx=30)
+                  6, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
     m2 = Macchina("15_25", (100, 200), ["palo", "pinza"], ["creatore"], 200,
                   ["dentatura"],
                   4, 100, int_min=100, m_incl_elica_dx=30, m_incl_elica_sx=30)
@@ -260,3 +309,4 @@ if __name__ == '__main__':
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista, fase)
     else:
         print("Particolare non presente nel database.")
+
