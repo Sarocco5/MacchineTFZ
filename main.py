@@ -179,6 +179,9 @@ def remove_particolare(codice_particolare, fs=None):
 def insert_database(cod, tipo, fs=None):
     if tipo == "m":
         x = get_macchina(cod)
+        lista_attrezzatura = ["palo", "pinza", "manuale"]
+        lista_utensili = ["creatore", "coltello", "tazza", "gambo"]
+        lista_lavorazioni = ["dentatura", "stozza", "stozza elicoidale", "stozza elicoidale bombata"]
         if isinstance(x, Macchina):
             print(f'La macchina "{cod}" è presente nel database.')
         else:
@@ -186,10 +189,25 @@ def insert_database(cod, tipo, fs=None):
             d_min = int(input("Inserire diametro minimo: "))
             d_max = int(input("Inserire diametro massimo: "))
             d = (d_min, d_max)
+            print(lista_attrezzatura)
             att = input("Inserire il tipo di attrezzatura compatibile: ")
+            if att in lista_attrezzatura:
+                pass
+            while att not in lista_attrezzatura:
+                att = input("Attrezzatura non disponibile.Inserire nuovamente il tipo di attrezzatura: ")
+            print(lista_utensili)
             t_u = input("Inserire il tipo di utensile: ")
+            if t_u in lista_utensili:
+                pass
+            while t_u not in lista_utensili:
+                t_u = input("Utensile non disponibile.Inserire nuovamente l'utensile: ")
             d_max_u = int(input("Inserire il diametro massimo dell'utensile: "))
+            print(lista_lavorazioni)
             lav = input("Inserire tipo di lavorazioni: ")
+            if lav in lista_lavorazioni:
+                pass
+            while lav not in lista_lavorazioni:
+                lav = input("Lavorazione non disponibile.Inserire nuovamente la lavorazione: ")
             mod_max = int(input("Inserire modulo massimo: "))
             h_max = int(input("Inserire altezza massima: "))
             int_min = int(input("Inserire interasse minimo: "))
@@ -249,10 +267,10 @@ if __name__ == '__main__':
                   ["dentatura"],
                   7, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
     m9 = Macchina("20_52", (40, 380), ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                  ["stozza", "interna", "stozza_elicoidale", "stozza_elicoidale_bombata"],
+                  ["stozza", "interna", "stozza elicoidale", "stozza elicoidale bombata"],
                   6, 50, incl_tav=10)
     m10 = Macchina("20_54", (40, 380), ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                   ["stozza", "interna", "stozza_elicoidale", "stozza_elicoidale_bombata"],
+                   ["stozza", "interna", "stozza elicoidale", "stozza elicoidale bombata"],
                    6, 50, incl_tav=10)
     m11 = Macchina("15_18", (100, 250), ["palo", "pinza"], ["creatore"], 200,
                    ["dentatura"],
@@ -270,10 +288,10 @@ if __name__ == '__main__':
                    ["stozza", "interna"],
                    5, 50)
     m16 = Macchina("20_51", (40, 200), ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                   ["stozza", "interna", "stozza_elicoidale"],
+                   ["stozza", "interna", "stozza elicoidale"],
                    5, 50, incl_tav=10)
     m17 = Macchina("20_04", (40, 200), ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                   ["stozza", "interna", "stozza_elicoidale"],
+                   ["stozza", "interna", "stozza elicoidale"],
                    5, 60, )
     m18 = Macchina("20_10", (40, 200), ["pinza"], ["coltello", "tazza", "gambo"], 200,
                    ["stozza", "interna"],
@@ -290,7 +308,7 @@ if __name__ == '__main__':
                         p_incl_elica_dx=22)
     part2 = Particolare("607", 120, ["palo", "manuale"], "creatore", 160, "120", "dentatura", 1.5, 40)
     part3 = Particolare("495", 150, ["manuale"], "creatore", 160, "120", "dentatura", 4, 20, p_incl_elica_sx=14)
-    part4 = Particolare("3312", 75, ["pinza"], "coltello", 120, "081", "stozza_elicoidale", 3, 22)
+    part4 = Particolare("3312", 75, ["pinza"], "coltello", 120, "081", "stozza elicoidale", 3, 22)
     part5 = Particolare("3312", 80, ["pinza"], "coltello", 160, "082", "stozza", 2.5, 45)
     part6 = Particolare("368", 60, ["pinza"], "coltello", 160, "080", "stozza", 4, 10, incl=8)
     Particolari = [part1, part2, part3, part4, part5, part6]
