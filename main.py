@@ -202,7 +202,7 @@ def insert_database(cod, tipo, fs=None):
     else:
         pass
     if tipo == "p":
-        y = get_particolare(cod)
+        y = get_particolare(cod, fs)
         if isinstance(y, Particolare):
             print(f'Il particolare "{cod}" è presente nel database.')
         else:
@@ -301,12 +301,11 @@ if __name__ == '__main__':
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista)
     elif len(mini_lista) > 1:
         print("Il codice presenta più fasi. Quale intendi scegliere?")
-        l_f = lista_fasi(mini_lista)
-        print(l_f)
+        li_fa = lista_fasi(mini_lista)
+        print(li_fa)
         fase = input("Selezionare fase: ")
-        while fase not in l_f:
+        while fase not in li_fa:
             fase = input("Fase non presente. Selezionare nuovamente la fase: ")
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista, fase)
     else:
         print("Particolare non presente nel database.")
-
