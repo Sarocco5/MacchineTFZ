@@ -156,6 +156,18 @@ def stampa_valori(v):
     print(vars(v))
 
 
+def stampa_lista(lista):
+    for item in lista:
+        print(item)
+
+
+def check_inserimento_dati(lista, tipo):
+    scelta = input(f'Inserire {tipo}: ')
+    while scelta not in lista:
+        scelta = input(f'{tipo.capitalize()} non disponibile. Inserire nuovamente il tipo di {tipo}: ')
+    return scelta
+
+
 def remove_macchina(nome_macchina):
     x = get_macchina(nome_macchina)
     if isinstance(x, Macchina):
@@ -174,80 +186,74 @@ def remove_particolare(codice_particolare, fs=None):
         print("Codice non trovato")
 
 
+def valuta_input(scelta):
+    scelta = scelta.replace(' ', '')
+    if "," in scelta:
+        scelta = scelta.split(',')
+    return scelta
+
+
 # mettere opzioni di scelta per tipo lavorazione e
 # attrezzatura
 def insert_database(cod, tipo, fs=None):
     lista_attrezzatura = ["palo", "pinza", "manuale"]
     lista_utensili = ["creatore", "coltello", "tazza", "gambo"]
     lista_lavorazioni = ["dentatura", "stozza", "stozza elicoidale", "stozza elicoidale bombata"]
-    if tipo == "m":
-        x = get_macchina(cod)
-        if isinstance(x, Macchina):
-            print(f'La macchina "{cod}" è presente nel database.')
+    try:
+        if tipo == "m":
+            x = get_macchina(cod)
+            if isinstance(x, Macchina):
+                print(f'La macchina "{cod}" è presente nel database.')
+            else:
+                print(f'Inserire valori macchina "{cod}"')
+                d_min = int(input("Inserire diametro minimo: "))
+                d_max = int(input("Inserire diametro massimo: "))
+                d = (d_min, d_max)
+                stampa_lista(lista_attrezzatura)
+                att = check_inserimento_dati(lista_attrezzatura, "attrezzatura")
+                att = valuta_input(att)
+                stampa_lista(lista_utensili)
+                t_u = check_inserimento_dati(lista_utensili, "utensile")
+                d_max_u = int(input("Inserire il diametro massimo dell'utensile: "))
+                stampa_lista(lista_lavorazioni)
+                lav = check_inserimento_dati(lista_lavorazioni, "lavorazione")
+                mod_max = int(input("Inserire modulo massimo: "))
+                h_max = int(input("Inserire altezza fascia massima: "))
+                int_min = int(input("Inserire interasse minimo: "))
+                inc_el_max_dx = int(input("Inserire inclinazione elica dx massima: "))
+                inc_el_max_sx = int(input("Inserire inclinazione elica sx massima: "))
+                inc_tav = int(input("Inserire inclinazione tavola: "))
+                print("Inserimento completato con successo")
+                m = Macchina(cod, d, att, t_u, d_max_u, lav, mod_max, h_max, int_min, inc_el_max_dx, inc_el_max_sx, inc_tav)
+                Macchine_TFZ_Aprilia.append(m)
         else:
-            print(f'Inserire valori macchina "{cod}"')
-            d_min = int(input("Inserire diametro minimo: "))
-            d_max = int(input("Inserire diametro massimo: "))
-            d = (d_min, d_max)
-            for ele_att in lista_attrezzatura:
-                print(ele_att)
-            att = input("Inserire il tipo di attrezzatura compatibile: ")
-            while att not in lista_attrezzatura:
-                att = input("Attrezzatura non disponibile.Inserire nuovamente il tipo di attrezzatura: ")
-            for ele_ut in lista_utensili:
-                print(ele_ut)
-            t_u = input("Inserire il tipo di utensile: ")
-            while t_u not in lista_utensili:
-                t_u = input("Utensile non disponibile.Inserire nuovamente l'utensile: ")
-            d_max_u = int(input("Inserire il diametro massimo dell'utensile: "))
-            for ele_lav in lista_lavorazioni:
-                print(ele_lav)
-            lav = input("Inserire tipo di lavorazioni: ")
-            while lav not in lista_lavorazioni:
-                lav = input("Lavorazione non disponibile.Inserire nuovamente la lavorazione: ")
-            mod_max = int(input("Inserire modulo massimo: "))
-            h_max = int(input("Inserire altezza massima: "))
-            int_min = int(input("Inserire interasse minimo: "))
-            inc_el_max_dx = int(input("Inserire inclinazione elica dx massima: "))
-            inc_el_max_sx = int(input("Inserire inclinazione elica sx massima: "))
-            inc_tav = int(input("Inserire inclinazione tavola: "))
-            print("Inserimento completato con successo")
-            m = Macchina(cod, d, att, t_u, d_max_u, lav, mod_max, h_max, int_min, inc_el_max_dx, inc_el_max_sx, inc_tav)
-            Macchine_TFZ_Aprilia.append(m)
-    else:
-        pass
-    if tipo == "p":
-        y = get_particolare(cod, fs)
-        if isinstance(y, Particolare):
-            print(f'Il particolare "{cod}" è presente nel database.')
-        else:
-            print(f'Inserire valori particolare "{cod}"')
-            d = int(input("Inserire diametro pezzo: "))
-            for ele_att in lista_attrezzatura:
-                print(ele_att)
-            att = input("Inserire il tipo di attrezzatura compatibile: ")
-            while att not in lista_attrezzatura:
-                att = input("Attrezzatura non disponibile.Inserire nuovamente il tipo di attrezzatura: ")
-            for ele_ut in lista_utensili:
-                print(ele_ut)
-            t_u = input("Inserire il tipo di utensile: ")
-            while t_u not in lista_utensili:
-                t_u = input("Utensile non disponibile.Inserire nuovamente l'utensile: ")
-            d_u = int(input("Inserire diametro utensile: "))
-            fs = input("Inserire fase: ")
-            for ele_lav in lista_lavorazioni:
-                print(ele_lav)
-            lav = input("Inserire tipo di lavorazioni: ")
-            while lav not in lista_lavorazioni:
-                lav = input("Lavorazione non disponibile.Inserire nuovamente la lavorazione: ")
-            m = int(input("Inserire modulo: "))
-            h = int(input("Inserire fascia: "))
-            inc_el_dx = int(input("Inserire elica pezzo: "))
-            inc_el_sx = int(input("Inserire elica pezzo: "))
-            inc = int(input("Inserire inclinazione pezzo:"))
-            print("Inserimento completato con successo")
-            p = (d, att, t_u, d_u, fs, lav, m, h, inc_el_dx, inc_el_sx, inc)
-            Particolari.append(p)
+            pass
+        if tipo == "p":
+            y = get_particolare(cod, fs)
+            if isinstance(y, Particolare):
+                print(f'Il particolare "{cod}" è presente nel database.')
+            else:
+                print(f'Inserire valori particolare "{cod}"')
+                d = int(input("Inserire diametro pezzo: "))
+                stampa_lista(lista_attrezzatura)
+                att = check_inserimento_dati(lista_attrezzatura, "attrezzatura")
+                stampa_lista(lista_utensili)
+                t_u = check_inserimento_dati(lista_utensili, "utensile")
+                d_u = int(input("Inserire diametro utensile: "))
+                fs = input("Inserire fase: ")
+                stampa_lista(lista_lavorazioni)
+                lav = check_inserimento_dati(lista_lavorazioni, "lavorazione")
+                m = int(input("Inserire modulo: "))
+                h = int(input("Inserire fascia: "))
+                inc_el_dx = int(input("Inserire elica pezzo: "))
+                inc_el_sx = int(input("Inserire elica pezzo: "))
+                inc = int(input("Inserire inclinazione pezzo:"))
+                print("Inserimento completato con successo")
+                p = Particolare(d, att, t_u, d_u, fs, lav, m, h, inc_el_dx, inc_el_sx, inc)
+                Particolari.append(p)
+    except ValueError as e:
+        print("Valore errato. Hai inserito un carattere invece che un numero.")
+        #menu()
 
 
 if __name__ == '__main__':
@@ -331,9 +337,9 @@ if __name__ == '__main__':
         li_fa = lista_fasi(mini_lista)
         for index in li_fa:
             print(index)
-        fase = input("Selezionare fase: ")
-        while fase not in li_fa:
-            fase = input("Fase non presente. Selezionare nuovamente la fase: ")
+        fase = check_inserimento_dati(li_fa, "fase")
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista, fase)
     else:
         print("Particolare non presente nel database.")
+
+insert_database("15_22", "m")
