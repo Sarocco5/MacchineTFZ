@@ -189,16 +189,19 @@ def insert_database(cod, tipo, fs=None):
             d_min = int(input("Inserire diametro minimo: "))
             d_max = int(input("Inserire diametro massimo: "))
             d = (d_min, d_max)
-            print(lista_attrezzatura)
+            for ele_att in lista_attrezzatura:
+                print(ele_att)
             att = input("Inserire il tipo di attrezzatura compatibile: ")
             while att not in lista_attrezzatura:
                 att = input("Attrezzatura non disponibile.Inserire nuovamente il tipo di attrezzatura: ")
-            print(lista_utensili)
+            for ele_ut in lista_utensili:
+                print(ele_ut)
             t_u = input("Inserire il tipo di utensile: ")
             while t_u not in lista_utensili:
                 t_u = input("Utensile non disponibile.Inserire nuovamente l'utensile: ")
             d_max_u = int(input("Inserire il diametro massimo dell'utensile: "))
-            print(lista_lavorazioni)
+            for ele_lav in lista_lavorazioni:
+                print(ele_lav)
             lav = input("Inserire tipo di lavorazioni: ")
             while lav not in lista_lavorazioni:
                 lav = input("Lavorazione non disponibile.Inserire nuovamente la lavorazione: ")
@@ -220,17 +223,20 @@ def insert_database(cod, tipo, fs=None):
         else:
             print(f'Inserire valori particolare "{cod}"')
             d = int(input("Inserire diametro pezzo: "))
-            print(lista_attrezzatura)
+            for ele_att in lista_attrezzatura:
+                print(ele_att)
             att = input("Inserire il tipo di attrezzatura compatibile: ")
             while att not in lista_attrezzatura:
                 att = input("Attrezzatura non disponibile.Inserire nuovamente il tipo di attrezzatura: ")
-            print(lista_utensili)
+            for ele_ut in lista_utensili:
+                print(ele_ut)
             t_u = input("Inserire il tipo di utensile: ")
             while t_u not in lista_utensili:
                 t_u = input("Utensile non disponibile.Inserire nuovamente l'utensile: ")
             d_u = int(input("Inserire diametro utensile: "))
             fs = input("Inserire fase: ")
-            print(lista_lavorazioni)
+            for ele_lav in lista_lavorazioni:
+                print(ele_lav)
             lav = input("Inserire tipo di lavorazioni: ")
             while lav not in lista_lavorazioni:
                 lav = input("Lavorazione non disponibile.Inserire nuovamente la lavorazione: ")
@@ -323,7 +329,8 @@ if __name__ == '__main__':
     elif len(mini_lista) > 1:
         print("Il codice presenta più fasi. Quale intendi scegliere?")
         li_fa = lista_fasi(mini_lista)
-        print(li_fa)
+        for index in li_fa:
+            print(index)
         fase = input("Selezionare fase: ")
         while fase not in li_fa:
             fase = input("Fase non presente. Selezionare nuovamente la fase: ")
