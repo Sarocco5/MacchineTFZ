@@ -1,3 +1,6 @@
+import pickle
+
+
 class Macchina:
     nome = None
     diametro = ()
@@ -292,77 +295,35 @@ def insert_database(cod, tipo, fs=None):
         # menu()
 
 
-if __name__ == '__main__':
-    m1 = Macchina("15_24", (120, 300), ["palo", "pinza"], ["creatore"], 200,
-                  ["dentatura"],
-                  6, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m2 = Macchina("15_25", (100, 200), ["palo", "pinza"], ["creatore"], 200,
-                  ["dentatura"],
-                  4, 100, int_min=100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m3 = Macchina("15_16", (100, 200), ["palo"], ["creatore"], 200,
-                  ["dentatura"],
-                  4, 100, m_incl_elica_dx=13, m_incl_elica_sx=21)
-    m4 = Macchina("15_17", (100, 200), ["palo"], ["creatore"], 200,
-                  ["dentatura"],
-                  4, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m5 = Macchina("15_15", (100, 200), ["palo"], ["creatore"], 200,
-                  ["dentatura"],
-                  4, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m6 = Macchina("15-52", (100, 380), ["pinza"], ["creatore"], 200,
-                  ["dentatura"],
-                  8, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m7 = Macchina("15-54", (100, 380), ["pinza"], ["creatore"], 200,
-                  ["dentatura"],
-                  8, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m8 = Macchina("15_29", (100, 320), ["pinza", "manuale"], ["creatore"], 200,
-                  ["dentatura"],
-                  7, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m9 = Macchina("20_52", (40, 380), ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                  ["stozza", "interna", "stozza elicoidale", "stozza elicoidale bombata"],
-                  6, 50, incl_tav=10)
-    m10 = Macchina("20_54", (40, 380), ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                   ["stozza", "interna", "stozza elicoidale", "stozza elicoidale bombata"],
-                   6, 50, incl_tav=10)
-    m11 = Macchina("15_18", (100, 250), ["palo", "pinza"], ["creatore"], 200,
-                   ["dentatura"],
-                   5, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m12 = Macchina("15_10", (100, 320), ["pinza", "manuale"], ["creatore"], 200,
-                   ["dentatura"],
-                   6, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m13 = Macchina("15_26", (100, 200), ["palo", "pinza"], ["creatore"], 200,
-                   ["dentatura"],
-                   5, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m14 = Macchina("20_13", (40, 200), ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                   ["stozza", "interna"],
-                   5, 50, incl_tav=10)
-    m15 = Macchina("20_12", (40, 200), ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                   ["stozza", "interna"],
-                   5, 50)
-    m16 = Macchina("20_51", (40, 200), ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                   ["stozza", "interna", "stozza elicoidale"],
-                   5, 50, incl_tav=10)
-    m17 = Macchina("20_04", (40, 200), ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                   ["stozza", "interna", "stozza elicoidale"],
-                   5, 60, )
-    m18 = Macchina("20_10", (40, 200), ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                   ["stozza", "interna"],
-                   5, 50, incl_tav=10)
-    m19 = Macchina("15_51", (40, 200), ["pinza"], ["coltello"], 150,
-                   ["stozza"],
-                   5, 50, incl_tav=10)
-    m20 = Macchina("20_08", (40, 200), ["manuale"], ["coltello", "gambo"], 200,
-                   ["stozza", "interna"],
-                   5, 50)
-    Macchine_TFZ_Aprilia = [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16, m17, m18, m19, m20]
+def save_db(tipo):
+    print(f'   ... salvataggio database {tipo}.')
+    with open(f'db_{tipo}.pickle', 'wb') as handle:
+        if tipo == "macchine":
+            pickle.dump(Macchine_TFZ_Aprilia, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            pickle.dump(Particolari, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    part1 = Particolare("368", 150, ["palo", "pinza"], "creatore", 160, "120", "dentatura", 3, 20,
-                        p_incl_elica_dx=22)
-    part2 = Particolare("607", 120, ["palo", "manuale"], "creatore", 160, "120", "dentatura", 1.5, 40)
-    part3 = Particolare("495", 150, ["manuale"], "creatore", 160, "120", "dentatura", 4, 20, p_incl_elica_sx=14)
-    part4 = Particolare("3312", 75, ["pinza"], "coltello", 120, "081", "stozza elicoidale", 3, 22)
-    part5 = Particolare("3312", 80, ["pinza"], "coltello", 160, "082", "stozza", 2.5, 45)
-    part6 = Particolare("368", 60, ["pinza"], "coltello", 160, "080", "stozza", 4, 10, incl=8)
-    Particolari = [part1, part2, part3, part4, part5, part6]
+
+def load_db():
+    try:
+        global Macchine_TFZ_Aprilia
+        global Particolari
+        with open(f'db_macchine.pickle', 'rb') as handle:
+            print('Database macchine caricato')
+            Macchine_TFZ_Aprilia = pickle.load(handle)
+        with open(f'db_particolari.pickle', 'rb') as handle:
+            print('Database particolari caricato')
+            Particolari = pickle.load(handle)
+        return True
+    except FileNotFoundError:
+        print("... file db non trovato")
+        return False
+
+
+if __name__ == '__main__':
+    Macchine_TFZ_Aprilia = []
+    Particolari = []
+    load_db()
 
     codice = input("Inserire codice particolare: ")
     mini_lista = lista_particolari(codice, Particolari)
@@ -377,5 +338,3 @@ if __name__ == '__main__':
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista, fase)
     else:
         print("Particolare non presente nel database.")
-
-
