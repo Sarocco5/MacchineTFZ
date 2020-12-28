@@ -162,8 +162,8 @@ def stampa_lista(lista):
 
 
 def check_inserimento_dati(lista, tipo):
-    scelta = input(f'Inserire {tipo}: ')
-    while scelta not in lista:
+    scelta = input(f'Inserire {tipo} (utilizzare virgola per scelte multiple): ')
+    while not valuta_input(scelta, lista):
         scelta = input(f'{tipo.capitalize()} non disponibile. Inserire nuovamente il tipo di {tipo}: ')
     return scelta
 
@@ -186,11 +186,23 @@ def remove_particolare(codice_particolare, fs=None):
         print("Codice non trovato")
 
 
-def valuta_input(scelta):
+def valuta_input(scelta, lista):
     scelta = scelta.replace(' ', '')
-    if "," in scelta:
-        scelta = scelta.split(',')
-    return scelta
+    scelta = scelta.split(',')
+    return set(scelta) <= set(lista)
+
+
+def scelta_elica():
+    valore_elica = None
+    elica = input("Inserire verso dell'elica (dx, sx): ")
+    if elica == "dx":
+        valore_elica = int(input("Inserire elica pezzo(dx): "))
+    elif elica == "sx":
+        valore_elica = int(input("Inserire elica pezzo(sx): "))
+    else:
+        print("Inserimento errato. Consentiti solo 'dx' e 'sx'")
+        quit()
+    return elica, valore_elica
 
 
 # mettere opzioni di scelta per tipo lavorazione e
@@ -199,6 +211,7 @@ def insert_database(cod, tipo, fs=None):
     lista_attrezzatura = ["palo", "pinza", "manuale"]
     lista_utensili = ["creatore", "coltello", "tazza", "gambo"]
     lista_lavorazioni = ["dentatura", "stozza", "stozza elicoidale", "stozza elicoidale bombata"]
+    lista_fasi_pezzo = ["080", "081", "082", "083", "084", "085", "120", "121", "122", "123", "124", "125"]
     try:
         if tipo == "m":
             x = get_macchina(cod)
@@ -211,7 +224,6 @@ def insert_database(cod, tipo, fs=None):
                 d = (d_min, d_max)
                 stampa_lista(lista_attrezzatura)
                 att = check_inserimento_dati(lista_attrezzatura, "attrezzatura")
-                att = valuta_input(att)
                 stampa_lista(lista_utensili)
                 t_u = check_inserimento_dati(lista_utensili, "utensile")
                 d_max_u = int(input("Inserire il diametro massimo dell'utensile: "))
@@ -224,7 +236,8 @@ def insert_database(cod, tipo, fs=None):
                 inc_el_max_sx = int(input("Inserire inclinazione elica sx massima: "))
                 inc_tav = int(input("Inserire inclinazione tavola: "))
                 print("Inserimento completato con successo")
-                m = Macchina(cod, d, att, t_u, d_max_u, lav, mod_max, h_max, int_min, inc_el_max_dx, inc_el_max_sx, inc_tav)
+                m = Macchina(cod, d, att, t_u, d_max_u, lav, mod_max, h_max, int_min, inc_el_max_dx, inc_el_max_sx,
+                             inc_tav)
                 Macchine_TFZ_Aprilia.append(m)
         else:
             pass
@@ -240,20 +253,43 @@ def insert_database(cod, tipo, fs=None):
                 stampa_lista(lista_utensili)
                 t_u = check_inserimento_dati(lista_utensili, "utensile")
                 d_u = int(input("Inserire diametro utensile: "))
-                fs = input("Inserire fase: ")
+                fs = check_inserimento_dati(lista_fasi_pezzo, "fase")
                 stampa_lista(lista_lavorazioni)
                 lav = check_inserimento_dati(lista_lavorazioni, "lavorazione")
+                inc_el_dx = None
+                inc_el_sx = None
+                inc = None
+                if lav == "stozza":
+                    inc = int(input("Inserire inclinazione pezzo: "))
+                elif lav == "dentatura":
+                    scelta = input("Dentatura dritta o elicoidale?: ")
+                    if scelta != "dritta":
+                        elica = scelta_elica()
+                        if elica[0] == "dx":
+                            inc_el_dx = elica[1]
+                        else:
+                            inc_el_sx = elica[1]
+                else:
+                    elica = scelta_elica()
+                    if elica[0] == "dx":
+                        inc_el_dx = elica[1]
+                    else:
+                        inc_el_sx = elica[1]
                 m = int(input("Inserire modulo: "))
                 h = int(input("Inserire fascia: "))
-                inc_el_dx = int(input("Inserire elica pezzo: "))
-                inc_el_sx = int(input("Inserire elica pezzo: "))
-                inc = int(input("Inserire inclinazione pezzo:"))
-                print("Inserimento completato con successo")
-                p = Particolare(d, att, t_u, d_u, fs, lav, m, h, inc_el_dx, inc_el_sx, inc)
-                Particolari.append(p)
-    except ValueError as e:
+                p = Particolare(cod, d, att, t_u, d_u, fs, lav, m, h, inc_el_dx, inc_el_sx, inc)
+                stampa_valori(p)
+                scelta = input("I valori inseriti sono corretti?(si, no): ")
+                if scelta == "si":
+                    Particolari.append(p)
+                    print("Inserimento completato con successo")
+                elif scelta == "no":
+                    print("Inserimento errato. Programma interrotto")
+                else:
+                    print("Scelta sbagliata")
+    except ValueError:
         print("Valore errato. Hai inserito un carattere invece che un numero.")
-        #menu()
+        # menu()
 
 
 if __name__ == '__main__':
@@ -342,4 +378,4 @@ if __name__ == '__main__':
     else:
         print("Particolare non presente nel database.")
 
-insert_database("15_22", "m")
+
