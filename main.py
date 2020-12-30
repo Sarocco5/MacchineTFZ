@@ -30,6 +30,39 @@ class Macchina:
         self.incl_elica_max_sx = m_incl_elica_sx
         self.inclinazione_tavola = incl_tav
 
+    def set_diametro(self, d):
+        self.diametro = d
+
+    def set_tipo_attrezzatura(self, m_ta):
+        self.tipo_attrezzatura = m_ta
+
+    def set_tipo_utensile(self, m_tu):
+        self.tipo_utensile = m_tu
+
+    def set_diametro_max_utensile(self, d_max_ut):
+        self.diametro_max_utensile = d_max_ut
+
+    def set_lavorazione(self, m_lav):
+        self.lavorazione = m_lav
+
+    def set_modulo_max(self, mod_max):
+        self.modulo_max = mod_max
+
+    def set_altezza_fascia_max(self, m_fascia_max):
+        self.altezza_fascia_max = m_fascia_max
+
+    def set_interasse_min(self, int_min):
+        self.interasse_min = int_min
+
+    def set_incl_elica_max_dx(self, m_incl_elica_dx):
+        self.incl_elica_max_dx = m_incl_elica_dx
+
+    def set_incl_elica_max_sx(self, m_incl_elica_sx):
+        self.incl_elica_max_sx = m_incl_elica_sx
+
+    def set_inclinazione_tavola(self, incl_tav):
+        self.inclinazione_tavola = incl_tav
+
 
 class Particolare:
     nome = None
@@ -73,6 +106,7 @@ def tipo_lavorazione(p_lav, m_lav):
     return p_lav in m_lav
 
 
+# Funzione che prende 2 dati, esegue la somma e il risultato lo divide per 2
 def calcolo_interasse(diam_pezzo, diam_ute):
     return (diam_pezzo + diam_ute) / 2
 
@@ -88,6 +122,7 @@ def utensile_compatibile(p_tu, m_tu):
     return p_tu in m_tu
 
 
+# Valore A minore o uguale a B
 def minore_uguale(a, b):
     return a <= b
 
@@ -102,6 +137,7 @@ def lista_particolari(input_codice, db_particolari):
     return lp
 
 
+# Crea una mini lista che riempe prendendo le fasi dalla lista particolari
 def lista_fasi(particolari):
     l_f = []
     for pa in particolari:
@@ -159,6 +195,11 @@ def stampa_valori(v):
     print(vars(v))
 
 
+def stampa_etichetta(indice):
+    for numero, valore in indice.items():
+        print(f'[{numero}] - {valore}')
+
+
 def stampa_lista(lista):
     for item in lista:
         print(item)
@@ -189,10 +230,32 @@ def remove_particolare(codice_particolare, fs=None):
         print("Codice non trovato")
 
 
+def edit(cod, tipo, fs=0):
+    if tipo == "m":
+        x = get_macchina(cod)
+        if isinstance(x, Macchina):
+            stampa_etichetta(Indice_attributi_macchina)
+            scelta = input("Quale voce vuoi modificare?: ")
+            valuta_input_numero(scelta)
+
+    if tipo == "p":
+        y = get_particolare(cod, fs)
+        if isinstance(y, Particolare):
+            stampa_etichetta(Indice_attributi_particolare)
+            scelta = input("Quale voce vuoi modificare?: ")
+            valuta_input_numero(scelta)
+
+
 def valuta_input(scelta, lista):
     scelta = scelta.replace(' ', '')
     scelta = scelta.split(',')
     return set(scelta) <= set(lista)
+
+
+def valuta_input_numero(scelta):
+    scelta = scelta.replace(' ', '')
+    scelta = scelta.split(',')
+    return scelta
 
 
 def scelta_elica():
@@ -323,6 +386,12 @@ def load_db():
 if __name__ == '__main__':
     Macchine_TFZ_Aprilia = []
     Particolari = []
+    Indice_attributi_macchina = {1: "diametro", 2: "interasse_min", 3: "tipo_attrezzatura", 4: "tipo_utensile",
+                                 5: "diametro_max_utensile", 6: "lavorazione", 7: "modulo_max", 8: "altezza_fascia_max",
+                                 9: "incl_elica_max_dx", 10: "incl_elica_max_sx", 11: "inclinazione_tavola"}
+    Indice_attributi_particolare = {1: "diametro", 2: "interasse", 3: "tipo_attrezzatura", 4: "tipo_utensile",
+                                    5: "diametro_utensile", 6: "fase", 7: "lavorazione", 8: "modulo", 9: "fascia",
+                                    10: "incl_elica_dx", 11: "incl_elica_sx", 12: "inclinazione"}
     load_db()
 
     codice = input("Inserire codice particolare: ")
