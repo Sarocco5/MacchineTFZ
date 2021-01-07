@@ -96,17 +96,17 @@ class Particolare:
         self.inclinazione = incl
 
 
-# Ritorna true, se il valore del diametro è contenuto nella tupla (min, max)
+# Ritorna true, se il valore del diametro è contenuto nella tupla (min, max).
 def diametro_compatibile(valore, tupla):
     return tupla[0] <= valore <= tupla[1]
 
 
-# Definisco che tipo ti lavorazione è
+# Definisco che tipo ti lavorazione è.
 def tipo_lavorazione(p_lav, m_lav):
     return p_lav in m_lav
 
 
-# Funzione che prende 2 dati, esegue la somma e il risultato lo divide per 2
+# Funzione che prende 2 dati, esegue la somma e il risultato lo divide per 2.
 def calcolo_interasse(diam_pezzo, diam_ute):
     return (diam_pezzo + diam_ute) / 2
 
@@ -122,13 +122,13 @@ def utensile_compatibile(p_tu, m_tu):
     return p_tu in m_tu
 
 
-# Valore A minore o uguale a B
+# Valore A minore o uguale a B.
 def minore_uguale(a, b):
     return a <= b
 
 
 # creo una lista vuota da riempire con il codice che metto tramite l'input, che mi servirà per vedere se il codice è
-# è presente nel database_particolari
+# è presente nel database_particolari.
 def lista_particolari(input_codice, db_particolari):
     lp = []
     for particolare in db_particolari:
@@ -137,7 +137,7 @@ def lista_particolari(input_codice, db_particolari):
     return lp
 
 
-# Crea una mini lista che riempe prendendo le fasi dalla lista particolari
+# Crea una mini lista che riempe prendendo le fasi dalla lista particolari.
 def lista_fasi(particolari):
     l_f = []
     for pa in particolari:
@@ -145,12 +145,14 @@ def lista_fasi(particolari):
     return l_f
 
 
+# Controlla se un dato in "macchina" è presente anche in "particolare", se si mi ritorna True.
 def fase_compatibile(fs_macchina, fs_pezzo):
     if fs_macchina == fs_pezzo:
         return True
     return False
 
 
+# Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
 def compatibilita_generale(m, p):
     return diametro_compatibile(p.diametro, m.diametro) and \
         utensile_compatibile(p.tipo_utensile, m.tipo_utensile) and \
@@ -163,7 +165,9 @@ def compatibilita_generale(m, p):
         minore_uguale(p.inclinazione, m.inclinazione_tavola)
 
 
-# ls_macc= lista macchine; ls_part= lista particolari; fs= fase.
+# Funzione che scorre le 2 liste del database (macchine e particolari), e ,usando la funzione "compatibilità_generale",
+# mi stampa su quali macchine il particolare in questione è lavorabile. In questa funzione è presente anche la verifica
+# della fase del pezzo.
 def macchine_compatibili(ls_macc, ls_part, fs=None):
     for p in ls_part:
         for m in ls_macc:
@@ -176,12 +180,15 @@ def macchine_compatibili(ls_macc, ls_part, fs=None):
                         print(m.nome)
 
 
+# Scorre la lista macchine e mi ritorna la macchina.
 def get_macchina(nome_macchina):
     for m in Macchine_TFZ_Aprilia:
         if m.nome == nome_macchina:
             return m
 
 
+# Come "get_macchina" con la differenza che questa funzione controlla anche la fase, in caso ci siano particolari
+# presenti nel database con più fasi.
 def get_particolare(codice_particolare, fs=None):
     for p in Particolari:
         if p.codice == codice_particolare:
@@ -191,20 +198,25 @@ def get_particolare(codice_particolare, fs=None):
                 return p
 
 
+# Stampa gli attributi della macchina o del particolare. Esempio: { 'nome': '15_24', 'diametro': (120, 300) } ecc...
 def stampa_valori(v):
     print(vars(v))
 
 
+# Permette di dividere in "numero" e "valore" la stampa degli attributi della macchina o del particolare.
 def stampa_etichetta(indice):
     for numero, valore in indice.items():
         print(f'[{numero}] - {valore}')
 
 
+# Controlla se un oggetto è in una lista e stampa gli oggetti che trova nella lista.
 def stampa_lista(lista):
     for item in lista:
         print(item)
 
 
+# Verifica se l'input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
+# l' inserimento dell' input finché non riceve un input riconosciuto.
 def check_inserimento_dati(lista, tipo):
     scelta = input(f'Inserire {tipo} (utilizzare virgola per scelte multiple): ')
     while not valuta_input(scelta, lista):
@@ -358,6 +370,7 @@ def insert_database(cod, tipo, fs=None):
         # menu()
 
 
+# Funzione per il salvataggio del database
 def save_db(tipo):
     print(f'   ... salvataggio database {tipo}.')
     with open(f'db_{tipo}.pickle', 'wb') as handle:
@@ -367,6 +380,7 @@ def save_db(tipo):
             pickle.dump(Particolari, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
+# Funzione per il caricamento del database
 def load_db():
     try:
         global Macchine_TFZ_Aprilia
