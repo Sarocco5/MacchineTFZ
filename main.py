@@ -111,7 +111,7 @@ def calcolo_interasse(diam_pezzo, diam_ute):
     return (diam_pezzo + diam_ute) / 2
 
 
-# Scorro una lista e vedo se l'oggetto è presente nella lista.
+# Scorro 2 liste e vedo se l'oggetto è in entrambe le liste.
 def attrezzatura_compatibile(p_ta, m_ta):
     for attrezzatura in p_ta:
         return attrezzatura in m_ta
