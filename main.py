@@ -101,7 +101,7 @@ def diametro_compatibile(valore, tupla):
     return tupla[0] <= valore <= tupla[1]
 
 
-# Definisco che tipo ti lavorazione è.
+# Confronta 2 valori str
 def tipo_lavorazione(p_lav, m_lav):
     return p_lav in m_lav
 
@@ -145,11 +145,9 @@ def lista_fasi(particolari):
     return l_f
 
 
-# Controlla se un dato in "macchina" è presente anche in "particolare", se si mi ritorna True.
+# Controlla se il valore fase(int) nella macchina è presente anche nel particolare.
 def fase_compatibile(fs_macchina, fs_pezzo):
-    if fs_macchina == fs_pezzo:
-        return True
-    return False
+    return fs_macchina == fs_pezzo
 
 
 # Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
@@ -224,6 +222,7 @@ def check_inserimento_dati(lista, tipo):
     return scelta
 
 
+# Rimuove una macchina dalla lista
 def remove_macchina(nome_macchina):
     x = get_macchina(nome_macchina)
     if isinstance(x, Macchina):
@@ -233,6 +232,7 @@ def remove_macchina(nome_macchina):
         print("Macchina non trovata")
 
 
+# Rimuove un particolare dalla lista, con opzione per selezionare il tipo di fase
 def remove_particolare(codice_particolare, fs=None):
     x = get_particolare(codice_particolare, fs)
     if isinstance(x, Particolare):
@@ -242,6 +242,7 @@ def remove_particolare(codice_particolare, fs=None):
         print("Codice non trovato")
 
 
+# WIP
 def edit(cod, tipo, fs=0):
     if tipo == "m":
         x = get_macchina(cod)
@@ -258,18 +259,22 @@ def edit(cod, tipo, fs=0):
             valuta_input_numero(scelta)
 
 
+# Prima toglie lo spazio dalla scelta e poi lo spezza in lista per ogni virgola, ritornando una lista
 def valuta_input(scelta, lista):
     scelta = scelta.replace(' ', '')
     scelta = scelta.split(',')
     return set(scelta) <= set(lista)
 
 
+# Prima toglie eventuali spazi e poi spezza in lista per ogni virgola
 def valuta_input_numero(scelta):
     scelta = scelta.replace(' ', '')
     scelta = scelta.split(',')
     return scelta
 
 
+# Se il particolare, in fase di inserimento, presenta una dentatura/stozza elicoidale, con questa funzione posso
+# selezionare il verso dell'elica e poi inserire il valore.
 def scelta_elica():
     valore_elica = None
     elica = input("Inserire verso dell'elica (dx, sx): ")
