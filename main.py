@@ -101,7 +101,7 @@ def diametro_compatibile(valore, tupla):
     return tupla[0] <= valore <= tupla[1]
 
 
-# Confronta 2 valori str
+# Controlla se la lavorazione del particolare è presente nella lista delle lavorazioni della macchina.
 def tipo_lavorazione(p_lav, m_lav):
     return p_lav in m_lav
 
@@ -145,7 +145,7 @@ def lista_fasi(particolari):
     return l_f
 
 
-# Controlla se il valore fase(int) nella macchina è presente anche nel particolare.
+# Controlla se il valore fase(int) nella macchina è uguale anche nel particolare.
 def fase_compatibile(fs_macchina, fs_pezzo):
     return fs_macchina == fs_pezzo
 
@@ -222,7 +222,7 @@ def check_inserimento_dati(lista, tipo):
     return scelta
 
 
-# Rimuove una macchina dalla lista
+# Rimuove una macchina dalla lista.
 def remove_macchina(nome_macchina):
     x = get_macchina(nome_macchina)
     if isinstance(x, Macchina):
@@ -232,7 +232,7 @@ def remove_macchina(nome_macchina):
         print("Macchina non trovata")
 
 
-# Rimuove un particolare dalla lista, con opzione per selezionare il tipo di fase
+# Rimuove un particolare dalla lista, con opzione per selezionare il tipo di fase.
 def remove_particolare(codice_particolare, fs=None):
     x = get_particolare(codice_particolare, fs)
     if isinstance(x, Particolare):
@@ -259,14 +259,14 @@ def edit(cod, tipo, fs=0):
             valuta_input_numero(scelta)
 
 
-# Prima toglie lo spazio dalla scelta e poi lo spezza in lista per ogni virgola, ritornando una lista
+# Prima toglie lo spazio dalla scelta e poi lo spezza in lista per ogni virgola, ritornando una lista.
 def valuta_input(scelta, lista):
     scelta = scelta.replace(' ', '')
     scelta = scelta.split(',')
     return set(scelta) <= set(lista)
 
 
-# Prima toglie eventuali spazi e poi spezza in lista per ogni virgola
+# Prima toglie eventuali spazi e poi spezza in lista per ogni virgola.
 def valuta_input_numero(scelta):
     scelta = scelta.replace(' ', '')
     scelta = scelta.split(',')
@@ -289,7 +289,7 @@ def scelta_elica():
 
 
 # mettere opzioni di scelta per tipo lavorazione e
-# attrezzatura
+# attrezzatura.
 def insert_database(cod, tipo, fs=None):
     lista_attrezzatura = ["palo", "pinza", "manuale"]
     lista_utensili = ["creatore", "coltello", "tazza", "gambo"]
@@ -375,7 +375,7 @@ def insert_database(cod, tipo, fs=None):
         # menu()
 
 
-# Funzione per il salvataggio del database
+# Funzione per il salvataggio del database.
 def save_db(tipo):
     print(f'   ... salvataggio database {tipo}.')
     with open(f'db_{tipo}.pickle', 'wb') as handle:
@@ -385,7 +385,7 @@ def save_db(tipo):
             pickle.dump(Particolari, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-# Funzione per il caricamento del database
+# Funzione per il caricamento del database.
 def load_db():
     try:
         global Macchine_TFZ_Aprilia
