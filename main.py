@@ -68,7 +68,7 @@ class Particolare:
     nome = None
     diametro = None
     interasse = None
-    tipo_attrezzatura = None
+    tipo_attrezzatura = []
     tipo_utensile = []
     diametro_utensile = None
     fase = []
@@ -127,7 +127,7 @@ def minore_uguale(a, b):
     return a <= b
 
 
-# creo una lista vuota da riempire con il codice che metto tramite l'input, che mi servirà per vedere se il codice è
+# Creo una lista vuota da riempire con il codice che metto tramite l'input, che mi servirà per vedere se il codice è
 # è presente nel database_particolari.
 def lista_particolari(input_codice, db_particolari):
     lp = []
@@ -187,18 +187,18 @@ def get_macchina(nome_macchina):
 
 # Come "get_macchina" con la differenza che questa funzione controlla anche la fase, in caso ci siano particolari
 # presenti nel database con più fasi.
-def get_particolare(codice_particolare, fs=None):
+def get_particolare(codice_particolare, fs):
     for p in Particolari:
-        if p.codice == codice_particolare:
-            if fs is None:
-                return p
-            elif p.fase == fs:
-                return p
+        if p.codice == codice_particolare and p.fase == fs:
+            return p
 
 
 # Stampa gli attributi della macchina o del particolare. Esempio: { 'nome': '15_24', 'diametro': (120, 300) } ecc...
 def stampa_valori(v):
-    print(vars(v))
+    try:
+        print(vars(v))
+    except TypeError:
+        print("Testo non corretto")
 
 
 # Permette di dividere in "numero" e "valore" la stampa degli attributi della macchina o del particolare.
@@ -233,7 +233,7 @@ def remove_macchina(nome_macchina):
 
 
 # Rimuove un particolare dalla lista, con opzione per selezionare il tipo di fase.
-def remove_particolare(codice_particolare, fs=None):
+def remove_particolare(codice_particolare, fs):
     x = get_particolare(codice_particolare, fs)
     if isinstance(x, Particolare):
         Particolari.remove(x)
@@ -288,9 +288,8 @@ def scelta_elica():
     return elica, valore_elica
 
 
-# mettere opzioni di scelta per tipo lavorazione e
-# attrezzatura.
-def insert_database(cod, tipo, fs=None):
+# Funzione che inserisce una macchina o un particolare nel database.
+def insert_database(cod, tipo, fs):
     lista_attrezzatura = ["palo", "pinza", "manuale"]
     lista_utensili = ["creatore", "coltello", "tazza", "gambo"]
     lista_lavorazioni = ["dentatura", "stozza", "stozza elicoidale", "stozza elicoidale bombata"]
