@@ -30,6 +30,9 @@ class Macchina:
         self.incl_elica_max_sx = m_incl_elica_sx
         self.inclinazione_tavola = incl_tav
 
+    def set_nome(self, n):
+        self.nome = n
+
     def set_diametro(self, d):
         self.diametro = d
 
@@ -87,12 +90,48 @@ class Particolare:
         self.tipo_attrezzatura = p_ta
         self.tipo_utensile = p_tu
         self.diametro_utensile = d_ut
-        self.fase = p_f
+        self.fase_pezzo = p_f
         self.lavorazione = p_lav
         self.modulo = mod
         self.fascia = fascia
         self.incl_elica_dx = p_incl_elica_dx
         self.incl_elica_sx = p_incl_elica_sx
+        self.inclinazione = incl
+
+    def set_codice(self, c):
+        self.codice = c
+
+    def set_diametro(self, d):
+        self.diametro = d
+
+    def set_tipo_attrezzatura(self, p_ta):
+        self.tipo_attrezzatura = p_ta
+
+    def set_tipo_utensile(self, p_tu):
+        self.tipo_utensile = p_tu
+
+    def set_diametro_utensile(self, d_ut):
+        self.diametro_utensile = d_ut
+
+    def fase_pezzo(self, p_f):
+        self.fase = p_f
+
+    def set_lavorazione(self, p_lav):
+        self.lavorazione = p_lav
+
+    def set_modulo(self, mod):
+        self.modulo = mod
+
+    def set_fascia(self, fascia):
+        self.fascia = fascia
+
+    def set_incl_elica_dx(self, p_incl_elica_dx):
+        self.incl_elica_dx = p_incl_elica_dx
+
+    def set_incl_elica_sx(self, p_incl_elica_sx):
+        self.incl_elica_sx = p_incl_elica_sx
+
+    def set_inclinazione(self, incl):
         self.inclinazione = incl
 
 
@@ -243,7 +282,7 @@ def remove_particolare(codice_particolare, fs):
 
 
 # WIP
-def edit(cod, tipo, fs=0):
+def edit(cod, tipo, fs=None):
     if tipo == "m":
         x = get_macchina(cod)
         if isinstance(x, Macchina):
@@ -289,7 +328,7 @@ def scelta_elica():
 
 
 # Funzione che inserisce una macchina o un particolare nel database.
-def insert_database(cod, tipo, fs):
+def insert_database(cod, tipo, fs=None):
     lista_attrezzatura = ["palo", "pinza", "manuale"]
     lista_utensili = ["creatore", "coltello", "tazza", "gambo"]
     lista_lavorazioni = ["dentatura", "stozza", "stozza elicoidale", "stozza elicoidale bombata"]
