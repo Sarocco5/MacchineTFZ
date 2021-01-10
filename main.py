@@ -404,12 +404,14 @@ def load_db():
 if __name__ == '__main__':
     Macchine_TFZ_Aprilia = []
     Particolari = []
-    Indice_attributi_macchina = {1: "diametro", 2: "interasse_min", 3: "tipo_attrezzatura", 4: "tipo_utensile",
-                                 5: "diametro_max_utensile", 6: "lavorazione", 7: "modulo_max", 8: "altezza_fascia_max",
-                                 9: "incl_elica_max_dx", 10: "incl_elica_max_sx", 11: "inclinazione_tavola"}
-    Indice_attributi_particolare = {1: "diametro", 2: "interasse", 3: "tipo_attrezzatura", 4: "tipo_utensile",
-                                    5: "diametro_utensile", 6: "fase", 7: "lavorazione", 8: "modulo", 9: "fascia",
-                                    10: "incl_elica_dx", 11: "incl_elica_sx", 12: "inclinazione"}
+    Indice_attributi_macchina = {0: "nome", 1: "diametro", 2: "interasse_min", 3: "tipo_attrezzatura",
+                                 4: "tipo_utensile", 5: "diametro_max_utensile", 6: "lavorazione", 7: "modulo_max",
+                                 8: "altezza_fascia_max", 9: "incl_elica_max_dx", 10: "incl_elica_max_sx",
+                                 11: "inclinazione_tavola"}
+    Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "interasse", 3: "tipo_attrezzatura",
+                                    4: "tipo_utensile", 5: "diametro_utensile", 6: "fase", 7: "lavorazione",
+                                    8: "modulo", 9: "fascia", 10: "incl_elica_dx", 11: "incl_elica_sx",
+                                    12: "inclinazione"}
     load_db()
 
     codice = input("Inserire codice particolare: ")
