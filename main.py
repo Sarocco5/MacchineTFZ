@@ -256,7 +256,7 @@ def stampa_lista(lista):
 # l' inserimento dell' input finché non riceve un input riconosciuto.
 def check_inserimento_dati(lista, tipo):
     scelta = input(f'Inserire {tipo} (utilizzare virgola per scelte multiple): ')
-    while not valuta_input(scelta, lista):
+    while not valuta_input_testo(scelta, lista):
         scelta = input(f'{tipo.capitalize()} non disponibile. Inserire nuovamente il tipo di {tipo}: ')
     return scelta
 
@@ -287,19 +287,42 @@ def edit(cod, tipo, fs=None):
         x = get_macchina(cod)
         if isinstance(x, Macchina):
             stampa_etichetta(Indice_attributi_macchina)
-            scelta = input("Quale voce vuoi modificare?: ")
-            valuta_input_numero(scelta)
+            scelta = int(input("Quale voce vuoi modificare?: "))
+            # Controllo se la modifica riguarda una lista
+            if scelta in [3, 4, 6]:
+                k = input("Vuoi aggiungere o rimuovere?: ")
+                if k == "aggiungere":
+                    pass
+                elif k == "rimuovere":
+                    pass
+                else:
+                    print("Scelta errata.")
+            # Controllo se la modifica riguarda una tupla
+            elif scelta == 1:
+                pass
+            # Altrimenti la modifica è di tipo stringa o numero
+            else:
+                scelta_utente = int(input("Inserire la modifica: "))
+                # Questa voce mi prendere l' attributo, che scelgo tramite input [scelta], da un dizionario
+                getattr(x, "set_" + Indice_attributi_macchina[scelta])(scelta_utente)
 
     if tipo == "p":
         y = get_particolare(cod, fs)
         if isinstance(y, Particolare):
             stampa_etichetta(Indice_attributi_particolare)
-            scelta = input("Quale voce vuoi modificare?: ")
-            valuta_input_numero(scelta)
+            scelta = int(input("Quale voce vuoi modificare?: "))
+            # Controllo se la modifica riguarda una lista
+            if scelta in [3, 4, 6]:
+                pass
+            # Altrimenti la modifica è di tipo stringa o numero
+            else:
+                scelta_utente = int(input("Inserire la modifica: "))
+                # Questa voce mi prendere l' attributo, che scelgo tramite input [scelta], da un dizionario
+                getattr(y, "set_" + Indice_attributi_macchina[scelta])(scelta_utente)
 
 
 # Prima toglie lo spazio dalla scelta e poi lo spezza in lista per ogni virgola, ritornando una lista.
-def valuta_input(scelta, lista):
+def valuta_input_testo(scelta, lista):
     scelta = scelta.replace(' ', '')
     scelta = scelta.split(',')
     return set(scelta) <= set(lista)
@@ -466,3 +489,6 @@ if __name__ == '__main__':
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista, fase)
     else:
         print("Particolare non presente nel database.")
+
+    edit("20_54", "m")
+
