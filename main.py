@@ -36,17 +36,8 @@ class Macchina:
     def set_diametro(self, d):
         self.diametro = d
 
-    def set_tipo_attrezzatura(self, m_ta):
-        self.tipo_attrezzatura = m_ta
-
-    def set_tipo_utensile(self, m_tu):
-        self.tipo_utensile = m_tu
-
     def set_diametro_max_utensile(self, d_max_ut):
         self.diametro_max_utensile = d_max_ut
-
-    def set_lavorazione(self, m_lav):
-        self.lavorazione = m_lav
 
     def set_modulo_max(self, mod_max):
         self.modulo_max = mod_max
@@ -74,9 +65,9 @@ class Particolare:
     tipo_attrezzatura = []
     tipo_utensile = []
     diametro_utensile = None
-    fase = []
-    lavorazione = []
-    modulo = ()
+    fase = None
+    lavorazione = None
+    modulo = None
     fascia = None
     incl_elica_dx = None
     incl_elica_sx = None
@@ -104,20 +95,8 @@ class Particolare:
     def set_diametro(self, d):
         self.diametro = d
 
-    def set_tipo_attrezzatura(self, p_ta):
-        self.tipo_attrezzatura = p_ta
-
-    def set_tipo_utensile(self, p_tu):
-        self.tipo_utensile = p_tu
-
     def set_diametro_utensile(self, d_ut):
         self.diametro_utensile = d_ut
-
-    def fase_pezzo(self, p_f):
-        self.fase = p_f
-
-    def set_lavorazione(self, p_lav):
-        self.lavorazione = p_lav
 
     def set_modulo(self, mod):
         self.modulo = mod
@@ -167,7 +146,7 @@ def minore_uguale(a, b):
 
 
 # Creo una lista vuota da riempire con il codice che metto tramite l'input, che mi servirà per vedere se il codice è
-# è presente nel database_particolari.
+# è presente nel database_particolari.#todo modificare [1:] -> [6:] una volta corretto i codici nel database
 def lista_particolari(input_codice, db_particolari):
     lp = []
     for particolare in db_particolari:
@@ -253,11 +232,20 @@ def stampa_lista(lista):
 
 
 # Verifica se l'input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
-# l' inserimento dell' input finché non riceve un input riconosciuto.
+# l' inserimento dell' input finché non riceve un input riconosciuto. Ritorna una lista.
 def check_inserimento_dati(lista, tipo):
-    scelta = input(f'Inserire {tipo} (utilizzare virgola per scelte multiple): ')
+    scelta = input(f'Inserire {tipo} (utilizzare virgola per scelte multiple): ').strip()
     while not valuta_input_testo(scelta, lista):
-        scelta = input(f'{tipo.capitalize()} non disponibile. Inserire nuovamente il tipo di {tipo}: ')
+        scelta = input(f'{tipo.capitalize()} non disponibile. Inserire nuovamente il tipo di {tipo}: ').strip()
+    return crea_lista_da_stringa(scelta)
+
+
+# Verifica se l'input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
+# l' inserimento dell' input finché non riceve un input riconosciuto. Ritorna una stringa.
+def check_inserimento_stringhe(lista, tipo):
+    scelta = input(f'Inserire {tipo}: ').strip()
+    while not valuta_input_testo(scelta, lista):
+        scelta = input(f'{tipo.capitalize()} non disponibile. Inserire nuovamente il tipo di {tipo}: ').strip()
     return scelta
 
 
@@ -281,47 +269,62 @@ def remove_particolare(codice_particolare, fs):
         print("Codice non trovato")
 
 
-# WIP
+# Funzione per edit lista attrezzatura, sia per la macchina che per il particolare
+def edit_lista(tipo, operazione, valore):
+    if operazione == "aggiungere":
+        tipo.tipo_attrezzatura.append(valore)
+    if operazione == "rimuovi":
+        try:
+            tipo.tipo_attrezzatura.remove(valore)
+        except ValueError:
+            print(f'{valore} non presente nella lista attrezzatura!')
+
+
+# Funzione per editare macchine o particolari
 def edit(cod, tipo, fs=None):
     if tipo == "m":
-        x = get_macchina(cod)
-        if isinstance(x, Macchina):
+        m = get_macchina(cod)
+        if isinstance(m, Macchina):
             stampa_etichetta(Indice_attributi_macchina)
-            scelta = int(input("Quale voce vuoi modificare?: "))
+            choice = int(input("Quale voce vuoi modificare?: "))
             # Controllo se la modifica riguarda una lista
-            if scelta in [3, 4, 6]:
-                k = input("Vuoi aggiungere o rimuovere?: ")
-                if k == "aggiungere":
-                    pass
-                elif k == "rimuovere":
-                    pass
-                else:
-                    print("Scelta errata.")
+            if choice in [3, 4, 6]:
+                tipo_modifica = input("Vuoi aggiungere o rimuovere?: ")
+                valore_modifica = input("Inserisci la modifica: ")
+                edit_lista(m, tipo_modifica, valore_modifica)
             # Controllo se la modifica riguarda una tupla
-            elif scelta == 1:
-                pass
+            elif choice == 1:
+                minimo = input("Inserire valore minimo:")
+                massimo = input("Inserire valore massimo: ")
+                m.set_diametro((minimo, massimo))
             # Altrimenti la modifica è di tipo stringa o numero
             else:
-                scelta_utente = int(input("Inserire la modifica: "))
+                scelta_utente = input("Inserire la modifica: ")
                 # Questa voce mi prendere l' attributo, che scelgo tramite input [scelta], da un dizionario
-                getattr(x, "set_" + Indice_attributi_macchina[scelta])(scelta_utente)
-
-    if tipo == "p":
-        y = get_particolare(cod, fs)
-        if isinstance(y, Particolare):
+                getattr(m, "set_" + Indice_attributi_macchina[choice])(scelta_utente)
+            stampa_valori(m)
+            print("Modifica completata con successo!")
+    elif tipo == "p":
+        p = get_particolare(cod, fs)
+        if isinstance(p, Particolare):
             stampa_etichetta(Indice_attributi_particolare)
             scelta = int(input("Quale voce vuoi modificare?: "))
             # Controllo se la modifica riguarda una lista
-            if scelta in [3, 4, 6]:
-                pass
+            if scelta in [3, 4]:
+                tipo_modifica = input("Vuoi aggiungere o rimuovere?: ")
+                valore_modifica = input("Inserisci la modifica: ")
+                edit_lista(p, tipo_modifica, valore_modifica)
             # Altrimenti la modifica è di tipo stringa o numero
             else:
                 scelta_utente = int(input("Inserire la modifica: "))
                 # Questa voce mi prendere l' attributo, che scelgo tramite input [scelta], da un dizionario
-                getattr(y, "set_" + Indice_attributi_macchina[scelta])(scelta_utente)
+                getattr(p, "set_" + Indice_attributi_macchina[scelta])(scelta_utente)
+            stampa_valori(p)
+            print("Modifica completata con successo!")
 
 
-# Prima toglie lo spazio dalla scelta e poi lo spezza in lista per ogni virgola, ritornando una lista.
+# Prima toglie lo spazio dalla scelta e poi lo spezza in lista per ogni virgola,
+# ritorna True se la scelta è contenuta nella lista
 def valuta_input_testo(scelta, lista):
     scelta = scelta.replace(' ', '')
     scelta = scelta.split(',')
@@ -329,7 +332,7 @@ def valuta_input_testo(scelta, lista):
 
 
 # Prima toglie eventuali spazi e poi spezza in lista per ogni virgola.
-def valuta_input_numero(scelta):
+def crea_lista_da_stringa(scelta):
     scelta = scelta.replace(' ', '')
     scelta = scelta.split(',')
     return scelta
@@ -397,9 +400,9 @@ def insert_database(cod, tipo, fs=None):
                 stampa_lista(lista_utensili)
                 t_u = check_inserimento_dati(lista_utensili, "utensile")
                 d_u = int(input("Inserire diametro utensile: "))
-                fs = check_inserimento_dati(lista_fasi_pezzo, "fase")
+                fs = check_inserimento_stringhe(lista_fasi_pezzo, "fase")
                 stampa_lista(lista_lavorazioni)
-                lav = check_inserimento_dati(lista_lavorazioni, "lavorazione")
+                lav = check_inserimento_stringhe(lista_lavorazioni, "lavorazione")
                 inc_el_dx = None
                 inc_el_sx = None
                 inc = None
@@ -489,5 +492,3 @@ if __name__ == '__main__':
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista, fase)
     else:
         print("Particolare non presente nel database.")
-
-
