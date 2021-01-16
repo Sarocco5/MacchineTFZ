@@ -382,10 +382,17 @@ def insert_database(cod, tipo, fs=None):
                 inc_el_max_dx = int(input("Inserire inclinazione elica dx massima: "))
                 inc_el_max_sx = int(input("Inserire inclinazione elica sx massima: "))
                 inc_tav = int(input("Inserire inclinazione tavola: "))
-                print("Inserimento completato con successo")
                 m = Macchina(cod, d, att, t_u, d_max_u, lav, mod_max, h_max, int_min, inc_el_max_dx, inc_el_max_sx,
                              inc_tav)
-                Macchine_TFZ_Aprilia.append(m)
+                stampa_valori(m)
+                scelta = input("I valori inseriti sono corretti?(si, no): ")
+                if scelta == "si":
+                    Macchine_TFZ_Aprilia.append(m)
+                    print("Inserimento completato con successo")
+                elif scelta == "no":
+                    print("Inserimento errato. Programma interrotto")
+                else:
+                    print("Scelta sbagliata")
         else:
             pass
         if tipo == "p":
