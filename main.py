@@ -171,7 +171,7 @@ def minore_uguale(a, b):
 def lista_particolari(input_codice, db_particolari):
     lp = []
     for particolare in db_particolari:
-        if input_codice == particolare.codice:
+        if input_codice == particolare.codice[1:] or input_codice == particolare.codice:
             lp.append(particolare)
     return lp
 
@@ -490,5 +490,4 @@ if __name__ == '__main__':
     else:
         print("Particolare non presente nel database.")
 
-    edit("20_54", "m")
 
