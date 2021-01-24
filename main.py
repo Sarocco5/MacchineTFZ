@@ -357,7 +357,7 @@ def scelta_elica():
 def insert_database(cod, tipo, fs=None):
     lista_attrezzatura = ["palo", "pinza", "manuale"]
     lista_utensili = ["creatore", "coltello", "tazza", "gambo"]
-    lista_lavorazioni = ["dentatura", "stozza", "stozza elicoidale", "stozza elicoidale bombata"]
+    lista_lavorazioni = ["dentatura", "dentatura_conica", "stozza", "stozza elicoidale", "stozza elicoidale bombata"]
     lista_fasi_pezzo = ["080", "081", "082", "083", "084", "085", "120", "121", "122", "123", "124", "125"]
     try:
         if tipo == "m":
