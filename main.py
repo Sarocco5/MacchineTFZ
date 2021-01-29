@@ -136,61 +136,60 @@ Particolari = []
 
 
 def init_db_test():
-    m1 = Macchina("15_24", (120, 300), 80, ["palo", "pinza"], ["creatore"], 200,
+    m1 = Macchina("15_24", (120, 300), 80, ["palo", "pinza", "contropunta", "corpo porta pinza"], ["creatore"], 200,
                   ["dentatura", "dentatura_conica"], True,
                   6, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m2 = Macchina("15_25", (100, 200), 80, ["palo", "pinza"], ["creatore"], 200,
-                  ["dentatura", "dentatura_conica"], True,
+    m2 = Macchina("15_25", (100, 200), 80, ["palo", "pinza", "contropunta", "corpo porta pinza"], ["creatore"], 200,
                   4, 100, int_min=100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m3 = Macchina("15_16", (100, 200), 80, ["palo"], ["creatore"], 200,
+    m3 = Macchina("15_16", (100, 200), 80, ["palo", "contropunta"], ["creatore"], 200,
                   ["dentatura", "dentatura_conica"], True,
                   4, 100, m_incl_elica_dx=13, m_incl_elica_sx=21)
-    m4 = Macchina("15_17", (100, 200), 80, ["palo"], ["creatore"], 200,
+    m4 = Macchina("15_17", (100, 200), 80, ["palo", "contropunta"], ["creatore"], 200,
                   ["dentatura", "dentatura_conica"], True,
                   4, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m5 = Macchina("15_15", (100, 200), 80, ["palo"], ["creatore"], 200,
+    m5 = Macchina("15_15", (100, 200), 80, ["palo", "contropunta"], ["creatore"], 200,
                   ["dentatura", "dentatura_conica"], False,
                   4, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m6 = Macchina("15-52", (100, 380), 80, ["pinza"], ["creatore"], 200,
+    m6 = Macchina("15-52", (100, 380), 80, ["contropunta", "corpo porta pinza"], ["creatore"], 200,
                   ["dentatura", "dentatura_conica"], True,
                   8, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m7 = Macchina("15-54", (100, 380), 80, ["pinza"], ["creatore"], 200,
+    m7 = Macchina("15-54", (100, 380), 80, ["contropunta", "corpo porta pinza"], ["creatore"], 200,
                   ["dentatura", "dentatura_conica"], True,
                   8, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m8 = Macchina("15_29", (100, 320), 80, ["pinza", "manuale"], ["creatore"], 200,
+    m8 = Macchina("15_29", (100, 320), 80, ["contropunta", "corpo porta pinza", "manuale"], ["creatore"], 200,
                   ["dentatura", "dentatura_conica"], False,
                   7, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m9 = Macchina("20_52", (40, 380), 80, ["pinza"], ["coltello", "tazza", "gambo"], 200,
+    m9 = Macchina("20_52", (40, 380), 80, ["contropunta", "corpo porta pinza"], ["coltello", "tazza", "gambo"], 200,
                   ["stozza", "interna", "stozza elicoidale", "stozza elicoidale bombata"], False,
                   6, 50, incl_tav=10)
-    m10 = Macchina("20_53", (40, 380), 80, ["pinza"], ["coltello", "tazza", "gambo"], 200,
+    m10 = Macchina("20_53", (40, 380), 80, ["contropunta", "corpo porta pinza"], ["coltello", "tazza", "gambo"], 200,
                    ["stozza", "interna", "stozza elicoidale", "stozza elicoidale bombata"], False,
                    6, 50, incl_tav=10)
-    m11 = Macchina("15_18", (100, 250), 80, ["palo", "pinza"], ["creatore"], 200,
+    m11 = Macchina("15_18", (100, 250), 80, ["palo", "contropunta", "corpo porta pinza"], ["creatore"], 200,
                    ["dentatura", "dentatura_conica"], True,
                    5, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m12 = Macchina("15_10", (100, 320), 80, ["pinza", "manuale"], ["creatore"], 200,
+    m12 = Macchina("15_10", (100, 320), 80, ["contropunta", "corpo porta pinza", "manuale"], ["creatore"], 200,
                    ["dentatura"], False,
                    6, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m13 = Macchina("15_26", (100, 200), 80, ["palo", "pinza"], ["creatore"], 200,
+    m13 = Macchina("15_26", (100, 200), 80, ["palo", "corpo porta pinza"], ["creatore"], 200,
                    ["dentatura", "dentatura_conica"], False,
                    5, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m14 = Macchina("20_13", (40, 200), 80, ["pinza"], ["coltello", "tazza", "gambo"], 200,
+    m14 = Macchina("20_13", (40, 200), 80, ["pinza", "corpo porta pinza"], ["coltello", "tazza", "gambo"], 200,
                    ["stozza", "interna"], False,
                    5, 50, incl_tav=10)
-    m15 = Macchina("20_12", (40, 200), 80, ["pinza"], ["coltello", "tazza", "gambo"], 200,
+    m15 = Macchina("20_12", (40, 200), 80, ["pinza", "corpo porta pinza"], ["coltello", "tazza", "gambo"], 200,
                    ["stozza", "interna"], False,
                    5, 50)
-    m16 = Macchina("20_51", (40, 200), 80, ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                   ["stozza", "interna", "stozza elicoidale"], False,
+    m16 = Macchina("20_51", (40, 200), 80, ["pinza", "contropunta", "corpo porta pinza"],
+                   ["coltello", "tazza", "gambo"], 200, ["stozza", "interna", "stozza elicoidale"], False,
                    5, 50, incl_tav=10)
-    m17 = Macchina("20_04", (40, 200), 80, ["pinza"], ["coltello", "tazza", "gambo"], 200,
-                   ["stozza", "interna", "stozza elicoidale"], False,
+    m17 = Macchina("20_04", (40, 200), 80, ["pinza", "contropunta", "corpo porta pinza"],
+                   ["coltello", "tazza", "gambo"], 200, ["stozza", "interna", "stozza elicoidale"], False,
                    5, 60, )
-    m18 = Macchina("20_10", (40, 200), 80, ["pinza"], ["coltello", "tazza", "gambo"], 200,
+    m18 = Macchina("20_10", (40, 200), 80, ["pinza", "corpo porta pinza"], ["coltello", "tazza", "gambo"], 200,
                    ["stozza", "interna"], False,
                    5, 50, incl_tav=10)
-    m19 = Macchina("15_51", (40, 200), 80, ["pinza"], ["coltello"], 150,
+    m19 = Macchina("15_51", (40, 200), 80, ["pinza", "corpo porta pinza"], ["coltello"], 150,
                    ["stozza"], False,
                    5, 50, incl_tav=10)
     m20 = Macchina("20_08", (40, 200), 80, ["manuale"], ["coltello", "gambo"], 200,
@@ -199,15 +198,17 @@ def init_db_test():
     global Macchine_TFZ_Aprilia
     Macchine_TFZ_Aprilia = [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16, m17, m18, m19, m20]
 
-    part1 = Particolare("752/3534368", 108.65, ["palo", "pinza"], ["creatore"], 110, "120", "dentatura", False, 3.75, 28,
-                        p_incl_elica_sx=20)
+    part1 = Particolare("752/3534368", 108.65, ["palo", "corpo porta pinza"], ["creatore"], 110, "120", "dentatura",
+                        False, 3.75, 28, p_incl_elica_sx=20)
     part2 = Particolare("81/47823607", 119.4, ["palo", "manuale"], ["creatore"], 80, "120", "dentatura_conica",
                         False, 2, 53.5)
     part3 = Particolare("752/3535495", 105.3, ["manuale"], ["creatore"], 80, "120", "dentatura", False, 4, 20,
                         p_incl_elica_dx=24)
-    part4 = Particolare("81/87553312", 75, ["pinza"], ["coltello"], 120, "081", "stozza elicoidale", False, 3, 22)
-    part5 = Particolare("81/87553312", 80, ["pinza"], ["coltello"], 160, "082", "stozza", False, 2.5, 45)
-    part6 = Particolare("752/3534368", 60, ["pinza"], ["coltello"], 160, "080", "stozza", False, 4, 10, incl=8)
+    part4 = Particolare("81/87553312", 75, ["corpo porta pinza"], ["coltello"], 120, "081", "stozza elicoidale",
+                        False, 3, 22)
+    part5 = Particolare("81/87553312", 80, ["corpo porta pinza"], ["coltello"], 160, "082", "stozza", False, 2.5, 45)
+    part6 = Particolare("752/3534368", 60, ["pinza", "corpo porta pinza"], ["coltello"], 160, "080", "stozza", False,
+                        4, 10, incl=8)
     global Particolari
     Particolari = [part1, part2, part3, part4, part5, part6]
 
@@ -465,9 +466,9 @@ def scelta_elica():
 
 # Funzione che inserisce una macchina o un particolare nel database.
 def insert_database(cod, tipo, fs=None):
-    lista_attrezzatura = ["palo", "pinza", "manuale"]
+    lista_attrezzatura = ["palo", "pinza", "corpo porta pinza" "manuale", "contropunta"]
     lista_utensili = ["creatore", "coltello", "tazza", "gambo"]
-    lista_lavorazioni = ["dentatura", "dentatura_conica", "stozza", "stozza elicoidale", "stozza elicoidale bombata"]
+    lista_lavorazioni = ["dentatura", "dentatura conica", "stozza", "stozza elicoidale", "stozza elicoidale bombata"]
     lista_fasi_pezzo = ["080", "081", "082", "083", "084", "085", "120", "121", "122", "123", "124", "125"]
     try:
         if tipo == "m":
@@ -611,5 +612,6 @@ if __name__ == '__main__':
         macchine_compatibili(Macchine_TFZ_Aprilia, mini_lista, fase)
     else:
         print("Particolare non presente nel database.")
-    #x = get_particolare("752/3534368", "120")
-    #stampa_valori(x)
+
+# x = get_particolare("752/3534368", "120")
+# stampa_valori(x)
