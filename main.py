@@ -225,8 +225,12 @@ def init_db_test():
                         False, 2.5, 22, p_incl_elica_sx=20)
     part8 = Particolare("81/84560087", 104.5, ["corpo porta pinza"], ["coltello"], 127.5, "080", ["stozza"],
                         False, 2.5, 10, p_alt_att=286)
+    part9 = Particolare("81/87553311", 153.5, ["palo", "corpo porta pinza"], ["creatore"], 100, "121", ["dentatura"],
+                        True, 2.75, 23, p_incl_elica_sx=20)
+    part10 = Particolare("81/87553311", 131.5, ["palo", "corpo porta pinza"], ["creatore"], 100, "122", ["dentatura"],
+                         True, 2.75, 23, p_incl_elica_sx=22)
     global Particolari
-    Particolari = [part1, part2, part3, part4, part5, part6, part7, part8]
+    Particolari = [part1, part2, part3, part4, part5, part6, part7, part8, part9, part10]
     save_db("macchine")
     save_db("particolari")
 
