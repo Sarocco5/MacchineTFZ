@@ -145,7 +145,7 @@ Macchine_TFZ_Aprilia = []
 Particolari = []
 
 
-# Cancellare alla consegna
+# todo cancellare alla consegna
 def init_db_test():
     m1 = Macchina("15_24", (120, 300), 90, ["palo", "pinza", "contropunta", "corpo porta pinza"],  ["creatore"],
                   200, ["dentatura", "dentatura_conica"], True,
@@ -267,10 +267,10 @@ def maggiore_uguale(a, b):
 
 
 # Verifica se il particolare richiede un programma multiplo e ritorna True
-def verifica_programma_multiplo(p, m):
-    if not p.prog_multi:
+def verifica_programma_multiplo(p_pm, m_pm):
+    if not p_pm:
         return True
-    elif m.prog_multi:
+    elif m_pm:
         return True
     return False
 
@@ -279,9 +279,23 @@ def verifica_programma_multiplo(p, m):
 # è presente nel database_particolari.
 def lista_particolari(input_codice, db_particolari):
     lp = []
+    lista_codice_particolari_simili = []
     for p in db_particolari:
-        if input_codice == p.codice[5:] or input_codice == p.codice[4:] or input_codice == p.codice:
+        if input_codice == p.codice[8:] or input_codice == p.codice[7:] or input_codice == p.codice:
             lp.append(p)
+    # Da qui controllo se lp contiene codici diversi con parte finale uguale.
+    if len(lp) > 1:
+        for item in lp:
+            if item.codice not in lista_codice_particolari_simili:
+                lista_codice_particolari_simili.append(item.codice)
+    if len(lista_codice_particolari_simili) > 1:
+        print("Quale codice è quello giusto?")
+        for item in lista_codice_particolari_simili:
+            print("   " + item)
+        scelta = check_inserimento_stringhe(lista_codice_particolari_simili, "codice per intero")
+        for item in lp:
+            if item.codice != scelta:
+                lp.remove(item)
     return lp
 
 
@@ -310,7 +324,8 @@ def compatibilita_generale(p, m):
         minore_uguale(p.incl_elica_dx, m.incl_elica_max_dx) and \
         minore_uguale(p.incl_elica_sx, m.incl_elica_max_sx) and \
         minore_uguale(p.inclinazione, m.inclinazione_tavola) and \
-        minore_uguale(p.altezza_attrezzatura, m.altezza_attrezzatura_max)
+        minore_uguale(p.altezza_attrezzatura, m.altezza_attrezzatura_max) and \
+        verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo)
 
 
 # Funzione che scorre le 2 liste del database (macchine e particolari), e ,usando la funzione "compatibilità_generale",
@@ -360,7 +375,7 @@ def stampa_etichetta(indice):
 # Controlla se un oggetto è in una lista e stampa gli oggetti che trova nella lista.
 def stampa_lista(lista):
     for item in lista:
-        print(item)
+        print("   " + item)
 
 
 # Verifica se l'input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
@@ -377,7 +392,7 @@ def check_inserimento_dati(lista, tipo):
 def check_inserimento_stringhe(lista, tipo):
     scelta = input(f'Inserire {tipo}: ').strip()
     while not valuta_input_testo(scelta, lista):
-        scelta = input(f'{tipo.capitalize()} non disponibile. Inserire nuovamente il tipo di {tipo}: ').strip()
+        scelta = input(f'{tipo.capitalize()} non disponibile. Inserire nuovamente "{tipo}": ').strip()
     return scelta
 
 
@@ -620,7 +635,7 @@ if __name__ == '__main__':
                                     12: "inclinazione", 13: "altezza attrezzatura"}
     load_db()
 
-    codice = input("Inserire codice particolare (inserire codice completo o ultime 5 cifre): ")
+    codice = input("Inserire codice particolare (inserire codice completo o ultime 4 cifre): ")
     mini_lista = lista_particolari(codice, Particolari)
     if len(mini_lista) == 1:
         macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia)
@@ -628,7 +643,7 @@ if __name__ == '__main__':
         print("Il codice presenta più fasi. Quale intendi scegliere?")
         li_fa = lista_fasi(mini_lista)
         for index in li_fa:
-            print(index)
+            print("   " + index)
         fase = check_inserimento_stringhe(li_fa, "fase")
         if fase != li_fa:
             macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fase)
