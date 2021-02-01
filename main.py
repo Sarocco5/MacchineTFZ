@@ -348,6 +348,8 @@ def get_macchina(nome_macchina):
     for m in Macchine_TFZ_Aprilia:
         if m.nome == nome_macchina:
             return m
+    else:
+        print("Macchina non trovata")
 
 
 # Come "get_macchina" con la differenza che questa funzione controlla anche la fase, in caso ci siano particolari
@@ -356,6 +358,8 @@ def get_particolare(codice_particolare, fs):
     for p in Particolari:
         if p.codice == codice_particolare and p.fase == fs:
             return p
+    else:
+        print("Codice non trovato")
 
 
 # Stampa gli attributi della macchina o del particolare. Esempio: { 'nome': '15_24', 'diametro': (120, 300) } ecc...
@@ -402,8 +406,6 @@ def remove_macchina(nome_macchina):
     if isinstance(x, Macchina):
         Macchine_TFZ_Aprilia.remove(x)
         print("Macchina eliminato con successo")
-    else:
-        print("Macchina non trovata")
 
 
 # Rimuove un particolare dalla lista, con opzione per selezionare il tipo di fase.
@@ -412,8 +414,6 @@ def remove_particolare(codice_particolare, fs):
     if isinstance(x, Particolare):
         Particolari.remove(x)
         print("Codice eliminato con successo")
-    else:
-        print("Codice non trovato")
 
 
 # Funzione per edit lista attrezzatura, sia per la macchina che per il particolare
