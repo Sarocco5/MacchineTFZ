@@ -73,7 +73,7 @@ class Macchina:
 
 
 class Particolare:
-    nome = None
+    codice = None
     diametro = None
     interasse = None
     tipo_attrezzatura = []
@@ -437,6 +437,8 @@ def edit(cod, tipo, fs=None):
             # Controllo se la modifica riguarda una lista
             if choice in [3, 4, 6]:
                 tipo_modifica = input("Vuoi aggiungere o rimuovere?: ")
+                if tipo_modifica != "aggiungere" or "rimuovere":
+                    print("Scelta errata!")
                 valore_modifica = input("Inserisci la modifica: ")
                 edit_lista(m, tipo_modifica, valore_modifica)
             # Controllo se la modifica riguarda una tupla
@@ -459,6 +461,8 @@ def edit(cod, tipo, fs=None):
             # Controllo se la modifica riguarda una lista
             if scelta in [3, 4]:
                 tipo_modifica = input("Vuoi aggiungere o rimuovere?: ")
+                if tipo_modifica != "aggiungere" or "rimuovere":
+                    print("Scelta errata!")
                 valore_modifica = input("Inserisci la modifica: ")
                 edit_lista(p, tipo_modifica, valore_modifica)
             # Altrimenti la modifica è di tipo stringa o numero
