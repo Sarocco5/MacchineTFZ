@@ -1,10 +1,10 @@
 import pickle
+import bisect
 
 
 class Macchina:
     codice = None
     diametro_range = ()
-    interasse_min = None
     tipo_attrezzatura = []
     tipo_utensile = []
     diametro_max_utensile = None
@@ -12,6 +12,7 @@ class Macchina:
     programma_multiplo = None
     modulo_max = None
     altezza_fascia_max = None
+    interasse_min = None
     incl_elica_max_dx = None
     incl_elica_max_sx = None
     inclinazione_tavola = None
@@ -79,12 +80,12 @@ class Utensile:
     senso_elica = None
     inclinazione_elica = None
 
-    def __init__(self, c, t, d, senso_el, inc_el=0):
+    def __init__(self, c, t, d, senso_el, inc_el=0.0):
         self.codice = c
         self.tipo = t
         self.diametro_utensile = d
         self.senso_elica = senso_el
-        self.inclinazione_elica = inc_el
+        self.inclinazione_elica = float(inc_el)
 
     def set_codice(self, c):
         self.codice = c
@@ -105,11 +106,11 @@ class Utensile:
 class Particolare:
     codice = None
     diametro = None
-    codice_utensile = None
+    codice_utensile = []
     interasse = None
     tipo_attrezzatura = []
     tipo_utensile = []
-    diametro_utensile = None
+    diametro_utensile = []
     fase = None
     lavorazione = []
     programma_multiplo = None
@@ -135,8 +136,8 @@ class Particolare:
         self.programma_multiplo = p_prog_multi
         self.modulo = mod
         self.fascia = fascia
-        self.incl_elica_dx = calcolo_inclinazione("dx", u.senso_elica, p_incl_elica_dx)
-        self.incl_elica_sx = calcolo_inclinazione("sx", u.senso_elica, p_incl_elica_sx)
+        self.incl_elica_dx = calcolo_inclinazione("dx", u.senso_elica, p_lav, p_incl_elica_dx)
+        self.incl_elica_sx = calcolo_inclinazione("sx", u.senso_elica, p_lav, p_incl_elica_sx)
         self.inclinazione = incl
         self.altezza_attrezzatura = p_alt_att
 
@@ -217,7 +218,7 @@ def init_db_test():
     m12 = Macchina("15_10", (100, 320), 80, ["contropunta", "corpo porta pinza", "manuale"], ["creatore"], 200,
                    ["dentatura"], False,
                    6, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m13 = Macchina("15_26", (100, 200), 80, ["palo", "corpo porta pinza"], ["creatore"], 200,
+    m13 = Macchina("15_26", (100, 210), 80, ["palo", "corpo porta pinza"], ["creatore"], 200,
                    ["dentatura", "dentatura_conica"], False,
                    5, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
     m14 = Macchina("20_13", (40, 200), 80, ["pinza", "corpo porta pinza"], ["coltello", "tazza", "gambo"], 250,
@@ -244,41 +245,46 @@ def init_db_test():
     global Macchine_TFZ_Aprilia
     Macchine_TFZ_Aprilia = [m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16, m17, m18, m19, m20]
 
-    part1 = Particolare("752/3534368", 108.65, ["palo", "corpo porta pinza"], ["creatore"], 110, "120", ["dentatura"],
-                        False, 3.75, 28, p_incl_elica_sx=20)
-    part2 = Particolare("81/47823607", 119.4, ["palo", "manuale"], ["creatore"], 80, "120", ["dentatura_conica"],
-                        False, 2, 53.5)
-    part3 = Particolare("752/3535495", 105.3, ["manuale"], ["creatore"], 80, "120", ["dentatura"], False, 4, 20,
-                        p_incl_elica_dx=24)
-    part4 = Particolare("81/87553312", 75, ["corpo porta pinza", "slitta elicoidale"], ["coltello"], 120, "081",
-                        ["stozza elicoidale"], False, 3, 22)
-    part5 = Particolare("81/87553312", 80, ["corpo porta pinza"], ["coltello"], 160, "082",
-                        ["stozza"], False, 2.5, 45)
-    part6 = Particolare("752/3534368", 60, ["pinza", "corpo porta pinza"], ["coltello"], 160, "080", ["stozza"], False,
-                        4, 10, incl=8)
-    part7 = Particolare("453/32106060", 74.9, ["palo"], ["creatore"], 100, "120", ["dentatura"],
-                        False, 2.5, 22, p_incl_elica_sx=20)
-    part8 = Particolare("81/84560087", 104.5, ["corpo porta pinza"], ["coltello"], 127.5, "080", ["stozza"],
-                        False, 2.5, 10, p_alt_att=286)
-    part9 = Particolare("81/87553311", 153.5, ["palo", "corpo porta pinza"], ["creatore"], 100, "121", ["dentatura"],
-                        True, 2.75, 23, p_incl_elica_sx=20)
-    part10 = Particolare("81/87553311", 131.5, ["palo", "corpo porta pinza"], ["creatore"], 100, "122", ["dentatura"],
-                         True, 2.75, 23, p_incl_elica_sx=22)
-    global Particolari
-    Particolari = [part1, part2, part3, part4, part5, part6, part7, part8, part9, part10]
-
     ut1 = Utensile("1011762", "coltello", 127.50, "dritto")
-    ut2 = Utensile("1011753", "coltello", 178, "dritto", 22)
+    ut2 = Utensile("1011753", "coltello", 178, "dx", 22)
     ut3 = Utensile("1012137", "tazza", 113.50, "dritto")
     ut4 = Utensile("1012152", "coltello", 131, "dritto")
     ut5 = Utensile("1011750", "coltello", 202, "dritto")
+    ut6 = Utensile("1006300", "creatore", 80, "dx", 6.83)
+    ut7 = Utensile("1006149", "creatore", 110, "sx", 6.46)
+    ut8 = Utensile("1006047", "creatore", 80, "sx", 2.61)
+    ut9 = Utensile("1005862", "creatore", 100, "sx", 1.53)
+    ut10 = Utensile("1005848", "creatore", 100, "sx", 5.13)
 
     global Utensili
-    Utensili = [ut1, ut2, ut3, ut4, ut5]
+    Utensili = [ut1, ut2, ut3, ut4, ut5, ut6, ut7, ut8, ut9, ut10]
+
+    part1 = Particolare("752/3534368", 108.65, ["1006149"], ["palo", "corpo porta pinza"], ["creatore"], "120",
+                        ["dentatura"], False, 3.75, 28, p_incl_elica_sx=20)
+    part2 = Particolare("81/47823607", 119.4, ["1006300"], ["palo", "manuale"], ["creatore"], "120",
+                        ["dentatura_conica"], False, 2, 53.5)
+    part3 = Particolare("752/3535495", 105.3, ["1006047"], ["manuale"], ["creatore"], "120", ["dentatura"], False, 4,
+                        20, p_incl_elica_dx=24)
+    part4 = Particolare("81/87553312", 75, ["1011753"], ["corpo porta pinza", "slitta elicoidale"], ["coltello"], 120,
+                        "081", ["stozza elicoidale"], False, 3, p_incl_elica_dx=22)
+    part5 = Particolare("81/87553312", 80, ["1011750"], ["corpo porta pinza"], ["coltello"], "082",
+                        ["stozza"], False, 2.5, 45)
+    part6 = Particolare("752/3534368", 60, ["1012152", "1012137"], ["pinza", "corpo porta pinza"],
+                        ["coltello", "tazza"], "080", ["stozza"], False, 4, 10, incl=8)
+    part7 = Particolare("453/32106060", 74.9, ["1005862"], ["palo"], ["creatore"], "120", ["dentatura"],
+                        False, 2.5, 22, p_incl_elica_sx=20)
+    part8 = Particolare("81/84560087", 104.5, ["1011762"], ["corpo porta pinza"], ["coltello"], "080", ["stozza"],
+                        False, 2.5, 10, p_alt_att=286)
+    part9 = Particolare("81/87553311", 153.5, ["1005848"], ["palo", "corpo porta pinza"], ["creatore"], "121",
+                        ["dentatura"], True, 2.75, 23, p_incl_elica_sx=20)
+    part10 = Particolare("81/87553311", 131.5, ["1005848"], ["palo", "corpo porta pinza"], ["creatore"], "122",
+                         ["dentatura"], True, 2.75, 23, p_incl_elica_sx=22)
+    global Particolari
+    Particolari = [part1, part2, part3, part4, part5, part6, part7, part8, part9, part10]
 
     save_db("macchine")
-    save_db("particolari")
     save_db("utensili")
+    save_db("particolari")
 
 
 # Ritorna true, se il valore del diametro è contenuto nella tupla (min, max).
@@ -362,25 +368,24 @@ def fase_compatibile(fs_macchina, fs_pezzo):
     return fs_macchina == fs_pezzo
 
 
-def calcolo_inclinazione(u_senso_el, u_inc_el, p_inc_el_dx=0, p_inc_el_sx=0, incl=0):
-    if p_inc_el_sx is None and incl is None:
-        if u_senso_el == "dx" and p_inc_el_dx == p_inc_el_dx:
-            inclinazione_dx = u_inc_el - p_inc_el_dx
-            return inclinazione_dx
-    elif p_inc_el_sx is None and incl is None:
-        if u_senso_el == "sx" and p_inc_el_dx == p_inc_el_dx:
-            inclinazione_sx = u_inc_el + p_inc_el_dx
-            return inclinazione_sx
-    elif p_inc_el_dx is None and incl is None:
-        if u_senso_el == "dx" and p_inc_el_sx == p_inc_el_sx:
-            inclinazione_dx = u_inc_el + p_inc_el_sx
-            return inclinazione_dx
-    elif p_inc_el_dx is None and incl is None:
-        if u_senso_el == "sx" and p_inc_el_sx == p_inc_el_sx:
-            inclinazione_sx = u_inc_el - p_inc_el_sx
-            return inclinazione_sx
-    elif u_senso_el == "stozza":
-        return incl
+def calcolo_inclinazione(u_senso_el, u_inc_el, lavorazione, p_inc_el_dx=0, p_inc_el_sx=0, incl=0):
+    if lavorazione != "stozza" or "stozza elicoidale" or "stozza elicoidale bombata":
+        if p_inc_el_sx is None and incl is None:
+            if u_senso_el == "dx" and p_inc_el_dx == p_inc_el_dx:
+                inclinazione_dx = u_inc_el - p_inc_el_dx
+                return inclinazione_dx
+        elif p_inc_el_sx is None and incl is None:
+            if u_senso_el == "sx" and p_inc_el_dx == p_inc_el_dx:
+                inclinazione_sx = u_inc_el + p_inc_el_dx
+                return inclinazione_sx
+        elif p_inc_el_dx is None and incl is None:
+            if u_senso_el == "dx" and p_inc_el_sx == p_inc_el_sx:
+                inclinazione_dx = u_inc_el + p_inc_el_sx
+                return inclinazione_dx
+        elif p_inc_el_dx is None and incl is None:
+            if u_senso_el == "sx" and p_inc_el_sx == p_inc_el_sx:
+                inclinazione_sx = u_inc_el - p_inc_el_sx
+                return inclinazione_sx
 
 
 # Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
@@ -463,6 +468,26 @@ def stampa_lista(lista):
         print("   " + item)
 
 
+# Stampa il database.
+def stampa_database(lista):
+    db = []
+    if isinstance(lista[0], Particolare):
+        for indice in lista:
+            s = indice.codice.split("/")[0]
+            k = len(s)
+            if k < 3:
+                for i in range(3 - k):
+                    indice.codice = "0" + indice.codice
+            bisect.insort(db, indice.codice)
+    elif isinstance(lista[0], Utensile):
+        for indice in lista:
+            bisect.insort(db, indice.codice)
+    elif isinstance(lista[0], Macchina):
+        for indice in lista:
+            bisect.insort(db, indice.codice)
+    print(db)
+
+
 # Verifica se l'input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
 # l' inserimento dell' input finché non riceve un input riconosciuto. Ritorna una lista.
 def check_inserimento_dati(lista, tipo):
@@ -518,22 +543,22 @@ def edit(cod, tipo, fs=None):
         if isinstance(m, Macchina):
             stampa_etichetta(Indice_attributi_macchina)
             choice = int(input("Quale voce vuoi modificare?: "))
-            # Controllo se la modifica riguarda una lista
+            # Controllo se la modifica riguarda una lista.
             if choice in [3, 4, 6]:
                 tipo_modifica = input("Vuoi aggiungere o rimuovere?: ")
                 if tipo_modifica != "aggiungere" or "rimuovere":
                     print("Scelta errata!")
                 valore_modifica = input("Inserisci la modifica: ")
                 edit_lista(m, tipo_modifica, valore_modifica)
-            # Controllo se la modifica riguarda una tupla
+            # Controllo se la modifica riguarda una tupla.
             elif choice == 1:
                 minimo = input("Inserire valore minimo:")
                 massimo = input("Inserire valore massimo: ")
                 m.set_diametro((minimo, massimo))
-            # Altrimenti la modifica è di tipo stringa o numero
+            # Altrimenti la modifica è di tipo stringa o numero.
             else:
                 scelta_utente = input("Inserire la modifica: ")
-                # Questa voce mi prendere l' attributo, che scelgo tramite input [scelta], da un dizionario
+                # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                 getattr(m, "set_" + Indice_attributi_macchina[choice])(scelta_utente)
             stampa_valori(m)
             print("Modifica completata con successo!")
@@ -542,17 +567,17 @@ def edit(cod, tipo, fs=None):
         if isinstance(p, Particolare):
             stampa_etichetta(Indice_attributi_particolare)
             scelta = int(input("Quale voce vuoi modificare?: "))
-            # Controllo se la modifica riguarda una lista
-            if scelta in [3, 4]:
+            # Controllo se la modifica riguarda una lista.
+            if scelta in [2, 4, 5]:
                 tipo_modifica = input("Vuoi aggiungere o rimuovere?: ")
                 if tipo_modifica != "aggiungere" or "rimuovere":
                     print("Scelta errata!")
                 valore_modifica = input("Inserisci la modifica: ")
                 edit_lista(p, tipo_modifica, valore_modifica)
-            # Altrimenti la modifica è di tipo stringa o numero
+            # Altrimenti la modifica è di tipo stringa o numero.
             else:
                 scelta_utente = int(input("Inserire la modifica: "))
-                # Questa voce mi prendere l' attributo, che scelgo tramite input [scelta], da un dizionario
+                # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                 getattr(p, "set_" + Indice_attributi_macchina[scelta])(scelta_utente)
             stampa_valori(p)
             print("Modifica completata con successo!")
@@ -562,7 +587,7 @@ def edit(cod, tipo, fs=None):
             stampa_etichetta(Indice_attributi_particolare)
             scelta = int(input("Quale voce vuoi modificare?: "))
             scelta_utente = int(input("Inserire la modifica: "))
-            # Questa voce mi prendere l' attributo, che scelgo tramite input [scelta], da un dizionario
+            # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
             getattr(u, "set_" + Indice_attributi_macchina[scelta])(scelta_utente)
             stampa_valori(u)
             print("Modifica completata con successo!")
@@ -602,8 +627,10 @@ def scelta_elica():
 def insert_database(cod, tipo, fs=None):
     lista_attrezzatura = ["palo", "pinza", "corpo porta pinza" "manuale", "contropunta", "slitta elicoidale"]
     lista_utensili = ["creatore", "coltello", "tazza", "gambo"]
-    lista_lavorazioni = ["dentatura", "dentatura conica", "stozza", "stozza elicoidale", "stozza elicoidale bombata"]
-    lista_fasi_pezzo = ["080", "081", "082", "083", "084", "085", "120", "121", "122", "123", "124", "125"]
+    lista_lavorazioni = ["dentatura", "dentatura conica", "stozza", "interna", "stozza elicoidale",
+                         "stozza elicoidale bombata"]
+    lista_fasi_pezzo = ["080", "081", "082", "083", "084", "085", "120", "121", "122", "123", "124", "125", "130",
+                        "131", "132", "133", "134", "135"]
     try:
         if tipo == "m":
             x = get_macchina(cod)
@@ -697,10 +724,14 @@ def insert_database(cod, tipo, fs=None):
                 d = int(input("Inserire diametro: "))
                 stampa_lista(lista_utensili)
                 t = input("Inserisci il tipo di utensile: ")
-                sens_el = input("Inserisci senso elica(Inserire 'dx', 'sx' o 'dritta'): ")
+                sens_el = input("Inserisci senso elica(Inserire 'dx', 'sx' o 'dritto'): ")
                 if sens_el == "dritto":
-                    pass
-                else:
+                    sens_el = "dritto"
+                elif sens_el == "dx":
+                    sens_el = "dx"
+                    inc_el = int(input("Inserisci gradi inclinazione elica: "))
+                elif sens_el == "sx":
+                    sens_el = "sx"
                     inc_el = int(input("Inserisci gradi inclinazione elica: "))
                 u = Utensile(cod, t, d, sens_el, inc_el=0)
                 stampa_valori(u)
@@ -753,16 +784,17 @@ def load_db():
 
 
 if __name__ == '__main__':
-    Indice_attributi_macchina = {0: "codice", 1: "diametro_range", 2: "interasse_min", 3: "tipo_attrezzatura",
-                                 4: "tipo_utensile", 5: "diametro_max_utensile", 6: "lavorazione", 7: "modulo_max",
-                                 8: "altezza_fascia_max", 9: "incl_elica_max_dx", 10: "incl_elica_max_sx",
-                                 11: "inclinazione_tavola", 12: "altezza attrezzatura"}
-    Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "interasse", 3: "tipo_attrezzatura",
-                                    4: "tipo_utensile", 5: "diametro_utensile", 6: "fase", 7: "lavorazione",
-                                    8: "modulo", 9: "fascia", 10: "incl_elica_dx", 11: "incl_elica_sx",
-                                    12: "inclinazione", 13: "altezza attrezzatura"}
-    Indice_attributi_utensile = {0: "codice", 1: "tipo", 2: "diametro_utensile", 3: "senso_elica",
-                                 4: "inclinazione_elica"}
+    Indice_attributi_macchina = {0: "codice", 1: "diametro range", 2: "interasse min", 3: "tipo attrezzatura",
+                                 4: "tipo utensile", 5: "diametro max utensile", 6: "lavorazione", 7: "modulo max",
+                                 8: "altezza fascia_max", 9: "inclinazione elica max dx",
+                                 10: "inclinazione elica max sx", 11: "inclinazione tavola",
+                                 12: "altezza attrezzatura massima"}
+    Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "codice utensile", 3: "interasse",
+                                    4: "tipo attrezzatura", 5: "tipo utensile", 6: "diametro utensile", 7: "fase",
+                                    8: "lavorazione", 9: "modulo", 10: "fascia", 11: "inclinazione elica dx",
+                                    12: "inclinazione elica sx", 13: "inclinazione", 14: "altezza attrezzatura"}
+    Indice_attributi_utensile = {0: "codice", 1: "tipo", 2: "diametro utensile", 3: "senso elica",
+                                 4: "inclinazione elica"}
 
     load_db()
 
