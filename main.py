@@ -127,7 +127,7 @@ class Particolare:
         self.codice = c
         self.diametro = d
         self.codice_utensile = cod_ut
-        self.interasse = calcolo_interasse(d, u.diametro_utensile)
+        self.interasse = calcolo_interasse(cod_ut, d, p_lav)
         self.tipo_attrezzatura = p_ta
         self.tipo_utensile = p_tu
         self.diametro_utensile = u.diametro_utensile
@@ -182,7 +182,7 @@ Particolari = []
 
 # todo cancellare alla consegna
 def init_db_test():
-    m1 = Macchina("15_24", (120, 300), 90, ["palo", "pinza", "contropunta", "corpo porta pinza"],  ["creatore"],
+    m1 = Macchina("15_24", (80, 300), 90, ["palo", "pinza", "contropunta", "corpo porta pinza"],  ["creatore"],
                   200, ["dentatura", "dentatura_conica"], True,
                   6, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
     m2 = Macchina("15_25", (100, 200), 90, ["palo", "pinza", "contropunta", "corpo porta pinza"], ["creatore"],
@@ -197,10 +197,10 @@ def init_db_test():
     m5 = Macchina("15_15", (100, 200), 80, ["palo", "contropunta"], ["creatore"], 200,
                   ["dentatura", "dentatura_conica"], False,
                   4, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m6 = Macchina("15-52", (100, 380), 80, ["contropunta", "corpo porta pinza"], ["creatore"], 200,
+    m6 = Macchina("15_52", (100, 380), 80, ["contropunta", "corpo porta pinza"], ["creatore"], 200,
                   ["dentatura", "dentatura_conica"], True,
                   8, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
-    m7 = Macchina("15-54", (100, 380), 80, ["contropunta", "corpo porta pinza"], ["creatore"], 200,
+    m7 = Macchina("15_54", (100, 380), 80, ["contropunta", "corpo porta pinza"], ["creatore"], 200,
                   ["dentatura", "dentatura_conica"], True,
                   8, 100, m_incl_elica_dx=30, m_incl_elica_sx=30)
     m8 = Macchina("15_29", (100, 320), 80, ["contropunta", "corpo porta pinza", "manuale"], ["creatore"], 200,
@@ -292,9 +292,15 @@ def diametro_compatibile(valore, tupla):
     return tupla[0] <= valore <= tupla[1]
 
 
-# Funzione che prende 2 dati, esegue la somma e il risultato lo divide per 2.
-def calcolo_interasse(diam_pezzo, diam_ute):
-    return (diam_pezzo + diam_ute) / 2
+# Verifico che la lavorazione non sia una stozza, poi creo una lista vuota (lu) e scorro tutti gli indici di una lista
+# per calcolare l' interasse. Il risultato lo metto in lu.
+def calcolo_interasse(codice_utensile, diam_pezzo, p_lav):
+    if p_lav != "stozza" or "stozza elicoidale" or "stozza elicoidale bombata":
+        lu = []
+        for indice in codice_utensile:
+            r = (indice.diametro_utensile + diam_pezzo) / 2
+            lu.append(r)
+            return lu
 
 
 # Scorro 2 liste e vedo se l'oggetto è in entrambe le liste.
@@ -311,6 +317,12 @@ def minore_uguale(a, b):
     if a is None or b is None:
         return True
     return a <= b
+
+
+#  Confronta il contenuto di una lista (a) con un valore fisso (b)
+def minore_uguale_lista(lista, b):
+    for a in lista:
+        return a <= b
 
 
 # Valore (a) maggiore o uguale a (b).
@@ -368,6 +380,9 @@ def fase_compatibile(fs_macchina, fs_pezzo):
     return fs_macchina == fs_pezzo
 
 
+# Prende il tipo di lavorazione, se è stozza passa, se invece è una dentatura prende il verso dell'elica sia del pezzo
+# che dell'utensile e fa i conti ritornando l' inclinazione esatta da confrontare con la macchina. Se i versi sono
+# concordi esegue una differenza, mentre se sono opposti fa una somma. Il risultato è in centesimi.
 def calcolo_inclinazione(u_senso_el, u_inc_el, lavorazione, p_inc_el_dx=0, p_inc_el_sx=0, incl=0):
     if lavorazione != "stozza" or "stozza elicoidale" or "stozza elicoidale bombata":
         if p_inc_el_sx is None and incl is None:
@@ -390,7 +405,7 @@ def calcolo_inclinazione(u_senso_el, u_inc_el, lavorazione, p_inc_el_dx=0, p_inc
 
 # Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
 def compatibilita_generale(p, m):
-    return diametro_compatibile(p.diametro, m.diametro) and \
+    return diametro_compatibile(p.diametro, m.diametro_range) and \
         oggetto_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura) and \
         oggetto_compatibile(p.tipo_utensile, m.tipo_utensile) and \
         oggetto_compatibile(p.lavorazione, m.lavorazione) and \
@@ -413,17 +428,17 @@ def macchine_compatibili(ls_part, ls_macc, fs=None):
         for m in ls_macc:
             if fs is None:
                 if compatibilita_generale(p, m):
-                    print(m.nome)
+                    print(m.codice)
             else:
                 if p.fase == fs:
                     if compatibilita_generale(p, m):
-                        print(m.nome)
+                        print(m.codice)
 
 
 # Scorre la lista macchine e mi ritorna la macchina.
-def get_macchina(nome_macchina):
+def get_macchina(codice_macchina):
     for m in Macchine_TFZ_Aprilia:
-        if m.nome == nome_macchina:
+        if m.codice == codice_macchina:
             return m
     else:
         print("Macchina non trovata")
@@ -473,6 +488,9 @@ def stampa_database(lista):
     db = []
     if isinstance(lista[0], Particolare):
         for indice in lista:
+            # Dato che con i particolari ad una o due cifre prima dello slash dava problemi di ordinamento, con questo
+            # metodo prima uso "split" e divido il codice in 2 dallo slash, aggiungo gli zeri mancati per portare tutti
+            # i codici a tre cifre prima dello slash e poi, mentre la scorro, ordino la nuova lista con "bisect".
             s = indice.codice.split("/")[0]
             k = len(s)
             if k < 3:
@@ -733,7 +751,7 @@ def insert_database(cod, tipo, fs=None):
                 elif sens_el == "sx":
                     sens_el = "sx"
                     inc_el = int(input("Inserisci gradi inclinazione elica: "))
-                u = Utensile(cod, t, d, sens_el, inc_el=0)
+                u = Utensile(cod, t, d, sens_el, inc_el=0.0)
                 stampa_valori(u)
                 scelta = input("I valori inseriti sono corretti?(si, no): ")
                 if scelta == "si":
