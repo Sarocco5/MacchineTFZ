@@ -283,19 +283,19 @@ def init_db_test():
 # concordi esegue una differenza, mentre se sono opposti fa una somma. Il risultato è in centesimi.
 def calcolo_inclinazione(u_senso_el, u_inc_el, p_lav, p_inc_el_dx=0.0, p_inc_el_sx=0.0):
     if "dentatura" in p_lav:
-        if p_inc_el_sx == 0.0:
+        if p_inc_el_dx > 0:
             if u_senso_el == "dx":
-                inclinazione_dx = u_inc_el - p_inc_el_dx
+                inclinazione_dx = p_inc_el_dx - u_inc_el
                 return inclinazione_dx
             else:
-                inclinazione_sx = u_inc_el + p_inc_el_dx
+                inclinazione_dx = p_inc_el_dx + u_inc_el
+                return inclinazione_dx
+        if p_inc_el_sx > 0:
+            if u_senso_el == "sx":
+                inclinazione_sx = p_inc_el_sx - u_inc_el
                 return inclinazione_sx
-        else:
-            if u_senso_el == "dx":
-                inclinazione_dx = u_inc_el + p_inc_el_sx
-                return inclinazione_dx
             else:
-                inclinazione_sx = u_inc_el - p_inc_el_sx
+                inclinazione_sx = p_inc_el_sx + u_inc_el
                 return inclinazione_sx
 
 
@@ -527,8 +527,6 @@ def insert_database(cod, tipo, fs=None):
                     print("Inserimento errato. Programma interrotto")
                 else:
                     print("Scelta sbagliata")
-        else:
-            pass
         if tipo == "p":
             y = get_particolare(cod, fs)
             if isinstance(y, Particolare):
@@ -552,9 +550,9 @@ def insert_database(cod, tipo, fs=None):
                 p_m = True if p_m == "si" else False
                 mod = float(sostituzione_virgola(input("Inserire modulo: ")))
                 h = float(sostituzione_virgola(input("Inserire fascia: ")))
-                inc_el_dx = None
-                inc_el_sx = None
-                inc = None
+                inc_el_dx = 0.0
+                inc_el_sx = 0.0
+                inc = 0.0
                 # Lavorazione è sempre una lista da 1 elemento.
                 if lav[0] == "stozza" or lav[0] == "interna":
                     inc = float(sostituzione_virgola(
@@ -563,10 +561,15 @@ def insert_database(cod, tipo, fs=None):
                     scelta = input("Dentatura dritta o elicoidale?: ")
                     if scelta != "dritta":
                         elica = scelta_elica()
+                        print(f'------ 1 {elica} 1 ----------')
                         if elica[0] == "dx":
+                            print(f'------ 2 {elica[0]} 2 ----------')
                             inc_el_dx = elica[1]
+                            print(f'------ 3 {elica[1]} 3 ----------')
                         else:
+                            print(f'------ 4 {elica[0]} 4 ----------')
                             inc_el_sx = elica[1]
+                            print(f'------ 5 {elica[1]} 5 ----------')
                 alt_att = int(input("Inserire altezza attrezzatura: "))
                 p = Particolare(cod, d, ls_ut, ta, fs, lav, p_m, mod, h, inc_el_dx, inc_el_sx, inc, alt_att)
                 stampa_valori(p)
@@ -870,6 +873,3 @@ if __name__ == '__main__':
     else:
         print("Particolare non presente nel database.")
 
-    # insert_database("1005678", "p", "120")
-    # stampa_valori(get_particolare("1005678", "120"))
-    stampa_valori(get_particolare("752/3534368", "120"))
