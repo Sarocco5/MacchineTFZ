@@ -278,120 +278,6 @@ def init_db_test():
     save_db("particolari")
 
 
-# Ritorna true, se il valore del diametro è contenuto nella tupla (min, max).
-def diametro_compatibile(valore, tupla):
-    return tupla[0] <= valore <= tupla[1]
-
-
-# Verifico che la lavorazione non sia una stozza, poi creo una lista vuota (lu) e scorro tutti gli indici di una lista
-# per calcolare l' interasse. Il risultato lo metto in lu.
-def calcolo_interasse(lista_utensili, diam_pezzo, p_lav):
-    if "dentatura" in p_lav:
-        ls_dia_ut = []
-        for u in lista_utensili:
-            r = (u.diametro_utensile + diam_pezzo) / 2
-            ls_dia_ut.append(r)
-        return ls_dia_ut
-
-
-# Crea una lista dove mette i diametri degli utensili presenti nel particolare.
-def lista_diametro_utensile(codice_utensili):
-    lu = []
-    for indice in codice_utensili:
-        u = get_utensile(indice)
-        d = u.diametro_utensile
-        lu.append(d)
-    return lu
-
-
-# Scorro 2 liste e vedo se l' attributo dell' oggetto è in entrambe le liste.
-def oggetto_compatibile(ls_attributi_p, ls_attributi_m):
-    for p in ls_attributi_p:
-        for m in ls_attributi_m:
-            if p == m:
-                return True
-    return False
-
-
-def utensile_compatibile(ls_u, ls_attributi_m):
-    for u in ls_u:
-        for m in ls_attributi_m:
-            if u == m:
-                return True
-        return False
-
-
-# Valore (a) minore o uguale a (b).
-def minore_uguale(a, b):
-    if a is None or b is None:
-        return True
-    return a <= b
-
-
-# Confronta il contenuto di una lista (a) con un valore fisso (b)
-def minore_uguale_lista(lista, b):
-    minore = True
-    for a in lista:
-        if a > b:
-            minore = False
-    return minore
-
-
-# Valore (a) maggiore o uguale a (b).
-def maggiore_uguale(a, b):
-    if a is None or b is None:
-        return True
-    return a >= b
-
-
-# Verifica se il particolare richiede un programma multiplo e ritorna True
-def verifica_programma_multiplo(p_pm, m_pm):
-    if not p_pm:
-        return True
-    elif m_pm:
-        return True
-    return False
-
-
-# Creo una lista vuota da riempire con il codice che metto tramite l' input, che mi servirà per vedere se il codice è
-# è presente nel database_particolari. Se nella lp risultano più particolari con le cifre finali uguali, mi crea una
-# lista_codici_particolari_simili e mi stampa i codici presenti nella lista per intero, così da poter scegliere quello
-# giusto. Una volta scelto rimuove gli altri da lp.
-def lista_particolari(input_codice, db_particolari):
-    lp = []
-    lista_codice_particolari_simili = []
-    for p in db_particolari:
-        if input_codice == p.codice[8:] or input_codice == p.codice[7:] or input_codice == p.codice:
-            lp.append(p)
-    # Da qui controllo se lp contiene codici diversi con parte finale uguale.
-    if len(lp) > 1:
-        for item in lp:
-            if item.codice not in lista_codice_particolari_simili:
-                lista_codice_particolari_simili.append(item.codice)
-    if len(lista_codice_particolari_simili) > 1:
-        print("Quale codice è quello giusto?")
-        for item in lista_codice_particolari_simili:
-            print("   " + item)
-        scelta = check_inserimento_stringhe(lista_codice_particolari_simili, "codice per intero")
-        for item in lp:
-            if item.codice != scelta:
-                lp.remove(item)
-    return lp
-
-
-# Crea una mini lista che riempe prendendo le fasi dalla lista particolari.
-def lista_fasi(particolari):
-    l_f = []
-    for pa in particolari:
-        l_f.append(pa.fase)
-    return l_f
-
-
-# Controlla se il valore fase(int) nella macchina è uguale anche nel particolare.
-def fase_compatibile(fs_macchina, fs_pezzo):
-    return fs_macchina == fs_pezzo
-
-
 # Prende il tipo di lavorazione, se è stozza passa, se invece è una dentatura prende il verso dell' elica sia del pezzo
 # che dell' utensile e fa i conti ritornando l' inclinazione esatta da confrontare con la macchina. Se i versi sono
 # concordi esegue una differenza, mentre se sono opposti fa una somma. Il risultato è in centesimi.
@@ -423,104 +309,25 @@ def calcolo_inclinazione_per_utensile(lista_utensili, p_lav, p_inc_el_dx=0.0, p_
     return inclinazione_utensili
 
 
-# Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
-def compatibilita_generale(p, m):
-    return diametro_compatibile(p.diametro, m.diametro_range) and \
-        oggetto_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura) and \
-        oggetto_compatibile(p.lavorazione, m.lavorazione) and \
-        maggiore_uguale(p.interasse, m.interasse_min) and \
-        minore_uguale(p.modulo, m.modulo_max) and \
-        minore_uguale(p.fascia, m.altezza_fascia_max) and \
-        minore_uguale(p.incl_elica_dx, m.incl_elica_max_dx) and \
-        minore_uguale(p.incl_elica_sx, m.incl_elica_max_sx) and \
-        minore_uguale(p.inclinazione, m.inclinazione_tavola) and \
-        minore_uguale(p.altezza_attrezzatura, m.altezza_attrezzatura_max) and \
-        verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo)
+# Verifico che la lavorazione non sia una stozza, poi creo una lista vuota (lu) e scorro tutti gli indici di una lista
+# per calcolare l' interasse. Il risultato lo metto in lu.
+def calcolo_interasse(lista_utensili, diam_pezzo, p_lav):
+    if "dentatura" in p_lav:
+        ls_dia_ut = []
+        for u in lista_utensili:
+            r = (u.diametro_utensile + diam_pezzo) / 2
+            ls_dia_ut.append(r)
+        return ls_dia_ut
 
 
-# Funzione che scorre le 2 liste del database (macchine e particolari), e ,usando la funzione "compatibilità_generale",
-# mi stampa su quali macchine il particolare in questione è lavorabile. In questa funzione è presente anche la verifica
-# della fase del pezzo.
-def macchine_compatibili(ls_part, ls_macc, fs=None):
-    for p in ls_part:
-        for m in ls_macc:
-            if fs is None:
-                if compatibilita_generale(p, m):
-                    print(m.codice)
-            else:
-                if p.fase == fs:
-                    if compatibilita_generale(p, m):
-                        print(m.codice)
-
-
-# Scorre la lista macchine e mi ritorna la macchina.
-def get_macchina(codice_macchina):
-    for m in Macchine_TFZ_Aprilia:
-        if m.codice == codice_macchina:
-            return m
-
-
-# Come "get_macchina" con la differenza che questa funzione controlla anche la fase, in caso ci siano particolari
-# presenti nel database con più fasi.
-def get_particolare(codice_particolare, fs):
-    for p in Particolari:
-        if p.codice == codice_particolare and p.fase == fs:
-            return p
-
-
-# Scorre la lista utensili e mi ritorna l' utensile.
-def get_utensile(codice_utensile):
-    for u in Utensili:
-        if u.codice == codice_utensile:
-            return u
-
-
-# Stampa gli attributi. Esempio: { 'nome': '15_24', 'diametro': (120, 300) } ecc...
-def stampa_valori(v):
-    try:
-        print(vars(v))
-    except TypeError:
-        print("Testo non corretto")
-
-
-# Permette di dividere in "numero" e "valore" la stampa degli attributi della macchina o del particolare.
-def stampa_etichetta(indice):
-    for numero, valore in indice.items():
-        print(f'[{numero}] - {valore}')
-
-
-# Controlla se un oggetto è in una lista e stampa gli oggetti che trova nella lista.
-def stampa_lista(lista):
-    for item in lista:
-        print("   " + item)
-
-
-# Stampa il database.
-def stampa_database(lista):
-    db = []
-    if isinstance(lista[0], Particolare):
-        for indice in lista:
-            # Dato che con i particolari ad una o due cifre prima dello slash dava problemi di ordinamento, con questo
-            # metodo prima uso "split" e divido il codice in 2 dallo slash, aggiungo gli zeri mancati per portare tutti
-            # i codici a tre cifre prima dello slash e poi, mentre la scorro, ordino la nuova lista con "bisect".
-            s = indice.codice.split("/")[0]
-            k = len(s)
-            if k < 3:
-                for i in range(3 - k):
-                    indice.codice = "0" + indice.codice
-            bisect.insort(db, indice.codice)
-    elif isinstance(lista[0], Utensile):
-        for indice in lista:
-            bisect.insort(db, indice.codice)
-    elif isinstance(lista[0], Macchina):
-        for indice in lista:
-            bisect.insort(db, indice.codice)
-    print(db)
-
-
-# Associa l' uso del programma multiplo alla macchina o al particolare in fase di insert.
-def inserimento_programma_multiplo(scelta):
-    return True if scelta == "si" else False
+# Verifica se l' input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
+# l' inserimento dell' input finché non riceve un input riconosciuto. Ritorna una lista. Il metodo .strip() elimina gli
+# spazi.
+def check_inserimento_dati(lista, tipo):
+    scelta = input(f'Inserire {tipo} (utilizzare virgola per scelte multiple): ').strip()
+    while not valuta_input_testo(scelta, lista):
+        scelta = input(f'{tipo.capitalize()} non disponibile. Inserire nuovamente il tipo di {tipo}: ').strip()
+    return crea_lista_da_stringa(scelta)
 
 
 # Funzione che lavora con i dizionari. Crea una lista con le scelte numeriche, poi crea una lista vuota che riempe con
@@ -538,16 +345,6 @@ def check_inserimento_indice(indice, tipo):
 
 
 # Verifica se l' input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
-# l' inserimento dell' input finché non riceve un input riconosciuto. Ritorna una lista. Il metodo .strip() elimina gli
-# spazi.
-def check_inserimento_dati(lista, tipo):
-    scelta = input(f'Inserire {tipo} (utilizzare virgola per scelte multiple): ').strip()
-    while not valuta_input_testo(scelta, lista):
-        scelta = input(f'{tipo.capitalize()} non disponibile. Inserire nuovamente il tipo di {tipo}: ').strip()
-    return crea_lista_da_stringa(scelta)
-
-
-# Verifica se l' input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
 # l' inserimento dell' input finché non riceve un input riconosciuto. Ritorna una stringa.Il metodo .strip() elimina gli
 # spazi.
 def check_inserimento_stringhe(lista, tipo):
@@ -557,34 +354,31 @@ def check_inserimento_stringhe(lista, tipo):
     return scelta
 
 
-# Rimuove una macchina, un particolare o un utensile dalla lista.
-def remove(tipo, nome, fs=0):
-    if tipo == "m":
-        x = get_macchina(nome)
-        if isinstance(x, Macchina):
-            Macchine_TFZ_Aprilia.remove(x)
-            print("Macchina eliminata con successo")
-    elif tipo == "p":
-        x = get_particolare(codice, fs)
-        if isinstance(x, Particolare):
-            Particolari.remove(x)
-            print("Codice eliminato con successo")
-    elif tipo == "u":
-        x = get_utensile(codice)
-        if isinstance(x, Utensile):
-            Utensili.remove(x)
-            print("Utensile eliminato con successo")
+# Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
+def compatibilita_generale(p, m):
+    return diametro_compatibile(p.diametro, m.diametro_range) and \
+        oggetto_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura) and \
+        oggetto_compatibile(p.lavorazione, m.lavorazione) and \
+        maggiore_uguale(p.interasse, m.interasse_min) and \
+        minore_uguale(p.modulo, m.modulo_max) and \
+        minore_uguale(p.fascia, m.altezza_fascia_max) and \
+        minore_uguale(p.incl_elica_dx, m.incl_elica_max_dx) and \
+        minore_uguale(p.incl_elica_sx, m.incl_elica_max_sx) and \
+        minore_uguale(p.inclinazione, m.inclinazione_tavola) and \
+        minore_uguale(p.altezza_attrezzatura, m.altezza_attrezzatura_max) and \
+        verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo)
 
 
-# Funzione per edit lista attrezzatura, sia per la macchina che per il particolare.
-def edit_lista(tipo, operazione, valore):
-    if operazione == "aggiungere":
-        tipo.tipo_attrezzatura.append(valore)
-    if operazione == "rimuovi":
-        try:
-            tipo.tipo_attrezzatura.remove(valore)
-        except ValueError:
-            print(f'{valore} non presente nella lista attrezzatura!')
+# Prima toglie eventuali spazi e poi spezza in lista per ogni virgola.
+def crea_lista_da_stringa(scelta):
+    scelta = scelta.replace(' ', '')
+    scelta = scelta.split(',')
+    return scelta
+
+
+# Ritorna true, se il valore del diametro è contenuto nella tupla (min, max).
+def diametro_compatibile(valore, tupla):
+    return tupla[0] <= valore <= tupla[1]
 
 
 # Funzione per editare macchine,particolari o utensili.
@@ -644,42 +438,47 @@ def edit(cod, tipo, fs=None):
             print("Modifica completata con successo!")
 
 
-# Prima toglie lo spazio dalla scelta e poi lo spezza in lista per ogni virgola,
-# ritorna True se la scelta è contenuta nella lista.
-def valuta_input_testo(scelta, lista):
-    scelta = scelta.replace(' ', '')
-    scelta = scelta.split(',')
-    return set(scelta) <= set(lista)
+# Funzione per edit lista attrezzatura, sia per la macchina che per il particolare.
+def edit_lista(tipo, operazione, valore):
+    if operazione == "aggiungere":
+        tipo.tipo_attrezzatura.append(valore)
+    if operazione == "rimuovi":
+        try:
+            tipo.tipo_attrezzatura.remove(valore)
+        except ValueError:
+            print(f'{valore} non presente nella lista attrezzatura!')
 
 
-# Funzione per numeri decimali, elimina la virgola e la sostituisce con il punto.
-def sostituzione_virgola(scelta):
-    if "," in scelta:
-        scelta = scelta.replace(',', '.')
-    return scelta
+# Controlla se il valore fase(int) nella macchina è uguale anche nel particolare.
+def fase_compatibile(fs_macchina, fs_pezzo):
+    return fs_macchina == fs_pezzo
 
 
-# Prima toglie eventuali spazi e poi spezza in lista per ogni virgola.
-def crea_lista_da_stringa(scelta):
-    scelta = scelta.replace(' ', '')
-    scelta = scelta.split(',')
-    return scelta
+# Scorre la lista macchine e mi ritorna la macchina.
+def get_macchina(codice_macchina):
+    for m in Macchine_TFZ_Aprilia:
+        if m.codice == codice_macchina:
+            return m
 
 
-# Se il particolare, in fase di inserimento, presenta una dentatura/stozza elicoidale, con questa funzione posso
-# selezionare il verso dell' elica e poi inserire il valore.
-def scelta_elica():
-    valore_elica = None
-    elica = input("Inserire senso elica (dx, sx): ")
-    while elica != "dx" and elica != "sx":
-        elica = input("Senso errato! Inserire nuovamente il senso dell' elica: ")
-    if elica == "dx":
-        valore_elica = float(sostituzione_virgola(input("Inserire elica pezzo dx "
-                                                        "(inserire il valore in centesimi) : ")))
-    elif elica == "sx":
-        valore_elica = float(sostituzione_virgola(input("Inserire elica pezzo sx "
-                                                        "(inserire il valore in centesimi) : ")))
-    return elica, valore_elica
+# Come "get_macchina" con la differenza che questa funzione controlla anche la fase, in caso ci siano particolari
+# presenti nel database con più fasi.
+def get_particolare(codice_particolare, fs):
+    for p in Particolari:
+        if p.codice == codice_particolare and p.fase == fs:
+            return p
+
+
+# Scorre la lista utensili e mi ritorna l' utensile.
+def get_utensile(codice_utensile):
+    for u in Utensili:
+        if u.codice == codice_utensile:
+            return u
+
+
+# Associa l' uso del programma multiplo alla macchina o al particolare in fase di insert.
+def inserimento_programma_multiplo(scelta):
+    return True if scelta == "si" else False
 
 
 # Funzione che inserisce una macchina, un particolare o un utensile nel database.
@@ -744,7 +543,6 @@ def insert_database(cod, tipo, fs=None):
                     while u is None:
                         u = get_utensile(input("Codice errato.Inserire codice utensile: "))
                     ls_ut.append(u)
-                print(ls_ut)
                 stampa_etichetta(indice_attrezzatura)
                 ta = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
                 fs = check_inserimento_stringhe(lista_fasi_pezzo, "fase")
@@ -814,18 +612,48 @@ def insert_database(cod, tipo, fs=None):
         # menu()
 
 
-# Funzione per il salvataggio del database.
-def save_db(tipo):
-    print(f'   ... salvataggio database {tipo}.')
-    with open(f'db_{tipo}.pickle', 'wb') as handle:
-        if tipo == "macchine":
-            pickle.dump(Macchine_TFZ_Aprilia, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        elif tipo == "particolari":
-            pickle.dump(Particolari, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        elif tipo == "utensili":
-            pickle.dump(Utensili, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        else:
-            print(f'Errore! Valore {tipo} non valido!')
+# Crea una lista dove mette i diametri degli utensili presenti nel particolare.
+def lista_diametro_utensile(codice_utensili):
+    lu = []
+    for indice in codice_utensili:
+        u = get_utensile(indice)
+        d = u.diametro_utensile
+        lu.append(d)
+    return lu
+
+
+# Crea una mini lista che riempe prendendo le fasi dalla lista particolari.
+def lista_fasi(particolari):
+    l_f = []
+    for pa in particolari:
+        l_f.append(pa.fase)
+    return l_f
+
+
+# Creo una lista vuota da riempire con il codice che metto tramite l' input, che mi servirà per vedere se il codice è
+# è presente nel database_particolari. Se nella lp risultano più particolari con le cifre finali uguali, mi crea una
+# lista_codici_particolari_simili e mi stampa i codici presenti nella lista per intero, così da poter scegliere quello
+# giusto. Una volta scelto rimuove gli altri da lp.
+def lista_particolari(input_codice, db_particolari):
+    lp = []
+    lista_codice_particolari_simili = []
+    for p in db_particolari:
+        if input_codice == p.codice[8:] or input_codice == p.codice[7:] or input_codice == p.codice:
+            lp.append(p)
+    # Da qui controllo se lp contiene codici diversi con parte finale uguale.
+    if len(lp) > 1:
+        for item in lp:
+            if item.codice not in lista_codice_particolari_simili:
+                lista_codice_particolari_simili.append(item.codice)
+    if len(lista_codice_particolari_simili) > 1:
+        print("Quale codice è quello giusto?")
+        for item in lista_codice_particolari_simili:
+            print("   " + item)
+        scelta = check_inserimento_stringhe(lista_codice_particolari_simili, "codice per intero")
+        for item in lp:
+            if item.codice != scelta:
+                lp.remove(item)
+    return lp
 
 
 # Funzione per il caricamento del database.
@@ -847,6 +675,169 @@ def load_db():
     except FileNotFoundError:
         print("... file db non trovato")
         return False
+
+
+# Funzione che scorre le 2 liste del database (macchine e particolari), e ,usando la funzione "compatibilità_generale",
+# mi stampa su quali macchine il particolare in questione è lavorabile. In questa funzione è presente anche la verifica
+# della fase del pezzo.
+def macchine_compatibili(ls_part, ls_macc, fs=None):
+    for p in ls_part:
+        for m in ls_macc:
+            if fs is None:
+                if compatibilita_generale(p, m):
+                    print(m.codice)
+            else:
+                if p.fase == fs:
+                    if compatibilita_generale(p, m):
+                        print(m.codice)
+
+
+# Valore (a) maggiore o uguale a (b).
+def maggiore_uguale(a, b):
+    if a is None or b is None:
+        return True
+    return a >= b
+
+
+# Valore (a) minore o uguale a (b).
+def minore_uguale(a, b):
+    if a is None or b is None:
+        return True
+    return a <= b
+
+
+# Confronta il contenuto di una lista (a) con un valore fisso (b).
+def minore_uguale_lista(lista, b):
+    minore = True
+    for a in lista:
+        if a > b:
+            minore = False
+    return minore
+
+
+# Scorro 2 liste e vedo se l' attributo dell' oggetto è in entrambe le liste.
+def oggetto_compatibile(ls_attributi_p, ls_attributi_m):
+    for p in ls_attributi_p:
+        for m in ls_attributi_m:
+            if p == m:
+                return True
+    return False
+
+
+# Rimuove una macchina, un particolare o un utensile dalla lista.
+def remove(tipo, nome, fs=0):
+    if tipo == "m":
+        x = get_macchina(nome)
+        if isinstance(x, Macchina):
+            Macchine_TFZ_Aprilia.remove(x)
+            print("Macchina eliminata con successo")
+    elif tipo == "p":
+        x = get_particolare(codice, fs)
+        if isinstance(x, Particolare):
+            Particolari.remove(x)
+            print("Codice eliminato con successo")
+    elif tipo == "u":
+        x = get_utensile(codice)
+        if isinstance(x, Utensile):
+            Utensili.remove(x)
+            print("Utensile eliminato con successo")
+
+
+# Funzione per il salvataggio del database.
+def save_db(tipo):
+    print(f'   ... salvataggio database {tipo}.')
+    with open(f'db_{tipo}.pickle', 'wb') as handle:
+        if tipo == "macchine":
+            pickle.dump(Macchine_TFZ_Aprilia, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        elif tipo == "particolari":
+            pickle.dump(Particolari, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        elif tipo == "utensili":
+            pickle.dump(Utensili, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            print(f'Errore! Valore {tipo} non valido!')
+
+
+# Se il particolare, in fase di inserimento, presenta una dentatura/stozza elicoidale, con questa funzione posso
+# selezionare il verso dell' elica e poi inserire il valore.
+def scelta_elica():
+    valore_elica = None
+    elica = input("Inserire senso elica (dx, sx): ")
+    while elica != "dx" and elica != "sx":
+        elica = input("Senso errato! Inserire nuovamente il senso dell' elica: ")
+    if elica == "dx":
+        valore_elica = float(sostituzione_virgola(input("Inserire elica pezzo dx "
+                                                        "(inserire il valore in centesimi) : ")))
+    elif elica == "sx":
+        valore_elica = float(sostituzione_virgola(input("Inserire elica pezzo sx "
+                                                        "(inserire il valore in centesimi) : ")))
+    return elica, valore_elica
+
+
+# Funzione per numeri decimali, elimina la virgola e la sostituisce con il punto.
+def sostituzione_virgola(scelta):
+    if "," in scelta:
+        scelta = scelta.replace(',', '.')
+    return scelta
+
+
+# Permette di dividere in "numero" e "valore" la stampa degli attributi della macchina o del particolare.
+def stampa_etichetta(indice):
+    for numero, valore in indice.items():
+        print(f'[{numero}] - {valore}')
+
+
+# Controlla se un oggetto è in una lista e stampa gli oggetti che trova nella lista.
+def stampa_lista(lista):
+    for item in lista:
+        print("   " + item)
+
+
+# Stampa il database.
+def stampa_database(lista):
+    db = []
+    if isinstance(lista[0], Particolare):
+        for indice in lista:
+            # Dato che con i particolari ad una o due cifre prima dello slash dava problemi di ordinamento, con questo
+            # metodo prima uso "split" e divido il codice in 2 dallo slash, aggiungo gli zeri mancati per portare tutti
+            # i codici a tre cifre prima dello slash e poi, mentre la scorro, ordino la nuova lista con "bisect".
+            s = indice.codice.split("/")[0]
+            k = len(s)
+            if k < 3:
+                for i in range(3 - k):
+                    indice.codice = "0" + indice.codice
+            bisect.insort(db, indice.codice)
+    elif isinstance(lista[0], Utensile):
+        for indice in lista:
+            bisect.insort(db, indice.codice)
+    elif isinstance(lista[0], Macchina):
+        for indice in lista:
+            bisect.insort(db, indice.codice)
+    print(db)
+
+
+# Stampa gli attributi. Esempio: { 'nome': '15_24', 'diametro': (120, 300) } ecc...
+def stampa_valori(v):
+    try:
+        print(vars(v))
+    except TypeError:
+        print("Testo non corretto")
+
+
+# Prima toglie lo spazio dalla scelta e poi lo spezza in lista per ogni virgola,
+# ritorna True se la scelta è contenuta nella lista.
+def valuta_input_testo(scelta, lista):
+    scelta = scelta.replace(' ', '')
+    scelta = scelta.split(',')
+    return set(scelta) <= set(lista)
+
+
+# Verifica se il particolare richiede un programma multiplo e ritorna True
+def verifica_programma_multiplo(p_pm, m_pm):
+    if not p_pm:
+        return True
+    elif m_pm:
+        return True
+    return False
 
 
 if __name__ == '__main__':
@@ -878,6 +869,3 @@ if __name__ == '__main__':
             macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fase)
     else:
         print("Particolare non presente nel database.")
-
-    insert_database("1005678", "p", "120")
-    stampa_valori(get_particolare("1005678", "120"))
