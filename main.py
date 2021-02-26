@@ -309,17 +309,6 @@ def calcolo_inclinazione_per_utensile(lista_utensili, p_lav, p_inc_el_dx=0.0, p_
     return inclinazione_utensili
 
 
-# Verifico che la lavorazione non sia una stozza, poi creo una lista vuota (lu) e scorro tutti gli indici di una lista
-# per calcolare l' interasse. Il risultato lo metto in lu.
-def calcolo_interasse(lista_utensili, diam_pezzo, p_lav):
-    if "dentatura" in p_lav:
-        ls_dia_ut = []
-        for u in lista_utensili:
-            r = (u.diametro_utensile + diam_pezzo) / 2
-            ls_dia_ut.append(r)
-        return ls_dia_ut
-
-
 # Verifica se l' input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
 # l' inserimento dell' input finché non riceve un input riconosciuto. Ritorna una lista. Il metodo .strip() elimina gli
 # spazi.
@@ -352,6 +341,17 @@ def check_inserimento_stringhe(lista, tipo):
     while not valuta_input_testo(scelta, lista):
         scelta = input(f'{tipo.capitalize()} non disponibile. Inserire nuovamente "{tipo}": ').strip()
     return scelta
+
+
+# Verifico che la lavorazione non sia una stozza, poi creo una lista vuota (lu) e scorro tutti gli indici di una lista
+# per calcolare l' interasse. Il risultato lo metto in lu.
+def calcolo_interasse(lista_utensili, diam_pezzo, p_lav):
+    if "dentatura" in p_lav:
+        ls_dia_ut = []
+        for u in lista_utensili:
+            r = (u.diametro_utensile + diam_pezzo) / 2
+            ls_dia_ut.append(r)
+        return ls_dia_ut
 
 
 # Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
@@ -869,3 +869,7 @@ if __name__ == '__main__':
             macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fase)
     else:
         print("Particolare non presente nel database.")
+
+    # insert_database("1005678", "p", "120")
+    # stampa_valori(get_particolare("1005678", "120"))
+    stampa_valori(get_particolare("752/3534368", "120"))
