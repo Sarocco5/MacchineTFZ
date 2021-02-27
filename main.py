@@ -116,10 +116,10 @@ class Particolare:
     incl_elica_dx = 0.0
     incl_elica_sx = 0.0
     inclinazione = 0.0
-    altezza_attrezzatura = None
+    altezza_attrezzatura = 0.0
 
     def __init__(self, c, d, ls_ut, p_ta, p_f, p_lav, p_prog_multi, mod, fascia,
-                 p_incl_elica_dx=0.0, p_incl_elica_sx=0.0, incl=0.0,  p_alt_att=0.0):
+                 p_incl_elica_dx, p_incl_elica_sx, incl,  p_alt_att):
         self.codice = c
         self.diametro = d
         self.lista_utensili = ls_ut
@@ -130,8 +130,12 @@ class Particolare:
         self.programma_multiplo = p_prog_multi
         self.modulo = mod
         self.fascia = fascia
-        self.incl_elica_dx = calcolo_inclinazione_per_utensile(ls_ut, p_lav, p_incl_elica_dx)
-        self.incl_elica_sx = calcolo_inclinazione_per_utensile(ls_ut, p_lav, p_incl_elica_sx)
+        if p_incl_elica_dx > 0:
+            p_incl_elica_dx = calcolo_inclinazione_per_utensile(ls_ut, p_lav, p_incl_elica_dx, p_incl_elica_sx)
+        else:
+            p_incl_elica_sx = calcolo_inclinazione_per_utensile(ls_ut, p_lav, p_incl_elica_dx, p_incl_elica_sx)
+        self.incl_elica_dx = p_incl_elica_dx
+        self.incl_elica_sx = p_incl_elica_sx
         self.inclinazione = incl
         self.altezza_attrezzatura = p_alt_att
 
@@ -281,7 +285,7 @@ def init_db_test():
 # Prende il tipo di lavorazione, se è stozza passa, se invece è una dentatura prende il verso dell' elica sia del pezzo
 # che dell' utensile e fa i conti ritornando l' inclinazione esatta da confrontare con la macchina. Se i versi sono
 # concordi esegue una differenza, mentre se sono opposti fa una somma. Il risultato è in centesimi.
-def calcolo_inclinazione(u_senso_el, u_inc_el, p_lav, p_inc_el_dx=0.0, p_inc_el_sx=0.0):
+def calcolo_inclinazione(u_senso_el, u_inc_el, p_lav, p_inc_el_dx, p_inc_el_sx):
     if "dentatura" in p_lav:
         if p_inc_el_dx > 0:
             if u_senso_el == "dx":
@@ -299,8 +303,9 @@ def calcolo_inclinazione(u_senso_el, u_inc_el, p_lav, p_inc_el_dx=0.0, p_inc_el_
                 return inclinazione_sx
 
 
-# Calcola l' inclinazione tra pezzo e utensile e ritorna il risultato. Lo fa per ogni utensile nella lista utensili.
-def calcolo_inclinazione_per_utensile(lista_utensili, p_lav, p_inc_el_dx=0.0, p_inc_el_sx=0.0):
+# Calcola l' inclinazione tra pezzo e utensile e ritorna il risultato creando un dizionario con il codice utensile
+# e il risultato dell 'inclinazione. Lo fa per ogni utensile nella lista utensili.
+def calcolo_inclinazione_per_utensile(lista_utensili, p_lav, p_inc_el_dx, p_inc_el_sx):
     inclinazione_utensili = {}
     for u in lista_utensili:
         risultato_inclinazione = calcolo_inclinazione(u.senso_elica, u.inclinazione_elica,
@@ -561,16 +566,11 @@ def insert_database(cod, tipo, fs=None):
                     scelta = input("Dentatura dritta o elicoidale?: ")
                     if scelta != "dritta":
                         elica = scelta_elica()
-                        print(f'------ 1 {elica} 1 ----------')
                         if elica[0] == "dx":
-                            print(f'------ 2 {elica[0]} 2 ----------')
                             inc_el_dx = elica[1]
-                            print(f'------ 3 {elica[1]} 3 ----------')
                         else:
-                            print(f'------ 4 {elica[0]} 4 ----------')
                             inc_el_sx = elica[1]
-                            print(f'------ 5 {elica[1]} 5 ----------')
-                alt_att = int(input("Inserire altezza attrezzatura: "))
+                alt_att = int(input("Inserire altezza attrezzatura (inserire 0 se non specificato): "))
                 p = Particolare(cod, d, ls_ut, ta, fs, lav, p_m, mod, h, inc_el_dx, inc_el_sx, inc, alt_att)
                 stampa_valori(p)
                 scelta = input("I valori inseriti sono corretti?(si, no): ")
@@ -661,23 +661,27 @@ def lista_particolari(input_codice, db_particolari):
 
 # Funzione per il caricamento del database.
 def load_db():
+    global Macchine_TFZ_Aprilia
+    global Particolari
+    global Utensili
     try:
-        global Macchine_TFZ_Aprilia
-        global Particolari
-        global Utensili
         with open(f'db_macchine.pickle', 'rb') as handle:
             print('Database macchine caricato')
             Macchine_TFZ_Aprilia = pickle.load(handle)
+    except FileNotFoundError:
+        print("...db macchine non trovato")
+    try:
         with open(f'db_particolari.pickle', 'rb') as handle:
             print('Database particolari caricato')
             Particolari = pickle.load(handle)
+    except FileNotFoundError:
+        print("...db particolari non trovato")
+    try:
         with open(f'db_utensili.pickle', 'rb') as handle:
             print('Database utensili caricato')
             Utensili = pickle.load(handle)
-        return True
     except FileNotFoundError:
-        print("... file db non trovato")
-        return False
+        print("...db utensili non trovato")
 
 
 # Funzione che scorre le 2 liste del database (macchine e particolari), e ,usando la funzione "compatibilità_generale",
@@ -769,7 +773,7 @@ def scelta_elica():
         elica = input("Senso errato! Inserire nuovamente il senso dell' elica: ")
     if elica == "dx":
         valore_elica = float(sostituzione_virgola(input("Inserire elica pezzo dx "
-                                                        "(inserire il valore in centesimi) : ")))
+                                                        "(inserire il valore in centesimi): ")))
     elif elica == "sx":
         valore_elica = float(sostituzione_virgola(input("Inserire elica pezzo sx "
                                                         "(inserire il valore in centesimi) : ")))
@@ -826,6 +830,22 @@ def stampa_valori(v):
         print("Testo non corretto")
 
 
+def stampa_valori_particolare(p):
+    print(f'Codice: \n {p.codice} \nDiametro: \n {p.diametro} \nLista utensili: ')
+    for u in p.lista_utensili:
+        print(f' {u.codice}')
+    print(f'Interasse minimo: \n {p.interasse} \nLista attrezzatura: ')
+    for a in p.tipo_attrezzatura:
+        print(f' {a}')
+    print(f'Fase: \n {p.fase} \nLavorazione: ')
+    for l in p.lavorazione:
+        print(f' {l}')
+    print(f'Programma multiplo: \n {"Si" if p.programma_multiplo is True else "No" } \nModulo: \n {p.modulo} \n'
+          f'Fascia: \n {p.fascia} \nInclinazione elica dx: \n {p.incl_elica_dx} \n'
+          f'Inclinazione elica sx: \n {p.incl_elica_sx} \nInclinazione: \n {p.inclinazione} \n'
+          f'Altezza attrezzatura: \n {p.altezza_attrezzatura}')
+
+
 # Prima toglie lo spazio dalla scelta e poi lo spezza in lista per ogni virgola,
 # ritorna True se la scelta è contenuta nella lista.
 def valuta_input_testo(scelta, lista):
@@ -872,4 +892,8 @@ if __name__ == '__main__':
             macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fase)
     else:
         print("Particolare non presente nel database.")
-
+    '''insert_database("752/3534368", "p", "120")
+    scelta = input("Vuoi salvare?: ")
+    if scelta == "si":
+        save_db("particolari")'''
+    stampa_valori_particolare(Particolari[0])
