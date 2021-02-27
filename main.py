@@ -731,8 +731,7 @@ def stampa_valori_macchina(m):
               f'\nAltezza fascia max: \n {m.altezza_fascia_max} \nInterasse min: \n {m.interasse_min} \n'
               f'Inclinazione elica dx max: \n {m.incl_elica_max_dx} \nInclinazione elica sx max: \n '
               f'{m.incl_elica_max_sx} \nInclinazione tavola: \n '
-              f'{"-----" if m.inclinazione_tavola == 0.0 else m.inclinazione_tavola} \nAltezza attrezzatura max: \n '
-              f'{m.altezza_attrezzatura_max} ')
+              f'{m.inclinazione_tavola} \nAltezza attrezzatura max: \n {m.altezza_attrezzatura_max} ')
     except TypeError:
         print("Codice macchina errato")
 
@@ -751,8 +750,8 @@ def stampa_valori_particolare(p):
             print(f' {lav}')
         print(f'Programma multiplo: \n {"Si" if p.programma_multiplo is True else "No" } \nModulo: \n {p.modulo} \n'
               f'Fascia: \n {p.fascia} \nInclinazione elica dx: \n '
-              f'{"----" if p.incl_elica_dx is None else p.incl_elica_dx} \n'
-              f'Inclinazione elica sx: \n {"-----" if p.incl_elica_sx is None else p.incl_elica_sx} \n'
+              f'{"-----" if p.incl_elica_dx == 0.0 else p.incl_elica_dx} \n'
+              f'Inclinazione elica sx: \n {"-----" if p.incl_elica_sx == 0.0 else p.incl_elica_sx} \n'
               f'Inclinazione: \n {p.inclinazione} \n'
               f'Altezza attrezzatura: \n {p.altezza_attrezzatura}')
     except TypeError:
@@ -814,3 +813,4 @@ if __name__ == '__main__':
             macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fase)
     else:
         print("Particolare non presente nel database.")
+    stampa_valori_particolare(get_particolare("752/3534368", "120"))
