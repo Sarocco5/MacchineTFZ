@@ -131,7 +131,7 @@ class Particolare:
         self.fascia = fascia
         if p_incl_elica_dx > 0:
             p_incl_elica_dx = calcolo_inclinazione_per_utensile(ls_ut, p_lav, p_incl_elica_dx, p_incl_elica_sx)
-        else:
+        elif p_incl_elica_sx > 0:
             p_incl_elica_sx = calcolo_inclinazione_per_utensile(ls_ut, p_lav, p_incl_elica_dx, p_incl_elica_sx)
         self.incl_elica_dx = p_incl_elica_dx
         self.incl_elica_sx = p_incl_elica_sx
@@ -174,7 +174,7 @@ Particolari = []
 # che dell' utensile e fa i conti ritornando l' inclinazione esatta da confrontare con la macchina. Se i versi sono
 # concordi esegue una differenza, mentre se sono opposti fa una somma. Il risultato è in centesimi.
 def calcolo_inclinazione(u_senso_el, u_inc_el, p_lav, p_inc_el_dx, p_inc_el_sx):
-    if "dentatura" in p_lav:
+    if "dentatura" in p_lav or "dentatura conica" in p_lav:
         if p_inc_el_dx > 0:
             if u_senso_el == "dx":
                 inclinazione_dx = format(p_inc_el_dx - u_inc_el, ".2f")
@@ -182,12 +182,19 @@ def calcolo_inclinazione(u_senso_el, u_inc_el, p_lav, p_inc_el_dx, p_inc_el_sx):
             else:
                 inclinazione_dx = format((p_inc_el_dx + u_inc_el), ".2f")
                 return inclinazione_dx
-        if p_inc_el_sx > 0:
+        elif p_inc_el_sx > 0:
             if u_senso_el == "sx":
                 inclinazione_sx = format((p_inc_el_sx - u_inc_el), ".2f")
                 return inclinazione_sx
             else:
                 inclinazione_sx = format((p_inc_el_sx + u_inc_el), ".2f")
+                return inclinazione_sx
+        elif p_inc_el_dx == 0 and p_inc_el_sx == 0:
+            if u_senso_el == "dx":
+                inclinazione_dx = u_inc_el
+                return inclinazione_dx
+            elif u_senso_el == "sx":
+                inclinazione_sx = u_inc_el
                 return inclinazione_sx
 
 
@@ -205,7 +212,7 @@ def calcolo_inclinazione_per_utensile(lista_utensili, p_lav, p_inc_el_dx, p_inc_
 # Verifico che la lavorazione non sia una stozza e calcolo l' interasse.
 def calcolo_interasse(utensile, diam_pezzo, p_lav):
     r = 0.0
-    if "dentatura" in p_lav:
+    if "dentatura" in p_lav or "dentatura conica" in p_lav:
         r = (utensile.diametro_utensile + diam_pezzo) / 2
     return r
 
@@ -272,8 +279,11 @@ def compatibilita_generale(p, m):
 def crea_dizionario_attrezzatura(lista_tipo_attrezzatura):
     dict_alt_att = {}
     for i in lista_tipo_attrezzatura:
-        x = float(sostituzione_virgola(input(f'Inserire altezza attrezzatura ({i}): ')))
-        dict_alt_att[i] = x
+        if i == "slitta elicoidale":
+            pass
+        else:
+            x = float(sostituzione_virgola(input(f'Inserire altezza attrezzatura ({i}): ')))
+            dict_alt_att[i] = x
     return dict_alt_att
 
 
@@ -475,7 +485,7 @@ def insert_database(cod, tipo, fs=None):
                 if lav[0] == "stozza" or lav[0] == "interna":
                     inc = float(sostituzione_virgola(
                         input("Inserire inclinazione pezzo (inserire gradi in centesimi): ")))
-                elif lav[0] == "dentatura":
+                elif lav[0] == "dentatura" or lav[0] == "dentatura conica":
                     scelta = input("Dentatura dritta o elicoidale?: ").strip()
                     while scelta != "dritta" and scelta != "elicoidale":
                         scelta = input("Scelta errata! Ripetere la scelta. Dritta o elicoidale?:").strip()
@@ -760,12 +770,10 @@ def stampa_valori_macchina(m):
 # Stampa gli attributi del particolare.
 def stampa_valori_particolare(p):
     try:
-        print(f'Codice: \n {p.codice} \nDiametro: \n {p.diametro} \nLista utensili: ')
-        for u in p.lista_utensili:
-            print(f' {u.codice}')
-        print(f'Interasse: \n {"-----" if p.interasse is None else p.interasse } \nLista attrezzatura: ')
+        print(f'Codice: \n {p.codice} \nDiametro: \n {p.diametro} \nLista utensili e interasse: ')
+        print(f'{"-----" if p.interasse == 0.0 else p.interasse } \nLista attrezzatura: ')
         for a in p.tipo_attrezzatura:
-            print(f'{a}: {p.tipo_attrezzatura.get(a)}')
+            print(f' {a}: {p.tipo_attrezzatura.get(a)}')
         print(f'Fase: \n {p.fase} \nLavorazione: ')
         for lav in p.lavorazione:
             print(f' {lav}')
