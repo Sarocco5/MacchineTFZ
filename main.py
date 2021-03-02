@@ -276,14 +276,24 @@ def compatibilita_generale(p, m):
 
 
 # Crea un dizionario con indice il tipo di attrezzatura e come valore la sua altezza
-def crea_dizionario_attrezzatura(lista_tipo_attrezzatura):
+def crea_dizionario_attrezzatura(lista_tipo_attrezzatura, lista_lavorazioni):
     dict_alt_att = {}
+    stozza_elicoidale = False
+    slitta_elicoidale = False
+    for r in lista_lavorazioni:
+        if r == "stozza elicoidale":
+            stozza_elicoidale = True
     for i in lista_tipo_attrezzatura:
         if i == "slitta elicoidale":
-            pass
+            slitta_elicoidale = True
         else:
             x = float(sostituzione_virgola(input(f'Inserire altezza attrezzatura ({i}): ')))
             dict_alt_att[i] = x
+    if stozza_elicoidale is True:
+        if slitta_elicoidale is True:
+            dict_alt_att["slitta elicoidale"] = "disponibile"
+        else:
+            dict_alt_att["slitta elicoidale"] = "non disponibile"
     return dict_alt_att
 
 
@@ -348,9 +358,9 @@ def edit(cod, tipo, fs=None):
             stampa_valori_particolare(p)
             print("Modifica completata con successo!")
     elif tipo == "u":
-        u = get_utensile(codice)
+        u = get_utensile(cod)
         if isinstance(u, Utensile):
-            stampa_etichetta(Indice_attributi_particolare)
+            stampa_etichetta(Indice_attributi_utensile)
             scelta = int(input("Quale voce vuoi modificare?: "))
             scelta_utente = int(input("Inserire la modifica: "))
             # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
@@ -465,12 +475,12 @@ def insert_database(cod, tipo, fs=None):
                     while u is None:
                         u = get_utensile(input("Codice errato.Inserire codice utensile: "))
                     ls_ut.append(u)
-                stampa_etichetta(indice_attrezzatura)
-                ta = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
-                ta = crea_dizionario_attrezzatura(ta)
                 fs = check_inserimento_stringhe(lista_fasi_pezzo, "fase")
                 stampa_etichetta(indice_lavorazioni)
                 lav = check_inserimento_indice(indice_lavorazioni, "lavorazione")
+                stampa_etichetta(indice_attrezzatura)
+                ta = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
+                ta = crea_dizionario_attrezzatura(ta, lav)
                 p_m = input("Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
                 while p_m != "si" and p_m != "no":
                     p_m = input("Scelta errata! Ripetere la scelta. "
@@ -511,7 +521,7 @@ def insert_database(cod, tipo, fs=None):
                 print(f'Utensile "{cod}" presente nel database.')
             else:
                 print(f'Inserire valori utensile "{cod}"')
-                d = int(input("Inserire diametro: "))
+                d = float(sostituzione_virgola(input("Inserire diametro: ")))
                 stampa_etichetta(indice_utensili)
                 t = check_inserimento_indice(indice_utensili, "utensile")
                 sens_el = input("Inserisci senso elica(Inserire 'dx', 'sx' o 'dritto'): ").strip()
@@ -770,8 +780,10 @@ def stampa_valori_macchina(m):
 # Stampa gli attributi del particolare.
 def stampa_valori_particolare(p):
     try:
-        print(f'Codice: \n {p.codice} \nDiametro: \n {p.diametro} \nLista utensili e interasse: ')
-        print(f'{"-----" if p.interasse == 0.0 else p.interasse } \nLista attrezzatura: ')
+        print(f'Codice: \n {p.codice} \nDiametro: \n {p.diametro} \nLista utensili: ')
+        for u in p.lista_utensili:
+            print(f' {u.codice}')
+        print(f'Interasse: \n {"-----" if p.interasse is None else p.interasse} \nLista attrezzatura: ')
         for a in p.tipo_attrezzatura:
             print(f' {a}: {p.tipo_attrezzatura.get(a)}')
         print(f'Fase: \n {p.fase} \nLavorazione: ')
