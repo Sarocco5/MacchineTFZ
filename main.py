@@ -30,19 +30,16 @@ class Macchina:
         self.modulo_max = mod_max
         self.altezza_fascia_max = h_fascia_max
         self.interasse_min = int_min
-        self.incl_elica_max_dx = m_incl_elica_dx
-        self.incl_elica_max_sx = m_incl_elica_sx
+        self.inclinazione_elica_max_dx = m_incl_elica_dx
+        self.inclinazione_elica_max_sx = m_incl_elica_sx
         self.inclinazione_tavola = incl_tav
         self.altezza_attrezzatura_max = m_alt_att_max
 
-    def set_nome(self, c):
+    def set_codice(self, c):
         self.codice = c
 
     def set_diametro(self, d):
         self.diametro_range = d
-
-    def set_interasse_minimo(self, m_int_min):
-        self.interasse_min = m_int_min
 
     def set_diametro_max_utensile(self, d_max_ut):
         self.diametro_max_utensile = d_max_ut
@@ -59,11 +56,11 @@ class Macchina:
     def set_interasse_min(self, int_min):
         self.interasse_min = int_min
 
-    def set_incl_elica_max_dx(self, m_incl_elica_dx):
-        self.incl_elica_max_dx = m_incl_elica_dx
+    def set_inclinazione_elica_max_dx(self, m_incl_elica_dx):
+        self.inclinazione_elica_max_dx = m_incl_elica_dx
 
-    def set_incl_elica_max_sx(self, m_incl_elica_sx):
-        self.incl_elica_max_sx = m_incl_elica_sx
+    def set_inclinazione_elica_max_sx(self, m_incl_elica_sx):
+        self.inclinazione_elica_max_sx = m_incl_elica_sx
 
     def set_inclinazione_tavola(self, incl_tav):
         self.inclinazione_tavola = incl_tav
@@ -105,16 +102,22 @@ class Utensile:
 class Particolare:
     codice = None
     diametro = None
+    # lista utensili: prendo l' utensile con get_utensile.
     lista_utensili = []
+    # dizionario: u.diametro, p.diametro
     interasse = {}
+    # dizionario: tipo attrezzatura, altezza attrezzatura
     tipo_attrezzatura = {}
     fase = None
+    # lista lavorazioni: str
     lavorazione = []
     programma_multiplo = None
     modulo = None
     fascia = None
-    incl_elica_dx = 0.0
-    incl_elica_sx = 0.0
+    # dizionario: u.codice, inclinazione
+    incl_elica_dx = {}
+    # dizionario: u.codice, inclinazione
+    incl_elica_sx = {}
     inclinazione = 0.0
 
     def __init__(self, c, d, ls_ut, p_ta, p_f, p_lav, p_prog_multi, mod, fascia,
@@ -168,6 +171,31 @@ class Particolare:
 Macchine_TFZ_Aprilia = []
 Utensili = []
 Particolari = []
+
+indice_attrezzatura = {1: "palo", 2: "pinza", 3: "corpo porta pinza", 4: "manuale",
+                       5: "contropunta", 6: "slitta elicoidale"}
+
+indice_utensili = {1: "creatore", 2: "coltello", 3: "tazza", 4: "gambo"}
+
+indice_lavorazioni = {1: "dentatura", 2: "dentatura conica", 3: "stozza", 4: "interna", 5: "stozza elicoidale",
+                      6: "stozza elicoidale bombata"}
+
+lista_fasi_pezzo = ["080", "081", "082", "083", "084", "085", "120", "121", "122", "123", "124", "125", "130",
+                    "131", "132", "133", "134", "135"]
+
+Indice_attributi_macchina = {0: "codice", 1: "diametro range", 2: "interasse min", 3: "tipo attrezzatura",
+                             4: "tipo utensile", 5: "diametro max utensile", 6: "lavorazione", 7: "modulo max",
+                             8: "altezza fascia max", 9: "inclinazione elica max dx",
+                             10: "inclinazione elica max sx", 11: "inclinazione tavola",
+                             12: "altezza attrezzatura massima"}
+
+Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "lista codici utensile", 3: "interasse",
+                                4: "lista tipo attrezzatura", 5: "lista tipo utensile", 6: "diametro utensile",
+                                7: "fase", 8: "lavorazione", 9: "modulo", 10: "fascia", 11: "inclinazione elica dx",
+                                12: "inclinazione elica sx", 13: "inclinazione", 14: "altezza attrezzatura"}
+
+Indice_attributi_utensile = {0: "codice", 1: "tipo", 2: "diametro utensile", 3: "senso elica",
+                             4: "inclinazione elica"}
 
 
 # Prende il tipo di lavorazione, se è stozza passa, se invece è una dentatura prende il verso dell' elica sia del pezzo
@@ -311,6 +339,10 @@ def diametro_compatibile(valore, tupla):
 
 # Funzione per editare macchine,particolari o utensili.
 def edit(cod, tipo, fs=None):
+    global indice_attrezzatura
+    global indice_utensili
+    global indice_lavorazioni
+    global lista_fasi_pezzo
     if tipo == "m":
         m = get_macchina(cod)
         if isinstance(m, Macchina):
@@ -318,11 +350,7 @@ def edit(cod, tipo, fs=None):
             choice = int(input("Quale voce vuoi modificare?: "))
             # Controllo se la modifica riguarda una lista.
             if choice in [3, 4, 6]:
-                tipo_modifica = input("Vuoi aggiungere o rimuovere?: ")
-                if tipo_modifica != "aggiungere" or "rimuovere":
-                    print("Scelta errata!")
-                valore_modifica = input("Inserisci la modifica: ")
-                edit_lista(m, tipo_modifica, valore_modifica)
+                edit_lista(m, choice)
             # Controllo se la modifica riguarda una tupla.
             elif choice == 1:
                 minimo = input("Inserire valore minimo:")
@@ -332,7 +360,7 @@ def edit(cod, tipo, fs=None):
             else:
                 scelta_utente = input("Inserire la modifica: ")
                 # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
-                getattr(m, "set_" + Indice_attributi_macchina[choice])(scelta_utente)
+                getattr(m, "set_" + Indice_attributi_macchina[choice].replace(" ", "_"))(scelta_utente)
             stampa_valori_macchina(m)
             print("Modifica completata con successo!")
     elif tipo == "p":
@@ -341,20 +369,13 @@ def edit(cod, tipo, fs=None):
             stampa_etichetta(Indice_attributi_particolare)
             scelta = int(input("Quale voce vuoi modificare?: "))
             # Controllo se la modifica riguarda una lista.
-            if scelta in [2, 4, 5, 6, 8]:
-                tipo_modifica = input("Vuoi aggiungere o rimuovere?: ")
-                if tipo_modifica != "aggiungere" or "rimuovere":
-                    print("Scelta errata!")
-                valore_modifica = input("Inserisci la modifica: ")
-                edit_lista(p, tipo_modifica, valore_modifica)
-            # Altrimenti la modifica è di tipo dizionario.
-            elif scelta in [11, 12]:
+            if scelta in [2, 4, 5, 6, 8, 11, 12]:
                 pass
             # Altrimenti la modifica è di tipo stringa o numero.
             else:
                 scelta_utente = int(input("Inserire la modifica: "))
                 # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
-                getattr(p, "set_" + Indice_attributi_macchina[scelta])(scelta_utente)
+                getattr(p, "set_" + Indice_attributi_macchina[scelta].replace(" ", "_"))(scelta_utente)
             stampa_valori_particolare(p)
             print("Modifica completata con successo!")
     elif tipo == "u":
@@ -364,20 +385,61 @@ def edit(cod, tipo, fs=None):
             scelta = int(input("Quale voce vuoi modificare?: "))
             scelta_utente = int(input("Inserire la modifica: "))
             # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
-            getattr(u, "set_" + Indice_attributi_macchina[scelta])(scelta_utente)
+            getattr(u, "set_" + Indice_attributi_macchina[scelta].replace(" ", "_"))(scelta_utente)
             stampa_valori_utensile(u)
             print("Modifica completata con successo!")
 
 
-# Funzione per edit lista attrezzatura, sia per la macchina che per il particolare.
-def edit_lista(tipo, operazione, valore):
-    if operazione == "aggiungere":
-        tipo.tipo_attrezzatura.append(valore)
-    if operazione == "rimuovi":
-        try:
-            tipo.tipo_attrezzatura.remove(valore)
-        except ValueError:
-            print(f'{valore} non presente nella lista attrezzatura!')
+# WIP
+# def edit_dizionario():
+
+
+# Funzione che modifica gli attributi di tipo lista per tutti e tre i tipi di oggetti.
+def edit_lista(oggetto, choice):
+    if isinstance(oggetto, Macchina):
+        operazione = input("Vuoi aggiungere o rimuovere?: ")
+        while operazione != "aggiungere" and operazione != "rimuovere":
+            operazione = input("Scelta errata!Vuoi aggiungere o rimuovere?: ")
+        if choice == 3:
+            if operazione == "aggiungere":
+                stampa_etichetta(indice_attrezzatura)
+                valore = check_inserimento_indice(indice_attrezzatura, "attrezzatura")[0]
+                oggetto.tipo_attrezzatura.append(valore)
+            elif operazione == "rimuovere":
+                dict_att = {}
+                for i, k in enumerate(oggetto.tipo_attrezzatura):
+                    dict_att[i] = k
+                stampa_etichetta(dict_att)
+                valore = check_inserimento_indice(dict_att, "attrezzatura")[0]
+                oggetto.tipo_attrezzatura.remove(valore)
+        elif choice == 4:
+            if operazione == "aggiungere":
+                stampa_etichetta(indice_utensili)
+                valore = check_inserimento_indice(indice_utensili, "utensile")[0]
+                oggetto.tipo_utensile.append(valore)
+            elif operazione == "rimuovere":
+                dict_ut = {}
+                for i, k in enumerate(oggetto.tipo_utensile):
+                    dict_ut[i] = k
+                stampa_etichetta(dict_ut)
+                valore = check_inserimento_indice(dict_ut, "utensile")[0]
+                oggetto.tipo_utensile.remove(valore)
+        elif choice == 6:
+            if operazione == "aggiungere":
+                stampa_etichetta(indice_lavorazioni)
+                valore = check_inserimento_indice(indice_lavorazioni, "lavorazioni")[0]
+                oggetto.lavorazione.append(valore)
+            elif operazione == "rimuovere":
+                dict_lav = {}
+                for i, k in enumerate(oggetto.lavorazione):
+                    dict_lav[i] = k
+                stampa_etichetta(dict_lav)
+                valore = check_inserimento_indice(dict_lav, "lavorazioni")[0]
+                oggetto.lavorazione.remove(valore)
+    elif isinstance(oggetto, Particolare):
+        operazione = input("Vuoi aggiungere o rimuovere?: ")
+        while operazione != "aggiungere" and operazione != "rimuovere":
+            operazione = input("Scelta errata!Vuoi aggiungere o rimuovere?: ")
 
 
 # Controlla se il valore fase(int) nella macchina è uguale anche nel particolare.
@@ -414,13 +476,10 @@ def inserimento_programma_multiplo(scelta):
 
 # Funzione che inserisce una macchina, un particolare o un utensile nel database.
 def insert_database(cod, tipo, fs=None):
-    indice_attrezzatura = {1: "palo", 2: "pinza", 3: "corpo porta pinza",
-                           4: "manuale", 5: "contropunta", 6: "slitta elicoidale"}
-    indice_utensili = {1: "creatore", 2: "coltello", 3: "tazza", 4: "gambo"}
-    indice_lavorazioni = {1: "dentatura", 2: "dentatura conica", 3: "stozza", 4: "interna", 5: "stozza elicoidale",
-                          6: "stozza elicoidale bombata"}
-    lista_fasi_pezzo = ["080", "081", "082", "083", "084", "085", "120", "121", "122", "123", "124", "125", "130",
-                        "131", "132", "133", "134", "135"]
+    global indice_attrezzatura
+    global indice_utensili
+    global indice_lavorazioni
+    global lista_fasi_pezzo
     try:
         if tipo == "m":
             x = get_macchina(cod)
@@ -825,17 +884,9 @@ def verifica_programma_multiplo(p_pm, m_pm):
 
 
 if __name__ == '__main__':
-    Indice_attributi_macchina = {0: "codice", 1: "diametro range", 2: "interasse min", 3: "tipo attrezzatura",
-                                 4: "tipo utensile", 5: "diametro max utensile", 6: "lavorazione", 7: "modulo max",
-                                 8: "altezza fascia_max", 9: "inclinazione elica max dx",
-                                 10: "inclinazione elica max sx", 11: "inclinazione tavola",
-                                 12: "altezza attrezzatura massima"}
-    Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "lista codici utensile", 3: "interasse",
-                                    4: "lista tipo attrezzatura", 5: "lista tipo utensile", 6: "diametro utensile",
-                                    7: "fase", 8: "lavorazione", 9: "modulo", 10: "fascia", 11: "inclinazione elica dx",
-                                    12: "inclinazione elica sx", 13: "inclinazione", 14: "altezza attrezzatura"}
-    Indice_attributi_utensile = {0: "codice", 1: "tipo", 2: "diametro utensile", 3: "senso elica",
-                                 4: "inclinazione elica"}
+    global Indice_attributi_macchina
+    global Indice_attributi_particolare
+    global Indice_attributi_utensile
 
     load_db()
 
