@@ -9,6 +9,7 @@ qui scrivi la descrizione del programma
 --- | --- | ---
 codice | String | codice del particolare
 diametro | Integer |
+lista_utensili | Lista di String |
 tipo_attrezzatura | Dict{lista attrezzature : altezza attrezzature} |
 fase | String | codice identificativo della fase
 lavorazione | Lista di String | 
