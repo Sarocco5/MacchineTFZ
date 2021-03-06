@@ -102,22 +102,15 @@ class Utensile:
 class Particolare:
     codice = None
     diametro = None
-    # lista utensili: prendo l' utensile con get_utensile.
     lista_utensili = []
-    # dizionario: u.diametro, p.diametro
-    interasse = {}
-    # dizionario: tipo attrezzatura, altezza attrezzatura
     tipo_attrezzatura = {}
     fase = None
-    # lista lavorazioni: str
     lavorazione = []
     programma_multiplo = None
     modulo = None
     fascia = None
-    # dizionario: u.codice, inclinazione
-    incl_elica_dx = {}
-    # dizionario: u.codice, inclinazione
-    incl_elica_sx = {}
+    incl_elica_dx = 0.0
+    incl_elica_sx = 0.0
     inclinazione = 0.0
 
     def __init__(self, c, d, ls_ut, p_ta, p_f, p_lav, p_prog_multi, mod, fascia,
@@ -125,17 +118,12 @@ class Particolare:
         self.codice = c
         self.diametro = d
         self.lista_utensili = ls_ut
-        self.interasse = calcolo_interasse_per_utensile(ls_ut, d, p_lav)
         self.tipo_attrezzatura = p_ta
         self.fase = p_f
         self.lavorazione = p_lav
         self.programma_multiplo = p_prog_multi
         self.modulo = mod
         self.fascia = fascia
-        if p_incl_elica_dx > 0:
-            p_incl_elica_dx = calcolo_inclinazione_per_utensile(ls_ut, p_lav, p_incl_elica_dx, p_incl_elica_sx)
-        elif p_incl_elica_sx > 0:
-            p_incl_elica_sx = calcolo_inclinazione_per_utensile(ls_ut, p_lav, p_incl_elica_dx, p_incl_elica_sx)
         self.incl_elica_dx = p_incl_elica_dx
         self.incl_elica_sx = p_incl_elica_sx
         self.inclinazione = incl
@@ -192,7 +180,7 @@ Indice_attributi_macchina = {0: "codice", 1: "diametro range", 2: "interasse min
 Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "lista codici utensile", 3: "interasse",
                                 4: "lista tipo attrezzatura", 5: "lista tipo utensile", 6: "diametro utensile",
                                 7: "fase", 8: "lavorazione", 9: "modulo", 10: "fascia", 11: "inclinazione elica dx",
-                                12: "inclinazione elica sx", 13: "inclinazione", 14: "altezza attrezzatura"}
+                                12: "inclinazione elica sx", 13: "inclinazione"}
 
 Indice_attributi_utensile = {0: "codice", 1: "tipo", 2: "diametro utensile", 3: "senso elica",
                              4: "inclinazione elica"}
@@ -368,8 +356,14 @@ def edit(cod, tipo, fs=None):
         if isinstance(p, Particolare):
             stampa_etichetta(Indice_attributi_particolare)
             scelta = int(input("Quale voce vuoi modificare?: "))
+            # Controllo se la modifica riguarda un dizionario.
+            if scelta in [4]:
+                edit_dizionario_attrezzatura_particolare(p)
             # Controllo se la modifica riguarda una lista.
-            if scelta in [2, 4, 5, 6, 8, 11, 12]:
+            elif scelta in [8]:
+                edit_lista(p, scelta)
+            # Scelta non gestibili perché relative ad utensili.
+            elif scelta in [2, 3, 5, 6, 11, 12]:
                 pass
             # Altrimenti la modifica è di tipo stringa o numero.
             else:
@@ -390,16 +384,32 @@ def edit(cod, tipo, fs=None):
             print("Modifica completata con successo!")
 
 
-# WIP
-# def edit_dizionario():
+# Modifica il dizionario "tipo attrezzatura" del particolare.
+def edit_dizionario_attrezzatura_particolare(particolare):
+    operazione = input("Vuoi aggiungere o rimuovere?: ")
+    while operazione != "aggiungere" and operazione != "rimuovere":
+        operazione = input("Scelta errata!Vuoi aggiungere o rimuovere?: ")
+    if operazione == "aggiungere":
+        stampa_etichetta(indice_attrezzatura)
+        valore = check_inserimento_indice(indice_attrezzatura, "attrezzatura")[0]
+        alt_att = float(sostituzione_virgola(input(f'Inserire altezza attrezzatura ({valore}): ')))
+        particolare.tipo_attrezzatura[valore] = alt_att
+    elif operazione == "rimuovere":
+        dict_att = {}
+        for i, k in enumerate(particolare.tipo_attrezzatura):
+            dict_att[i] = k
+        stampa_etichetta(dict_att)
+        valore = check_inserimento_indice(dict_att, "attrezzatura")[0]
+        particolare.tipo_attrezzatura.pop(valore)
 
 
-# Funzione che modifica gli attributi di tipo lista per tutti e tre i tipi di oggetti.
+# Funzione che modifica gli attributi di tipo lista per macchina e particolare.
 def edit_lista(oggetto, choice):
     if isinstance(oggetto, Macchina):
         operazione = input("Vuoi aggiungere o rimuovere?: ")
         while operazione != "aggiungere" and operazione != "rimuovere":
             operazione = input("Scelta errata!Vuoi aggiungere o rimuovere?: ")
+        # Scelta lista attrezzatura per la macchina.
         if choice == 3:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_attrezzatura)
@@ -412,6 +422,7 @@ def edit_lista(oggetto, choice):
                 stampa_etichetta(dict_att)
                 valore = check_inserimento_indice(dict_att, "attrezzatura")[0]
                 oggetto.tipo_attrezzatura.remove(valore)
+        # Scelta tipo utensile per la macchina
         elif choice == 4:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_utensili)
@@ -424,6 +435,7 @@ def edit_lista(oggetto, choice):
                 stampa_etichetta(dict_ut)
                 valore = check_inserimento_indice(dict_ut, "utensile")[0]
                 oggetto.tipo_utensile.remove(valore)
+        # Scelta tipo lavorazione per la macchina.
         elif choice == 6:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_lavorazioni)
@@ -440,6 +452,19 @@ def edit_lista(oggetto, choice):
         operazione = input("Vuoi aggiungere o rimuovere?: ")
         while operazione != "aggiungere" and operazione != "rimuovere":
             operazione = input("Scelta errata!Vuoi aggiungere o rimuovere?: ")
+        # Scelta lista lavorazione per il particolare.
+        if choice == 8:
+            if operazione == "aggiungere":
+                stampa_etichetta(indice_lavorazioni)
+                valore = check_inserimento_indice(indice_lavorazioni, "lavorazioni")[0]
+                oggetto.lavorazione.append(valore)
+            elif operazione == "rimuovere":
+                dict_lav = {}
+                for i, k in enumerate(oggetto.lavorazione):
+                    dict_lav[i] = k
+                stampa_etichetta(dict_lav)
+                valore = check_inserimento_indice(dict_lav, "lavorazioni")[0]
+                oggetto.lavorazione.remove(valore)
 
 
 # Controlla se il valore fase(int) nella macchina è uguale anche nel particolare.
@@ -533,7 +558,7 @@ def insert_database(cod, tipo, fs=None):
                     u = get_utensile(input("Inserire codice utensile: "))
                     while u is None:
                         u = get_utensile(input("Codice errato.Inserire codice utensile: "))
-                    ls_ut.append(u)
+                    ls_ut.append(u.codice)
                 fs = check_inserimento_stringhe(lista_fasi_pezzo, "fase")
                 stampa_etichetta(indice_lavorazioni)
                 lav = check_inserimento_indice(indice_lavorazioni, "lavorazione")
@@ -724,6 +749,16 @@ def oggetto_compatibile(ls_attributi_p, ls_attributi_m):
     return False
 
 
+# Scorre la lista dei particolari, controlla in quali particolari è usato l' utensile selezionato e crea una lista
+# con quei particolari.
+def particolari_usati_da_utensile(cod_ut):
+    list_part_use_ut = []
+    for p in Particolari:
+        if cod_ut in p.lista_utensili:
+            list_part_use_ut.append(p)
+    return list_part_use_ut
+
+
 # Rimuove una macchina, un particolare o un utensile dalla lista.
 def remove(cod, tipo, fs=None):
     if tipo == "m":
@@ -737,10 +772,21 @@ def remove(cod, tipo, fs=None):
             Particolari.remove(x)
             print("Codice eliminato con successo")
     elif tipo == "u":
-        x = get_utensile(cod)
-        if isinstance(x, Utensile):
-            Utensili.remove(x)
-            print("Utensile eliminato con successo")
+        u = get_utensile(cod)
+        if isinstance(u, Utensile):
+            ls_p = particolari_usati_da_utensile(u.codice)
+            if len(ls_p) > 0:
+                print(f'Utensile utilizzato da {len(ls_p)} {"particolare" if len(ls_p) == 1 else "particolari"}.')
+                [print(f' - {i.codice}') for i in ls_p]
+                scelta = input("Vuoi procedere alla rimozione?(si o no): ")
+                while scelta != "si" and scelta != "no":
+                    input("Scelta errata. Vuoi procedere alla rimozione?(si o no):")
+                if scelta == "si":
+                    ls_p.remove(u.codice)
+                    Utensili.remove(u)
+                    print("Utensile eliminato con successo.")
+                elif scelta == "no":
+                    print("Modifica annullata.")
 
 
 # Funzione per il salvataggio del database.
@@ -840,9 +886,9 @@ def stampa_valori_macchina(m):
 def stampa_valori_particolare(p):
     try:
         print(f'Codice: \n {p.codice} \nDiametro: \n {p.diametro} \nLista utensili: ')
-        for u in p.lista_utensili:
-            print(f' {u.codice}')
-        print(f'Interasse: \n {"-----" if p.interasse is None else p.interasse} \nLista attrezzatura: ')
+        for cod_u in p.lista_utensili:
+            print(f' {cod_u}')
+        print(f'Lista attrezzatura: ')
         for a in p.tipo_attrezzatura:
             print(f' {a}: {p.tipo_attrezzatura.get(a)}')
         print(f'Fase: \n {p.fase} \nLavorazione: ')
@@ -884,10 +930,6 @@ def verifica_programma_multiplo(p_pm, m_pm):
 
 
 if __name__ == '__main__':
-    global Indice_attributi_macchina
-    global Indice_attributi_particolare
-    global Indice_attributi_utensile
-
     load_db()
 
     codice = input("Inserire codice particolare (inserire codice completo o ultime 4 cifre): ")
