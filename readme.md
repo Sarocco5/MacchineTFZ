@@ -5,6 +5,16 @@ qui scrivi la descrizione del programma
 ## Descrizione classi
 
 ### Particolare
-**Attributo** | **Tipot** | **Descrizione**
+**Attributo** | **Tipo** | **Descrizione**
 --- | --- | ---
 codice | String | codice del particolare
+diametro | Integer |
+tipo_attrezzatura | Dict{lista attrezzature : altezza attrezzature} |
+fase | String | codice identificativo della fase
+lavorazione | Lista di String | 
+Programma_multiplo | boolean |
+modulo | float | 
+fascia | float | 
+inclinazione dx | float |
+inclinazione sx | float |
+inclinazione | float |
