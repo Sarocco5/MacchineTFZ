@@ -377,9 +377,17 @@ def edit(cod, tipo, fs=None):
         if isinstance(u, Utensile):
             stampa_etichetta(Indice_attributi_utensile)
             scelta = int(input("Quale voce vuoi modificare?: "))
-            scelta_utente = int(input("Inserire la modifica: "))
-            # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
-            getattr(u, "set_" + Indice_attributi_macchina[scelta].replace(" ", "_"))(scelta_utente)
+            if scelta == 1:
+                stampa_etichetta(indice_utensili)
+                scelta_utente = check_inserimento_indice(indice_utensili, "utensile")
+                getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
+            elif scelta == 3:
+                print(f'Senso elica attuale: {u.senso_elica}')
+                scelta_utente = input("Inserire senso elica(dx o sx): ")
+                getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
+            else:
+                scelta_utente = int(input("Inserire la modifica: "))
+                getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
             stampa_valori_utensile(u)
             print("Modifica completata con successo!")
 
@@ -576,7 +584,7 @@ def insert_database(cod, tipo, fs=None):
                 inc_el_sx = 0.0
                 inc = 0.0
                 # Lavorazione è sempre una lista da 1 elemento.
-                if lav[0] == "stozza" or lav[0] == "interna":
+                if lav[0] == "stozza" or lav[0] == "interna" or lav[0] == "dentatura conica":
                     inc = float(sostituzione_virgola(
                         input("Inserire inclinazione pezzo (inserire gradi in centesimi): ")))
                 elif lav[0] == "dentatura" or lav[0] == "dentatura conica":
@@ -589,6 +597,12 @@ def insert_database(cod, tipo, fs=None):
                             inc_el_dx = elica[1]
                         else:
                             inc_el_sx = elica[1]
+                elif lav[0] == "stozza elicoidale" or lav[0] == "stozza elicoidale bombata":
+                    elica = scelta_elica()
+                    if elica[0] == "dx":
+                        inc_el_dx = elica[1]
+                    else:
+                        inc_el_sx = elica[1]
                 p = Particolare(cod, d, ls_ut, ta, fs, lav, p_m, mod, h, inc_el_dx, inc_el_sx, inc)
                 stampa_valori_particolare(p)
                 scelta = input("I valori inseriti sono corretti?(si, no): ")
@@ -782,7 +796,8 @@ def remove(cod, tipo, fs=None):
                 while scelta != "si" and scelta != "no":
                     input("Scelta errata. Vuoi procedere alla rimozione?(si o no):")
                 if scelta == "si":
-                    ls_p.remove(u.codice)
+                    for p in ls_p:
+                        ls_p.remove(p.lista_utensili)
                     Utensili.remove(u)
                     print("Utensile eliminato con successo.")
                 elif scelta == "no":
@@ -898,7 +913,7 @@ def stampa_valori_particolare(p):
               f'Fascia: \n {p.fascia} \nInclinazione elica dx: \n '
               f'{"-----" if p.incl_elica_dx == 0.0 else p.incl_elica_dx} \n'
               f'Inclinazione elica sx: \n {"-----" if p.incl_elica_sx == 0.0 else p.incl_elica_sx} \n'
-              f'Inclinazione: \n {"-----" if p.inclinazione == 0.0 else p.inclinazione}')
+              f'Inclinazione conica: \n {"-----" if p.inclinazione == 0.0 else p.inclinazione}')
     except TypeError:
         print("Codice particolare errato")
 
