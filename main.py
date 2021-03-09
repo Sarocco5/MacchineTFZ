@@ -134,6 +134,9 @@ class Particolare:
     def set_diametro(self, d):
         self.diametro = d
 
+    def set_lista_utensili(self, ls_ut):
+        self.lista_utensili = ls_ut
+
     def set_fase(self, fs):
         self.fase = fs
 
@@ -154,6 +157,9 @@ class Particolare:
 
     def set_inclinazione(self, incl):
         self.inclinazione = incl
+
+    def rimuovi_utensile(self, cod):
+        self.lista_utensili.remove(cod)
 
 
 Macchine_TFZ_Aprilia = []
@@ -291,7 +297,7 @@ def compatibilita_generale(p, m):
         verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo)
 
 
-# Crea un dizionario con indice il tipo di attrezzatura e come valore la sua altezza
+# Crea un dizionario con indice il tipo di attrezzatura e come valore la sua altezza.
 def crea_dizionario_attrezzatura(lista_tipo_attrezzatura, lista_lavorazioni):
     dict_alt_att = {}
     stozza_elicoidale = False
@@ -360,10 +366,10 @@ def edit(cod, tipo, fs=None):
             if scelta in [4]:
                 edit_dizionario_attrezzatura_particolare(p)
             # Controllo se la modifica riguarda una lista.
-            elif scelta in [8]:
+            elif scelta in [2, 8]:
                 edit_lista(p, scelta)
             # Scelta non gestibili perché relative ad utensili.
-            elif scelta in [2, 3, 5, 6, 11, 12]:
+            elif scelta in [3, 6, 11, 12]:
                 pass
             # Altrimenti la modifica è di tipo stringa o numero.
             else:
@@ -461,6 +467,20 @@ def edit_lista(oggetto, choice):
         while operazione != "aggiungere" and operazione != "rimuovere":
             operazione = input("Scelta errata!Vuoi aggiungere o rimuovere?: ")
         # Scelta lista lavorazione per il particolare.
+        if choice == 2:
+            scelta = int(input("Quanti utensili devi associare al particolare?: "))
+            ls_ut = []
+            for i in range(scelta):
+                u = get_utensile(input("Inserire codice utensile: "))
+                count = 0
+                while u is None:
+                    u = get_utensile(input("Codice errato.Inserire codice utensile: "))
+                    count += 1
+                    if count == 3:
+                        print("Codice errato. Probabile che l' utensile non sia presente nel database.")
+                        quit()
+                ls_ut.append(u.codice)
+            oggetto.set_lista_utensili(ls_ut)
         if choice == 8:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_lavorazioni)
@@ -564,8 +584,13 @@ def insert_database(cod, tipo, fs=None):
                 ls_ut = []
                 for i in range(scelta):
                     u = get_utensile(input("Inserire codice utensile: "))
+                    count = 0
                     while u is None:
                         u = get_utensile(input("Codice errato.Inserire codice utensile: "))
+                        count += 1
+                        if count == 3:
+                            print("Codice errato. Probabile che l' utensile non sia presente nel database.")
+                            quit()
                     ls_ut.append(u.codice)
                 fs = check_inserimento_stringhe(lista_fasi_pezzo, "fase")
                 stampa_etichetta(indice_lavorazioni)
@@ -794,14 +819,23 @@ def remove(cod, tipo, fs=None):
                 [print(f' - {i.codice}') for i in ls_p]
                 scelta = input("Vuoi procedere alla rimozione?(si o no): ")
                 while scelta != "si" and scelta != "no":
-                    input("Scelta errata. Vuoi procedere alla rimozione?(si o no):")
+                    scelta = input("Scelta errata. Vuoi procedere alla rimozione?(si o no):")
                 if scelta == "si":
                     for p in ls_p:
-                        ls_p.remove(p.lista_utensili)
+                        p.rimuovi_utensile(cod)
+                        if len(p.lista_utensili) == 0:
+                            print(f'{p.codice} - [{p.fase}] non ha più utensili associati.')
+                        scelta = input("Vuoi aggiungere un utensile?(si o no): ")
+                        while scelta != "si" and scelta != "no":
+                            scelta = input("Scelta errata. Vuoi aggiungere un utensile?(si o no):")
+                        if scelta == "si":
+                            edit(p.codice, "p", p.fase)
                     Utensili.remove(u)
                     print("Utensile eliminato con successo.")
                 elif scelta == "no":
                     print("Modifica annullata.")
+        else:
+            print(f'Utensile "{cod}" non presente nel database.')
 
 
 # Funzione per il salvataggio del database.
@@ -935,7 +969,7 @@ def valuta_input_testo(scelta, lista):
     return set(scelta) <= set(lista)
 
 
-# Verifica se il particolare richiede un programma multiplo e ritorna True
+# Verifica se il particolare richiede un programma multiplo e ritorna True.
 def verifica_programma_multiplo(p_pm, m_pm):
     if not p_pm:
         return True
