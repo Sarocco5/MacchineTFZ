@@ -12,6 +12,7 @@ diametro | Integer |
 lista_utensili | Lista di String |
 tipo_attrezzatura | Dict{lista attrezzature : altezza attrezzature} |
 fase | String | codice identificativo della fase
+fascia_multipla | int | 
 lavorazione | Lista di String | 
 Programma_multiplo | boolean |
 modulo | float | 
