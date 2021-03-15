@@ -217,17 +217,17 @@ def calcolo_inclinazione(u_senso_el, u_inc_el, p_lav, p_inc_el_dx, p_inc_el_sx):
     if "dentatura" in p_lav or "dentatura conica" in p_lav:
         if p_inc_el_dx > 0:
             if u_senso_el == "dx":
-                inclinazione_dx = format(p_inc_el_dx - u_inc_el, ".2f")
+                inclinazione_dx = float(format(p_inc_el_dx - u_inc_el, ".2f"))
                 return inclinazione_dx
             else:
-                inclinazione_dx = format((p_inc_el_dx + u_inc_el), ".2f")
+                inclinazione_dx = float(format((p_inc_el_dx + u_inc_el), ".2f"))
                 return inclinazione_dx
         elif p_inc_el_sx > 0:
             if u_senso_el == "sx":
-                inclinazione_sx = format((p_inc_el_sx - u_inc_el), ".2f")
+                inclinazione_sx = float(format((p_inc_el_sx - u_inc_el), ".2f"))
                 return inclinazione_sx
             else:
-                inclinazione_sx = format((p_inc_el_sx + u_inc_el), ".2f")
+                inclinazione_sx = float(format((p_inc_el_sx + u_inc_el), ".2f"))
                 return inclinazione_sx
         elif p_inc_el_dx == 0 and p_inc_el_sx == 0:
             if u_senso_el == "dx":
@@ -239,14 +239,29 @@ def calcolo_inclinazione(u_senso_el, u_inc_el, p_lav, p_inc_el_dx, p_inc_el_sx):
 
 
 # Calcola l' inclinazione tra pezzo e utensile e ritorna il risultato creando un dizionario con il codice utensile
-# e il risultato dell 'inclinazione. Lo fa per ogni utensile nella lista utensili.
-def calcolo_inclinazione_per_utensile(lista_utensili, p_lav, p_inc_el_dx, p_inc_el_sx):
+# e il risultato dell 'inclinazione. Lo fa per ogni utensile nella lista utensili. Dopo prende i risultati e li
+# confronta con i valori della macchina ritornando True o False.
+def inclinazione_compatibile(lista_utensili, p_lav, p_inc_el_dx, p_inc_el_sx, incl_elica_max_dx, incl_elica_max_sx):
     inclinazione_utensili = {}
-    for u in lista_utensili:
+    for cod_ut in lista_utensili:
+        u = get_utensile(cod_ut)
         risultato_inclinazione = calcolo_inclinazione(u.senso_elica, u.inclinazione_elica,
                                                       p_lav, p_inc_el_dx, p_inc_el_sx)
         inclinazione_utensili[u.codice] = risultato_inclinazione
-    return inclinazione_utensili
+    # Qua controllo il risultato dell' inclinazione con l' inclinazione della macchina.
+    valore_maggiore_inclinazione = sorted(list(inclinazione_utensili.values()))[-1]
+    if p_inc_el_dx != 0 and p_inc_el_sx == 0:
+        return valore_maggiore_inclinazione <= incl_elica_max_dx
+    elif p_inc_el_sx != 0 and p_inc_el_dx == 0:
+        return valore_maggiore_inclinazione <= incl_elica_max_sx
+    elif p_inc_el_dx == 0 and p_inc_el_sx == 0:
+        for cod_ut in lista_utensili:
+            u = get_utensile(cod_ut)
+            if u.senso_elica == "dx" and valore_maggiore_inclinazione > incl_elica_max_dx:
+                return False
+            if u.senso_elica == "sx" and valore_maggiore_inclinazione > incl_elica_max_sx:
+                return False
+        return True
 
 
 # Verifico che la lavorazione non sia una stozza, creo una lista di risultati di interassi calcolati e li confronto con
@@ -302,14 +317,14 @@ def compatibilita_generale(p, m):
     return attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura, m.altezza_attrezzatura_max) and \
         calcolo_interasse(p.lista_utensili, p.diametro, p.lavorazione, m.interasse_min) and \
         diametro_compatibile(p.diametro, m.diametro_range) and \
+        inclinazione_compatibile(p.lista_utensili, p.lavorazione, p.incl_elica_dx, p.incl_elica_sx, m.incl_elica_max_dx,
+                                 m.incl_elica_max_sx) and \
         minore_uguale(p.modulo, m.modulo_max) and \
         minore_uguale((p.fascia * p.fascia_multipla), m.altezza_fascia_max) and \
         minore_uguale(p.inclinazione, m.inclinazione_tavola) and \
         oggetto_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura) and \
         oggetto_compatibile(p.lavorazione, m.lavorazione) and \
-        verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo) and \
-        minore_uguale(p.incl_elica_dx, m.incl_elica_max_dx) and \
-        minore_uguale(p.incl_elica_sx, m.incl_elica_max_sx)
+        verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo)
 
 
 # Crea un dizionario con indice il tipo di attrezzatura e come valore la sua altezza.
