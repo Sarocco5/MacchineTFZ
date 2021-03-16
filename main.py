@@ -286,7 +286,7 @@ def check_inserimento_stringhe(lista, tipo):
     return scelta
 
 
-# Funzione che gestisce le scelte con liste numerate
+# Funzione che gestisce le scelte con liste numerate.
 def check_scelta_menu(lista, domanda=None):
     if lista == ["si", "no"]:
         scelta = input(f'{domanda}[si/no]: ').strip()
