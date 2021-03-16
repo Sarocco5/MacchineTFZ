@@ -238,32 +238,6 @@ def calcolo_inclinazione(u_senso_el, u_inc_el, p_lav, p_inc_el_dx, p_inc_el_sx):
                 return inclinazione_sx
 
 
-# Calcola l' inclinazione tra pezzo e utensile e ritorna il risultato creando un dizionario con il codice utensile
-# e il risultato dell 'inclinazione. Lo fa per ogni utensile nella lista utensili. Dopo prende i risultati e li
-# confronta con i valori della macchina ritornando True o False.
-def inclinazione_compatibile(lista_utensili, p_lav, p_inc_el_dx, p_inc_el_sx, incl_elica_max_dx, incl_elica_max_sx):
-    inclinazione_utensili = {}
-    for cod_ut in lista_utensili:
-        u = get_utensile(cod_ut)
-        risultato_inclinazione = calcolo_inclinazione(u.senso_elica, u.inclinazione_elica,
-                                                      p_lav, p_inc_el_dx, p_inc_el_sx)
-        inclinazione_utensili[u.codice] = risultato_inclinazione
-    # Qua controllo il risultato dell' inclinazione con l' inclinazione della macchina.
-    valore_maggiore_inclinazione = sorted(list(inclinazione_utensili.values()))[-1]
-    if p_inc_el_dx != 0 and p_inc_el_sx == 0:
-        return valore_maggiore_inclinazione <= incl_elica_max_dx
-    elif p_inc_el_sx != 0 and p_inc_el_dx == 0:
-        return valore_maggiore_inclinazione <= incl_elica_max_sx
-    elif p_inc_el_dx == 0 and p_inc_el_sx == 0:
-        for cod_ut in lista_utensili:
-            u = get_utensile(cod_ut)
-            if u.senso_elica == "dx" and valore_maggiore_inclinazione > incl_elica_max_dx:
-                return False
-            if u.senso_elica == "sx" and valore_maggiore_inclinazione > incl_elica_max_sx:
-                return False
-        return True
-
-
 # Verifico che la lavorazione non sia una stozza, creo una lista di risultati di interassi calcolati e li confronto con
 # la macchina.
 def calcolo_interasse(p_lista_utensile, diam_pezzo, p_lav, m_int_min):
@@ -312,17 +286,31 @@ def check_inserimento_stringhe(lista, tipo):
     return scelta
 
 
+# Funzione che gestisce le scelte con liste numerate
+def check_scelta_menu(lista, domanda=None):
+    if lista == ["si", "no"]:
+        scelta = input(f'{domanda}[si/no]: ')
+        while scelta != "si" and scelta != "no":
+            scelta = input(f'Scelta errata! Ripetere scelta. {domanda}[si/no]: ')
+    else:
+        for i, k in enumerate(lista):
+            print(f'[{i}] - {k}')
+        scelta = int(input("Inserire scelta: "))
+        while scelta not in range(len(lista)):
+            scelta = input("Scelta errata! Ripetere scelta: ")
+        return lista[scelta]
+
+
 # Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
 def compatibilita_generale(p, m):
     return attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura, m.altezza_attrezzatura_max) and \
         calcolo_interasse(p.lista_utensili, p.diametro, p.lavorazione, m.interasse_min) and \
         diametro_compatibile(p.diametro, m.diametro_range) and \
-        inclinazione_compatibile(p.lista_utensili, p.lavorazione, p.incl_elica_dx, p.incl_elica_sx, m.incl_elica_max_dx,
-                                 m.incl_elica_max_sx) and \
+        inclinazione_compatibile(p.lista_utensili, p.lavorazione, p.incl_elica_dx, p.incl_elica_sx,
+                                 m.incl_elica_max_dx, m.incl_elica_max_sx) and \
         minore_uguale(p.modulo, m.modulo_max) and \
         minore_uguale((p.fascia * p.fascia_multipla), m.altezza_fascia_max) and \
         minore_uguale(p.inclinazione, m.inclinazione_tavola) and \
-        oggetto_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura) and \
         oggetto_compatibile(p.lavorazione, m.lavorazione) and \
         verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo)
 
@@ -556,6 +544,32 @@ def get_utensile(codice_utensile):
     for u in Utensili:
         if u.codice == codice_utensile:
             return u
+
+
+# Calcola l' inclinazione tra pezzo e utensile e ritorna il risultato creando un dizionario con il codice utensile
+# e il risultato dell 'inclinazione. Lo fa per ogni utensile nella lista utensili. Dopo prende i risultati e li
+# confronta con i valori della macchina ritornando True o False.
+def inclinazione_compatibile(lista_utensili, p_lav, p_inc_el_dx, p_inc_el_sx, incl_elica_max_dx, incl_elica_max_sx):
+    inclinazione_utensili = {}
+    for cod_ut in lista_utensili:
+        u = get_utensile(cod_ut)
+        risultato_inclinazione = calcolo_inclinazione(u.senso_elica, u.inclinazione_elica,
+                                                      p_lav, p_inc_el_dx, p_inc_el_sx)
+        inclinazione_utensili[u.codice] = risultato_inclinazione
+    # Qua controllo il risultato dell' inclinazione con l' inclinazione della macchina.
+    valore_maggiore_inclinazione = sorted(list(inclinazione_utensili.values()))[-1]
+    if p_inc_el_dx != 0 and p_inc_el_sx == 0:
+        return valore_maggiore_inclinazione <= incl_elica_max_dx
+    elif p_inc_el_sx != 0 and p_inc_el_dx == 0:
+        return valore_maggiore_inclinazione <= incl_elica_max_sx
+    elif p_inc_el_dx == 0 and p_inc_el_sx == 0:
+        for cod_ut in lista_utensili:
+            u = get_utensile(cod_ut)
+            if u.senso_elica == "dx" and valore_maggiore_inclinazione > incl_elica_max_dx:
+                return False
+            if u.senso_elica == "sx" and valore_maggiore_inclinazione > incl_elica_max_sx:
+                return False
+        return True
 
 
 # Associa l' uso del programma multiplo alla macchina o al particolare in fase di insert.
@@ -800,6 +814,89 @@ def maggiore_uguale(a, b):
     return a >= b
 
 
+# Funzione menu.
+def menu():
+    lista_opzioni = ["Verifica compatibilità", "Stampa database", "Modifica database", "Uscita"]
+    lista_verifica = ["Compatibilità generale",  "Confronta macchina con particolare",
+                      "Verifica particolari lavorati dall' utensile"]
+    lista_stampa_db = ["Stampa attributi macchina", "Stampa attributi particolari", "Stampa attributi utensile",
+                       "Stampa database macchine", "Stampa database particolari", "Stampa database utensili"]
+    lista_modifica = ["Inserimento", "Modifica", "Rimozione"]
+    print("Cosa si desidera fare?")
+    scelta = check_scelta_menu(lista_opzioni)
+    if "Verifica compatibilità" == scelta:
+        scelta = check_scelta_menu(lista_verifica)
+        if scelta == "Compatibilità generale":
+            verifica_compatibilita()
+        elif scelta == "Confronta macchina con particolare":
+            verifica_se_macchina_lavora_particolare()
+        elif scelta == "Verifica particolari lavorati dall' utensile":
+            verifica_particolari_lavorati_da_utensile(input("Inserire codice utensile: "))
+    elif "Stampa database" == scelta:
+        scelta = check_scelta_menu(lista_stampa_db)
+        if scelta == "Stampa attributi macchina":
+            scelta = input("Inserire codice macchina: ")
+            m = get_macchina(scelta)
+            stampa_valori_macchina(m)
+        elif scelta == "Stampa attributi particolare":
+            scelta_particolare = input("Inserire codice particolare: ")
+            scelta_fase_particolare = input("Inserire fase particolare: ")
+            p = get_particolare(scelta_particolare, scelta_fase_particolare)
+            stampa_valori_particolare(p)
+        elif scelta == "Stampa attributi utensile":
+            scelta = input("Inserire codice utensile: ")
+            u = get_utensile(scelta)
+            stampa_valori_utensile(u)
+        elif scelta == "Stampa database macchine":
+            stampa_database(Macchine_TFZ_Aprilia)
+        elif scelta == "Stampa database particolari":
+            stampa_database(Particolari)
+        elif scelta == "Stampa database utensili":
+            stampa_database(Utensili)
+    elif "Modifica database" == scelta:
+        scelta = check_scelta_menu(lista_modifica)
+        if scelta == "Inserimento":
+            scelta_tipo = input("Vuoi inserire una macchina, un utensile o un particolare?:")
+            scelta_fase = 0
+            while scelta_tipo != "macchina" and scelta_tipo != "utensile" and scelta_tipo != "particolare":
+                scelta_tipo = input("Scelta errata! Vuoi inserire una macchina, un utensile o un particolare?: ")
+            if scelta == "particolare":
+                scelta_codice = input("Inserire codice: ")
+                scelta_fase = input("Inserire fase: ")
+            else:
+                scelta_codice = input("Inserire codice: ")
+            insert_database(scelta_tipo, scelta_codice, scelta_fase)
+        elif scelta == "Modifica":
+            scelta_tipo = input(f'Vuoi modificare una macchina, un utensile o un particolare?: ')
+            scelta_fase = 0
+            while scelta_tipo != "macchina" and scelta_tipo != "utensile" and scelta_tipo != "particolare":
+                scelta_tipo = input("Scelta errata! Vuoi modificare una macchina, un utensile o un particolare?: ")
+            if scelta == "particolare":
+                scelta_codice = input("Inserire codice: ")
+                scelta_fase = input("Inserire fase: ")
+            else:
+                scelta_codice = input("Inserire codice: ")
+            edit(scelta_codice, scelta_tipo, scelta_fase)
+        elif scelta == "Rimozione":
+            scelta_tipo = input(f'Vuoi rimuovere una macchina, un utensile o un particolare?: ')
+            scelta_fase = 0
+            while scelta_tipo != "macchina" and scelta_tipo != "utensile" and scelta_tipo != "particolare":
+                scelta_tipo = input("Scelta errata! Vuoi rimuovere una macchina, un utensile o un particolare?: ")
+            if scelta == "particolare":
+                scelta_codice = input("Inserire codice: ")
+                scelta_fase = input("Inserire fase: ")
+            else:
+                scelta_codice = input("Inserire codice: ")
+            remove(scelta_codice, scelta_tipo, scelta_fase)
+    elif "Uscita" == scelta:
+        scelta = check_scelta_menu(["si", "no"], "Vuoi salvare?")
+        if scelta == "si":
+            save_db("macchine")
+            save_db("particolari")
+            save_db("utensili")
+        quit()
+
+
 # Valore (a) minore o uguale a (b).
 def minore_uguale(a, b):
     if a is None or b is None:
@@ -871,29 +968,26 @@ def remove(cod, tipo, fs=None):
             Particolari.remove(x)
             print("Codice eliminato con successo")
     elif tipo == "u":
+        verifica_particolari_lavorati_da_utensile(cod)
         u = get_utensile(cod)
-        if isinstance(u, Utensile):
+        scelta = input("Vuoi procedere alla rimozione?(si o no): ")
+        while scelta != "si" and scelta != "no":
+            scelta = input("Scelta errata. Vuoi procedere alla rimozione?(si o no):")
+        if scelta == "si":
             ls_p = particolari_usati_da_utensile(u.codice)
-            if len(ls_p) > 0:
-                print(f'Utensile utilizzato da {len(ls_p)} {"particolare" if len(ls_p) == 1 else "particolari"}.')
-                [print(f' - {i.codice}') for i in ls_p]
-                scelta = input("Vuoi procedere alla rimozione?(si o no): ")
+            for p in ls_p:
+                p.rimuovi_utensile(cod)
+                if len(p.lista_utensili) == 0:
+                    print(f'{p.codice} - [{p.fase}] non ha più utensili associati.')
+                scelta = input("Vuoi aggiungere un utensile?(si o no): ")
                 while scelta != "si" and scelta != "no":
-                    scelta = input("Scelta errata. Vuoi procedere alla rimozione?(si o no):")
+                    scelta = input("Scelta errata. Vuoi aggiungere un utensile?(si o no):")
                 if scelta == "si":
-                    for p in ls_p:
-                        p.rimuovi_utensile(cod)
-                        if len(p.lista_utensili) == 0:
-                            print(f'{p.codice} - [{p.fase}] non ha più utensili associati.')
-                        scelta = input("Vuoi aggiungere un utensile?(si o no): ")
-                        while scelta != "si" and scelta != "no":
-                            scelta = input("Scelta errata. Vuoi aggiungere un utensile?(si o no):")
-                        if scelta == "si":
-                            edit(p.codice, "p", p.fase)
-                    Utensili.remove(u)
-                    print("Utensile eliminato con successo.")
-                elif scelta == "no":
-                    print("Modifica annullata.")
+                    edit(p.codice, "p", p.fase)
+            Utensili.remove(u)
+            print("Utensile eliminato con successo.")
+        elif scelta == "no":
+            print("Modifica annullata.")
         else:
             print(f'Utensile "{cod}" non presente nel database.')
 
@@ -1029,18 +1123,8 @@ def valuta_input_testo(scelta, lista):
     return set(scelta) <= set(lista)
 
 
-# Verifica se il particolare richiede un programma multiplo e ritorna True.
-def verifica_programma_multiplo(p_pm, m_pm):
-    if not p_pm:
-        return True
-    elif m_pm:
-        return True
-    return False
-
-
-if __name__ == '__main__':
-    load_db()
-
+# Usa macchine compatibili per verificare su quali macchine è possibile lavorare il particolare.
+def verifica_compatibilita():
     codice = input("Inserire codice particolare (inserire codice completo o ultime 4 cifre): ")
     mini_lista = lista_particolari(codice, Particolari)
     if len(mini_lista) == 1:
@@ -1055,3 +1139,45 @@ if __name__ == '__main__':
             macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fase)
     else:
         print("Particolare non presente nel database.")
+
+
+# Verifica se il particolare può essere lavorato su una determinata macchina.
+def verifica_se_macchina_lavora_particolare():
+    scelta_macchina = input("Inserire codice macchina: ")
+    m = get_macchina(scelta_macchina)
+    if isinstance(m, Macchina):
+        scelta_particolare = input("Inserire codice particolare: ")
+        scelta_fase_particolare = input("Inserire fase particolare: ")
+        p = get_particolare(scelta_particolare, scelta_fase_particolare)
+        if isinstance(p, Particolare):
+            x = compatibilita_generale(p, m)
+            if x is True:
+                return print(f'La {m.codice} può lavorare il particolare {p.codice}')
+            else:
+                print(f'La {m.codice} non può lavorare il particolare {p.codice}')
+
+
+# Stampa una lista di particolari che usano l' utensile selezionato.
+def verifica_particolari_lavorati_da_utensile(cod):
+    u = get_utensile(cod)
+    if isinstance(u, Utensile):
+        ls_p = particolari_usati_da_utensile(u.codice)
+        if len(ls_p) > 0:
+            print(f'Utensile utilizzato da {len(ls_p)} {"particolare" if len(ls_p) == 1 else "particolari"}.')
+            [print(f' - {i.codice}') for i in ls_p]
+    else:
+        print(f'Il codice {cod} non è nel db')
+
+
+# Verifica se il particolare richiede un programma multiplo e ritorna True.
+def verifica_programma_multiplo(p_pm, m_pm):
+    if not p_pm:
+        return True
+    elif m_pm:
+        return True
+    return False
+
+
+if __name__ == '__main__':
+    load_db()
+    menu()
