@@ -288,18 +288,28 @@ def check_inserimento_stringhe(lista, tipo):
 
 # Funzione che gestisce le scelte con liste numerate.
 def check_scelta_menu(lista, domanda=None):
-    if lista == ["si", "no"]:
-        scelta = input(f'{domanda}[si/no]: ').strip()
-        while scelta != "si" and scelta != "no":
-            scelta = input(f'Scelta errata! Ripetere scelta. {domanda}[si/no]: ').strip()
-        return scelta
-    else:
-        for i, k in enumerate(lista):
-            print(f'[{i}] - {k}')
-        scelta = int(input("Inserire scelta: "))
+    try:
+        if lista == ["si", "no"]:
+            scelta = input(f'{domanda}[si/no]: ').strip()
+            while scelta != "si" and scelta != "no":
+                scelta = input(f'Scelta errata! Ripetere scelta. {domanda}[si/no]: ').strip()
+            return scelta
+        else:
+            for i, k in enumerate(lista):
+                print(f'[{i}] - {k}')
+            scelta = int((input("Inserire scelta: ")))
+            while scelta not in range(len(lista)):
+                scelta = int(input("Scelta errata! Ripetere scelta: "))
+            return lista[scelta]
+    except ValueError:
+        scelta = input("Scelta errata! Hai inserito un carattere invece che un numero! Ripetere scelta:  ")
         while scelta not in range(len(lista)):
-            scelta = input("Scelta errata! Ripetere scelta: ")
+            print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu.")
+            print("")
         return lista[scelta]
+    except AttributeError:
+        print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu.")
+        print("")
 
 
 # Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
@@ -366,8 +376,8 @@ def edit(cod, tipo, fs=None):
                 edit_lista(m, choice)
             # Controllo se la modifica riguarda una tupla.
             elif choice == 1:
-                minimo = input("Inserire valore minimo:")
-                massimo = input("Inserire valore massimo: ")
+                minimo = int(input("Inserire valore minimo:"))
+                massimo = int(input("Inserire valore massimo: "))
                 m.set_diametro((minimo, massimo))
             # Altrimenti la modifica è di tipo stringa o numero.
             else:
@@ -376,11 +386,13 @@ def edit(cod, tipo, fs=None):
                 getattr(m, "set_" + Indice_attributi_macchina[choice].replace(" ", "_"))(scelta_utente)
             stampa_valori_macchina(m)
             print("Modifica completata con successo!")
+        else:
+            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
     elif tipo == "particolare":
         p = get_particolare(cod, fs)
         if isinstance(p, Particolare):
             # Stampo l' indice attributi particolare rimuovendo le voci che riguardano l' utensile. Con la funzione
-            # .pop rimuovo quello che non me serve.
+            # .pop rimuovo quello che non mi serve.
             i_a_p_temp = Indice_attributi_particolare
             i_a_p_temp.pop(4)
             i_a_p_temp.pop(5)
@@ -402,6 +414,8 @@ def edit(cod, tipo, fs=None):
                 getattr(p, "set_" + Indice_attributi_macchina[scelta].replace(" ", "_"))(scelta_utente)
             stampa_valori_particolare(p)
             print("Modifica completata con successo!")
+        else:
+            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
     elif tipo == "utensile":
         u = get_utensile(cod)
         if isinstance(u, Utensile):
@@ -420,6 +434,8 @@ def edit(cod, tipo, fs=None):
                 getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
             stampa_valori_utensile(u)
             print("Modifica completata con successo!")
+        else:
+            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
 
 
 # Modifica il dizionario "tipo attrezzatura" del particolare.
@@ -585,7 +601,7 @@ def insert_database(cod, tipo, fs=None):
     global indice_lavorazioni
     global lista_fasi_pezzo
     try:
-        if tipo == "m":
+        if tipo == "macchina":
             x = get_macchina(cod)
             if isinstance(x, Macchina):
                 print(f'La macchina "{cod}" è presente nel database.')
@@ -624,7 +640,7 @@ def insert_database(cod, tipo, fs=None):
                     print("Inserimento errato. Programma interrotto")
                 else:
                     print("Scelta sbagliata")
-        if tipo == "p":
+        if tipo == "particolare":
             y = get_particolare(cod, fs)
             if isinstance(y, Particolare):
                 print(f'Il particolare "{cod}" è presente nel database.')
@@ -690,7 +706,7 @@ def insert_database(cod, tipo, fs=None):
                     print("Inserimento errato. Programma interrotto")
                 else:
                     print("Scelta sbagliata")
-        if tipo == "u":
+        if tipo == "utensile":
             z = get_utensile(cod)
             if isinstance(z, Utensile):
                 print(f'Utensile "{cod}" presente nel database.')
@@ -721,7 +737,6 @@ def insert_database(cod, tipo, fs=None):
                     print("Scelta sbagliata")
     except ValueError:
         print("Valore errato. Hai inserito un carattere invece che un numero.")
-        # menu()
 
 
 # Crea una lista dove mette i diametri degli utensili presenti nel particolare.
@@ -819,88 +834,59 @@ def maggiore_uguale(a, b):
 def menu():
     lista_opzioni = ["Verifica compatibilità", "Stampa database", "Modifica database", "Uscita"]
     lista_verifica = ["Compatibilità generale",  "Confronta macchina con particolare",
-                      "Verifica particolari lavorati dall' utensile"]
+                      "Verifica particolari lavorati dall' utensile", "Torna indietro"]
     lista_stampa_db = ["Stampa attributi macchina", "Stampa attributi particolare", "Stampa attributi utensile",
-                       "Stampa database macchine", "Stampa database particolari", "Stampa database utensili"]
-    lista_modifica = ["Inserimento", "Modifica", "Rimozione"]
-    print("Cosa si desidera fare?")
-    scelta = check_scelta_menu(lista_opzioni)
-    if "Verifica compatibilità" == scelta:
-        scelta = check_scelta_menu(lista_verifica)
-        if scelta == "Compatibilità generale":
-            verifica_compatibilita()
-        elif scelta == "Confronta macchina con particolare":
-            verifica_se_macchina_lavora_particolare()
-        elif scelta == "Verifica particolari lavorati dall' utensile":
-            verifica_particolari_lavorati_da_utensile(input("Inserire codice utensile: "))
-    elif "Stampa database" == scelta:
-        scelta = check_scelta_menu(lista_stampa_db)
-        if scelta == "Stampa attributi macchina":
-            scelta = input("Inserire codice macchina: ")
-            m = get_macchina(scelta)
-            stampa_valori_macchina(m)
-        elif scelta == "Stampa attributi particolare":
-            scelta_particolare = input("Inserire codice particolare: ")
-            scelta_fase_particolare = input("Inserire fase particolare: ")
-            p = get_particolare(scelta_particolare, scelta_fase_particolare)
-            stampa_valori_particolare(p)
-        elif scelta == "Stampa attributi utensile":
-            scelta = input("Inserire codice utensile: ")
-            u = get_utensile(scelta)
-            stampa_valori_utensile(u)
-        elif scelta == "Stampa database macchine":
-            stampa_database(Macchine_TFZ_Aprilia)
-        elif scelta == "Stampa database particolari":
-            stampa_database(Particolari)
-        elif scelta == "Stampa database utensili":
-            stampa_database(Utensili)
-    elif "Modifica database" == scelta:
-        scelta = check_scelta_menu(lista_modifica)
-        if scelta == "Inserimento":
-            scelta_tipo = input("Vuoi inserire una macchina, un utensile o un particolare?:").strip()
-            scelta_fase = 0
-            while scelta_tipo != "macchina" and scelta_tipo != "utensile" and scelta_tipo != "particolare":
-                scelta_tipo = input("Scelta errata! Vuoi inserire una macchina, un utensile o un particolare?: ")\
-                    .strip()
-            if scelta == "particolare":
-                scelta_codice = input("Inserire codice: ")
-                scelta_fase = input("Inserire fase: ")
-            else:
-                scelta_codice = input("Inserire codice: ")
-            insert_database(scelta_tipo, scelta_codice, scelta_fase)
-            menu()
-        elif scelta == "Modifica":
-            scelta_tipo = input(f'Vuoi modificare una macchina, un utensile o un particolare?: ').strip()
-            scelta_fase = 0
-            while scelta_tipo != "macchina" and scelta_tipo != "utensile" and scelta_tipo != "particolare":
-                scelta_tipo = input("Scelta errata! Vuoi modificare una macchina, un utensile o un particolare?: ")\
-                    .strip()
-            if scelta == "particolare":
-                scelta_codice = input("Inserire codice: ")
-                scelta_fase = input("Inserire fase: ")
-            else:
-                scelta_codice = input("Inserire codice: ")
-            edit(scelta_codice, scelta_tipo, scelta_fase)
-            menu()
-        elif scelta == "Rimozione":
-            scelta_tipo = input(f'Vuoi rimuovere una macchina, un utensile o un particolare?: ')
-            scelta_fase = 0
-            while scelta_tipo != "macchina" and scelta_tipo != "utensile" and scelta_tipo != "particolare":
-                scelta_tipo = input("Scelta errata! Vuoi rimuovere una macchina, un utensile o un particolare?: ")
-            if scelta == "particolare":
-                scelta_codice = input("Inserire codice: ")
-                scelta_fase = input("Inserire fase: ")
-            else:
-                scelta_codice = input("Inserire codice: ")
-            remove(scelta_codice, scelta_tipo, scelta_fase)
-            menu()
-    elif "Uscita" == scelta:
-        scelta = check_scelta_menu(["si", "no"], "Vuoi salvare?")
-        if scelta == "si":
-            save_db("macchine")
-            save_db("particolari")
-            save_db("utensili")
-        quit()
+                       "Stampa database macchine", "Stampa database particolari", "Stampa database utensili",
+                       "Torna indietro"]
+    lista_modifica = ["Inserimento", "Modifica", "Rimozione", "Torna indietro"]
+    scelta = None
+    while scelta != "Uscita":
+        print("Cosa si desidera fare?")
+        scelta = check_scelta_menu(lista_opzioni)
+        if "Verifica compatibilità" == scelta:
+            scelta = check_scelta_menu(lista_verifica)
+            if scelta == "Compatibilità generale":
+                verifica_compatibilita()
+            elif scelta == "Confronta macchina con particolare":
+                verifica_se_macchina_lavora_particolare()
+            elif scelta == "Verifica particolari lavorati dall' utensile":
+                verifica_particolari_lavorati_da_utensile(input("Inserire codice utensile: "))
+            elif scelta == "Torna indietro":
+                menu()
+        elif "Stampa database" == scelta:
+            scelta = check_scelta_menu(lista_stampa_db)
+            if scelta == "Stampa attributi macchina":
+                scelta = input("Inserire codice macchina: ")
+                m = get_macchina(scelta)
+                stampa_valori_macchina(m)
+            elif scelta == "Stampa attributi particolare":
+                scelta_particolare = input("Inserire codice particolare: ")
+                scelta_fase_particolare = input("Inserire fase particolare: ")
+                p = get_particolare(scelta_particolare, scelta_fase_particolare)
+                stampa_valori_particolare(p)
+            elif scelta == "Stampa attributi utensile":
+                scelta = input("Inserire codice utensile: ")
+                u = get_utensile(scelta)
+                stampa_valori_utensile(u)
+            elif scelta == "Stampa database macchine":
+                stampa_database(Macchine_TFZ_Aprilia)
+            elif scelta == "Stampa database particolari":
+                stampa_database(Particolari)
+            elif scelta == "Stampa database utensili":
+                stampa_database(Utensili)
+            elif scelta == "Torna indietro":
+                menu()
+        elif "Modifica database" == scelta:
+            scelta = check_scelta_menu(lista_modifica)
+            scelta_tipo_inserimento(scelta)
+        elif "Uscita" == scelta:
+            scelta = check_scelta_menu(["si", "no"], "Vuoi salvare?")
+            if scelta == "si":
+                save_db("macchine")
+                save_db("particolari")
+                save_db("utensili")
+            quit()
+        print("")
 
 
 # Valore (a) minore o uguale a (b).
@@ -963,22 +949,24 @@ def reinizializza_database(db):
 
 # Rimuove una macchina, un particolare o un utensile dalla lista.
 def remove(cod, tipo, fs=None):
-    if tipo == "m":
+    if tipo == "macchina":
         x = get_macchina(cod)
         if isinstance(x, Macchina):
             Macchine_TFZ_Aprilia.remove(x)
             print("Macchina eliminata con successo")
-    elif tipo == "p":
+        else:
+            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
+    elif tipo == "particolare":
         x = get_particolare(cod, fs)
         if isinstance(x, Particolare):
             Particolari.remove(x)
             print("Codice eliminato con successo")
-    elif tipo == "u":
+        else:
+            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
+    elif tipo == "utensile":
         verifica_particolari_lavorati_da_utensile(cod)
         u = get_utensile(cod)
-        scelta = input("Vuoi procedere alla rimozione?(si o no): ")
-        while scelta != "si" and scelta != "no":
-            scelta = input("Scelta errata. Vuoi procedere alla rimozione?(si o no):")
+        scelta = check_scelta_menu(["si", "no"], "Vuoi procedere alla rimozione?")
         if scelta == "si":
             ls_p = particolari_usati_da_utensile(u.codice)
             for p in ls_p:
@@ -995,7 +983,7 @@ def remove(cod, tipo, fs=None):
         elif scelta == "no":
             print("Modifica annullata.")
         else:
-            print(f'Utensile "{cod}" non presente nel database.')
+            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
 
 
 # Funzione per il salvataggio del database.
@@ -1026,6 +1014,44 @@ def scelta_elica():
         valore_elica = float(sostituzione_virgola(input("Inserire elica pezzo sx "
                                                         "(inserire il valore in centesimi) : ")))
     return elica, valore_elica
+
+
+# Scelgo che tipo di operazione devo fare (inserimento, modifica, rimozione) e in base alla scelta chiamo la funzione
+# appropriata.
+def scelta_tipo_inserimento(scelta):
+    if scelta == "Torna indietro":
+        menu()
+    lista_tipo = ["macchina", "utensile", "particolare"]
+    if scelta == "Inserimento":
+        print("Vuoi rimuovere una macchina, un utensile o un particolare?")
+        scelta_tipo = check_scelta_menu(lista_tipo)
+        scelta_fase = 0
+        if scelta == "particolare":
+            scelta_codice = input("Inserire codice: ")
+            scelta_fase = input("Inserire fase: ")
+        else:
+            scelta_codice = input("Inserire codice: ")
+        insert_database(scelta_codice, scelta_tipo, scelta_fase)
+    elif scelta == "Modifica":
+        print("Vuoi rimuovere una macchina, un utensile o un particolare?")
+        scelta_tipo = check_scelta_menu(lista_tipo)
+        scelta_fase = 0
+        if scelta == "particolare":
+            scelta_codice = input("Inserire codice: ")
+            scelta_fase = input("Inserire fase: ")
+        else:
+            scelta_codice = input("Inserire codice: ")
+        edit(scelta_codice, scelta_tipo, scelta_fase)
+    elif scelta == "Rimozione":
+        print("Vuoi rimuovere una macchina, un utensile o un particolare?")
+        scelta_tipo = check_scelta_menu(lista_tipo)
+        scelta_fase = 0
+        if scelta == "particolare":
+            scelta_codice = input("Inserire codice: ")
+            scelta_fase = input("Inserire fase: ")
+        else:
+            scelta_codice = input("Inserire codice: ")
+        remove(scelta_codice, scelta_tipo, scelta_fase)
 
 
 # Funzione per numeri decimali, elimina la virgola e la sostituisce con il punto.
@@ -1067,7 +1093,8 @@ def stampa_database(lista):
     elif isinstance(lista[0], Macchina):
         for indice in lista:
             bisect.insort(db, indice.codice)
-    print(db)
+    for i in db:
+        print(i)
 
 
 # Stampa gli attributi della macchina.
@@ -1089,6 +1116,8 @@ def stampa_valori_macchina(m):
               f'{m.inclinazione_tavola} \nAltezza attrezzatura max: \n {m.altezza_attrezzatura_max} ')
     except TypeError:
         print("Codice macchina errato")
+    except AttributeError:
+        print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu.")
 
 
 # Stampa gli attributi del particolare.
@@ -1110,6 +1139,8 @@ def stampa_valori_particolare(p):
               f'Inclinazione conica: \n {"-----" if p.inclinazione == 0.0 else p.inclinazione}')
     except TypeError:
         print("Codice particolare errato")
+    except AttributeError:
+        print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu.")
 
 
 # Stampa gli attributi dell' utensile.
@@ -1119,6 +1150,8 @@ def stampa_valori_utensile(u):
               f' {u.senso_elica} \nInclinazione elica: \n {u.inclinazione_elica}')
     except TypeError:
         print("Codice utensile errato")
+    except AttributeError:
+        print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu.")
 
 
 # Prima toglie lo spazio dalla scelta e poi lo spezza in lista per ogni virgola,
