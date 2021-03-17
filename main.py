@@ -1175,7 +1175,7 @@ def verifica_particolari_lavorati_da_utensile(cod):
         print(f'Il codice {cod} non è nel db')
 
 
-# Verifica se il particolare richiede un programma multiplo e ritorna True.
+# Verifica se il particolare richiede un programma multiplo e ritorna True o False.
 def verifica_programma_multiplo(p_pm, m_pm):
     if not p_pm:
         return True
