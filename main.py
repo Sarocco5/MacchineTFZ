@@ -30,8 +30,8 @@ class Macchina:
         self.modulo_max = mod_max
         self.altezza_fascia_max = h_fascia_max
         self.interasse_min = int_min
-        self.inclinazione_elica_max_dx = m_incl_elica_dx
-        self.inclinazione_elica_max_sx = m_incl_elica_sx
+        self.incl_elica_max_dx = m_incl_elica_dx
+        self.incl_elica_max_sx = m_incl_elica_sx
         self.inclinazione_tavola = incl_tav
         self.altezza_attrezzatura_max = m_alt_att_max
 
@@ -57,10 +57,10 @@ class Macchina:
         self.interasse_min = int_min
 
     def set_inclinazione_elica_max_dx(self, m_incl_elica_dx):
-        self.inclinazione_elica_max_dx = m_incl_elica_dx
+        self.incl_elica_max_dx = m_incl_elica_dx
 
     def set_inclinazione_elica_max_sx(self, m_incl_elica_sx):
-        self.inclinazione_elica_max_sx = m_incl_elica_sx
+        self.incl_elica_max_sx = m_incl_elica_sx
 
     def set_inclinazione_tavola(self, incl_tav):
         self.inclinazione_tavola = incl_tav
@@ -305,11 +305,11 @@ def check_scelta_menu(lista, domanda=None):
         scelta = input("Scelta errata! Hai inserito un carattere invece che un numero! Ripetere scelta:  ")
         while scelta not in range(len(lista)):
             print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu.")
-            print("")
+            menu()
         return lista[scelta]
     except AttributeError:
         print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu.")
-        print("")
+        menu()
 
 
 # Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
@@ -381,14 +381,17 @@ def edit(cod, tipo, fs=None):
                 m.set_diametro((minimo, massimo))
             # Altrimenti la modifica è di tipo stringa o numero.
             else:
-                scelta_utente = input("Inserire la modifica: ")
+                scelta_utente = int(input("Inserire la modifica: "))
                 # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                 getattr(m, "set_" + Indice_attributi_macchina[choice].replace(" ", "_"))(scelta_utente)
+                print(m.incl_elica_max_sx)
             stampa_valori_macchina(m)
             print("Modifica completata con successo!")
         else:
             print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
     elif tipo == "particolare":
+        cod = lista_particolari(cod, Particolari)
+        print(cod)
         p = get_particolare(cod, fs)
         if isinstance(p, Particolare):
             # Stampo l' indice attributi particolare rimuovendo le voci che riguardano l' utensile. Con la funzione
@@ -860,9 +863,16 @@ def menu():
                 m = get_macchina(scelta)
                 stampa_valori_macchina(m)
             elif scelta == "Stampa attributi particolare":
-                scelta_particolare = input("Inserire codice particolare: ")
+                scelta_particolare = input("Inserire codice particolare (inserire codice completo o ultime 4 cifre): ")
                 scelta_fase_particolare = input("Inserire fase particolare: ")
-                p = get_particolare(scelta_particolare, scelta_fase_particolare)
+                scelta_particolare = lista_particolari(scelta_particolare, Particolari)
+                p = None
+                if len(scelta_particolare) == 1:
+                    p = scelta_particolare[0]
+                else:
+                    for part in scelta_particolare:
+                        if part.fase == scelta_fase_particolare:
+                            p = part
                 stampa_valori_particolare(p)
             elif scelta == "Stampa attributi utensile":
                 scelta = input("Inserire codice utensile: ")
@@ -924,18 +934,27 @@ def particolari_usati_da_utensile(cod_ut):
     return list_part_use_ut
 
 
-# Aggiunge eventuali attributi alle classi. Al momento è impostata per aggiungere l' attributo "fascia_multipla".
+# Aggiunge eventuali attributi alle classi.
 def reinizializza_database(db):
     global Macchine_TFZ_Aprilia
     global Utensili
     global Particolari
     new_db = []
+    # Impostata per modificare in int interasse_min.
     if isinstance(db[0], Macchina):
-        # Funzione non ancora implementata.
-        pass
+        for m in db:
+            print(m.codice)
+            incl_elica_max_dx = int(input("Inserire valore: "))
+            new_m = Macchina(m.codice, m.diametro_range, m.tipo_attrezzatura, m.tipo_utensile, m.diametro_max_utensile,
+                             m.lavorazione, m.programma_multiplo, m.modulo_max, m.altezza_fascia_max, m.interasse_min,
+                             incl_elica_max_dx, m.incl_elica_max_sx, m.inclinazione_tavola,
+                             m.altezza_attrezzatura_max)
+            new_db.append(new_m)
+        Macchine_TFZ_Aprilia = new_db
     if isinstance(db[0], Utensile):
         # Funzione non ancora implementata.
         pass
+    # Impostata per aggiungere l' attributo "fascia_multipla".
     if isinstance(db[0], Particolare):
         for p in db:
             print(p.codice)
@@ -944,7 +963,7 @@ def reinizializza_database(db):
                                 p.programma_multiplo, p.modulo, p.fascia, fascia_multipla, p.incl_elica_dx,
                                 p.incl_elica_sx, p.inclinazione)
             new_db.append(new_p)
-    Particolari = new_db
+        Particolari = new_db
 
 
 # Rimuove una macchina, un particolare o un utensile dalla lista.
@@ -1023,22 +1042,38 @@ def scelta_tipo_inserimento(scelta):
         menu()
     lista_tipo = ["macchina", "utensile", "particolare"]
     if scelta == "Inserimento":
-        print("Vuoi rimuovere una macchina, un utensile o un particolare?")
+        print("Vuoi inserire una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
         scelta_fase = 0
-        if scelta == "particolare":
-            scelta_codice = input("Inserire codice: ")
+        if scelta_tipo == "particolare":
+            scelta_particolare = input("Inserire codice particolare (inserire codice completo o ultime 4 cifre): ")
             scelta_fase = input("Inserire fase: ")
+            scelta_particolare = lista_particolari(scelta_particolare, Particolari)
+            scelta_codice = None
+            if len(scelta_particolare) == 1:
+                scelta_codice = scelta_particolare[0]
+            else:
+                for part in scelta_particolare:
+                    if part.fase == scelta_fase:
+                        scelta_codice = part
         else:
             scelta_codice = input("Inserire codice: ")
         insert_database(scelta_codice, scelta_tipo, scelta_fase)
     elif scelta == "Modifica":
-        print("Vuoi rimuovere una macchina, un utensile o un particolare?")
+        print("Vuoi modificare una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
         scelta_fase = 0
-        if scelta == "particolare":
-            scelta_codice = input("Inserire codice: ")
+        if scelta_tipo == "particolare":
+            scelta_particolare = input("Inserire codice particolare (inserire codice completo o ultime 4 cifre): ")
             scelta_fase = input("Inserire fase: ")
+            scelta_particolare = lista_particolari(scelta_particolare, Particolari)
+            scelta_codice = None
+            if len(scelta_particolare) == 1:
+                scelta_codice = scelta_particolare[0]
+            else:
+                for part in scelta_particolare:
+                    if part.fase == scelta_fase:
+                        scelta_codice = part
         else:
             scelta_codice = input("Inserire codice: ")
         edit(scelta_codice, scelta_tipo, scelta_fase)
@@ -1046,9 +1081,17 @@ def scelta_tipo_inserimento(scelta):
         print("Vuoi rimuovere una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
         scelta_fase = 0
-        if scelta == "particolare":
-            scelta_codice = input("Inserire codice: ")
+        if scelta_tipo == "particolare":
+            scelta_particolare = input("Inserire codice particolare (inserire codice completo o ultime 4 cifre): ")
             scelta_fase = input("Inserire fase: ")
+            scelta_particolare = lista_particolari(scelta_particolare, Particolari)
+            scelta_codice = None
+            if len(scelta_particolare) == 1:
+                scelta_codice = scelta_particolare[0]
+            else:
+                for part in scelta_particolare:
+                    if part.fase == scelta_fase:
+                        scelta_codice = part
         else:
             scelta_codice = input("Inserire codice: ")
         remove(scelta_codice, scelta_tipo, scelta_fase)
@@ -1164,7 +1207,7 @@ def valuta_input_testo(scelta, lista):
 
 # Usa macchine compatibili per verificare su quali macchine è possibile lavorare il particolare.
 def verifica_compatibilita():
-    codice = input("Inserire codice particolare (inserire codice completo o ultime 4 cifre): ")
+    codice = input("Inserire codice particolare (inserire codice completo o ultime 3 o 4 cifre): ")
     mini_lista = lista_particolari(codice, Particolari)
     if len(mini_lista) == 1:
         macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia)
@@ -1183,6 +1226,7 @@ def verifica_compatibilita():
 # Verifica se il particolare può essere lavorato su una determinata macchina.
 def verifica_se_macchina_lavora_particolare():
     scelta_macchina = input("Inserire codice macchina: ")
+    scelta_macchina = lista_particolari(scelta_macchina, Particolari)
     m = get_macchina(scelta_macchina)
     if isinstance(m, Macchina):
         scelta_particolare = input("Inserire codice particolare: ")
