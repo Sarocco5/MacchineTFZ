@@ -249,7 +249,8 @@ def calcolo_interasse(p_lista_utensile, diam_pezzo, p_lav, m_int_min):
         for r in ls_r:
             if r >= m_int_min:
                 return True
-    return False
+        return False
+    return True
 
 
 # Verifica se l' input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
@@ -302,28 +303,52 @@ def check_scelta_menu(lista, domanda=None):
                 scelta = int(input("Scelta errata! Ripetere scelta: "))
             return lista[scelta]
     except ValueError:
-        scelta = input("Scelta errata! Hai inserito un carattere invece che un numero! Ripetere scelta:  ")
-        while scelta not in range(len(lista)):
-            print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu.")
-            menu()
-        return lista[scelta]
+        print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu. \n")
+        menu()
     except AttributeError:
-        print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu.")
+        print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu. \n")
         menu()
 
 
 # Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
-def compatibilita_generale(p, m):
-    return attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura, m.altezza_attrezzatura_max) and \
-        calcolo_interasse(p.lista_utensili, p.diametro, p.lavorazione, m.interasse_min) and \
-        diametro_compatibile(p.diametro, m.diametro_range) and \
-        inclinazione_compatibile(p.lista_utensili, p.lavorazione, p.incl_elica_dx, p.incl_elica_sx,
-                                 m.incl_elica_max_dx, m.incl_elica_max_sx) and \
-        minore_uguale(p.modulo, m.modulo_max) and \
-        minore_uguale((p.fascia * p.fascia_multipla), m.altezza_fascia_max) and \
-        minore_uguale(p.inclinazione, m.inclinazione_tavola) and \
-        oggetto_compatibile(p.lavorazione, m.lavorazione) and \
-        verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo)
+def compatibilita_generale(p, m, debug=False):
+    if not debug:
+        return attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura, m.altezza_attrezzatura_max) and \
+            calcolo_interasse(p.lista_utensili, p.diametro, p.lavorazione, m.interasse_min) and \
+            diametro_compatibile(p.diametro, m.diametro_range) and \
+            diametro_utensile_compatibile(p.lista_utensili, m.diametro_max_utensile) and \
+            inclinazione_compatibile(p.lista_utensili, p.lavorazione, p.incl_elica_dx, p.incl_elica_sx,
+                                     m.incl_elica_max_dx, m.incl_elica_max_sx) and \
+            minore_uguale(p.modulo, m.modulo_max) and \
+            minore_uguale((p.fascia * p.fascia_multipla), m.altezza_fascia_max) and \
+            minore_uguale(p.inclinazione, m.inclinazione_tavola) and \
+            oggetto_compatibile(p.lavorazione, m.lavorazione) and \
+            verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo)
+    else:
+        risultati_incompatibili = []
+        if not attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura, m.altezza_attrezzatura_max):
+            risultati_incompatibili.append("Attrezzatura")
+        if not calcolo_interasse(p.lista_utensili, p.diametro, p.lavorazione, m.interasse_min):
+            risultati_incompatibili.append("Interasse")
+        if not diametro_compatibile(p.diametro, m.diametro_range):
+            risultati_incompatibili.append("Diametro")
+        if not diametro_utensile_compatibile(p.lista_utensili, m.diametro_max_utensile):
+            risultati_incompatibili.append("Diametro utensile")
+        if not inclinazione_compatibile(p.lista_utensili, p.lavorazione, p.incl_elica_dx, p.incl_elica_sx,
+                                        m.incl_elica_max_dx, m.incl_elica_max_sx):
+            risultati_incompatibili.append("Inclinazione elica")
+        if not minore_uguale(p.modulo, m.modulo_max):
+            risultati_incompatibili.append("Modulo")
+        if not minore_uguale((p.fascia * p.fascia_multipla), m.altezza_fascia_max):
+            risultati_incompatibili.append("Fascia")
+        if not minore_uguale(p.inclinazione, m.inclinazione_tavola):
+            risultati_incompatibili.append("Inclinazione")
+        if not oggetto_compatibile(p.lavorazione, m.lavorazione):
+            risultati_incompatibili.append("Lavorazione")
+        if not verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo):
+            risultati_incompatibili.append("Programma multiplo")
+        if len(risultati_incompatibili) >= 1:
+            print(f'Macchina [{m.codice}] risultato: {risultati_incompatibili}')
 
 
 # Crea un dizionario con indice il tipo di attrezzatura e come valore la sua altezza.
@@ -358,6 +383,15 @@ def crea_lista_da_stringa(scelta):
 # Ritorna true, se il valore del diametro è contenuto nella tupla (min, max).
 def diametro_compatibile(valore, tupla):
     return tupla[0] <= valore <= tupla[1]
+
+
+# Controlla la lista utensili del particolare e verifica se i diametri sono compatibili con la macchina.
+def diametro_utensile_compatibile(lista_utensile, m_diametro_max_utensile):
+    for cod_u in lista_utensile:
+        diametro_utensile = get_utensile(cod_u).diametro_utensile
+        if minore_uguale(diametro_utensile, m_diametro_max_utensile):
+            return True
+    return False
 
 
 # Funzione per editare macchine,particolari o utensili.
@@ -578,6 +612,8 @@ def inclinazione_compatibile(lista_utensili, p_lav, p_inc_el_dx, p_inc_el_sx, in
         inclinazione_utensili[u.codice] = risultato_inclinazione
     # Qua controllo il risultato dell' inclinazione con l' inclinazione della macchina.
     valore_maggiore_inclinazione = sorted(list(inclinazione_utensili.values()))[-1]
+    if valore_maggiore_inclinazione is None:
+        valore_maggiore_inclinazione = 0
     if p_inc_el_dx != 0 and p_inc_el_sx == 0:
         return valore_maggiore_inclinazione <= incl_elica_max_dx
     elif p_inc_el_sx != 0 and p_inc_el_dx == 0:
@@ -628,8 +664,10 @@ def insert_database(cod, tipo, fs=None):
                 mod_max = int(input("Inserire modulo massimo: "))
                 h_max = int(input("Inserire altezza fascia massima: "))
                 int_min = int(input("Inserire interasse minimo (inserire 0 se non necessario): "))
-                inc_el_max_dx = int(input("Inserire inclinazione elica dx massima (inserire 30 se non necessario): "))
-                inc_el_max_sx = int(input("Inserire inclinazione elica sx massima (inserire 30 se non necessario): "))
+                inc_el_max_dx = int(input("Inserire inclinazione elica dx massima (inserire 30 "
+                                          "(per le dentatrici) o 0 (per le stozze) se non necessario): "))
+                inc_el_max_sx = int(input("Inserire inclinazione elica dx massima (inserire 30 "
+                                          "(per le dentatrici) o 0 (per le stozze) se non necessario): "))
                 inc_tav = int(input("Inserire inclinazione tavola (inserire 0 se non necessario): "))
                 alt_att_max = int(input("Inserire altezza attrezzatura massima(inserire 300 se non necessario): "))
                 m = Macchina(cod, d, att, t_u, d_max_u, lav, p_m,  mod_max, h_max,
@@ -768,7 +806,7 @@ def lista_particolari(input_codice, db_particolari):
     lp = []
     lista_codice_particolari_simili = []
     for p in db_particolari:
-        if input_codice == p.codice[8:] or input_codice == p.codice[7:] or input_codice == p.codice:
+        if input_codice == p.codice[-3:] or input_codice == p.codice[-4:] or input_codice == p.codice:
             lp.append(p)
     # Da qui controllo se lp contiene codici diversi con parte finale uguale.
     if len(lp) > 1:
@@ -814,16 +852,16 @@ def load_db():
 # Funzione che scorre le 2 liste del database (macchine e particolari), e ,usando la funzione "compatibilità_generale",
 # mi stampa su quali macchine il particolare in questione è lavorabile. In questa funzione è presente anche la verifica
 # della fase del pezzo.
-def macchine_compatibili(ls_part, ls_macc, fs=None):
+def macchine_compatibili(ls_part, ls_macc, fs=None, debug=False):
     for p in ls_part:
         for m in ls_macc:
             if fs is None:
-                if compatibilita_generale(p, m):
-                    print(m.codice)
+                if compatibilita_generale(p, m, debug):
+                    print("   " + m.codice)
             else:
                 if p.fase == fs:
-                    if compatibilita_generale(p, m):
-                        print(m.codice)
+                    if compatibilita_generale(p, m, debug):
+                        print("   " + m.codice)
 
 
 # Valore (a) maggiore o uguale a (b).
@@ -837,7 +875,7 @@ def maggiore_uguale(a, b):
 def menu():
     lista_opzioni = ["Verifica compatibilità", "Stampa database", "Modifica database", "Uscita"]
     lista_verifica = ["Compatibilità generale",  "Confronta macchina con particolare",
-                      "Verifica particolari lavorati dall' utensile", "Torna indietro"]
+                      "Verifica particolari lavorati dall' utensile", "Incompatibilità generale", "Torna indietro"]
     lista_stampa_db = ["Stampa attributi macchina", "Stampa attributi particolare", "Stampa attributi utensile",
                        "Stampa database macchine", "Stampa database particolari", "Stampa database utensili",
                        "Torna indietro"]
@@ -854,6 +892,9 @@ def menu():
                 verifica_se_macchina_lavora_particolare()
             elif scelta == "Verifica particolari lavorati dall' utensile":
                 verifica_particolari_lavorati_da_utensile(input("Inserire codice utensile: "))
+            elif scelta == "Incompatibilità generale":
+                # Passando il valore debug, compatibilità generale mi ritorna i risultati falsi.
+                verifica_compatibilita(True)
             elif scelta == "Torna indietro":
                 menu()
         elif "Stampa database" == scelta:
@@ -1153,10 +1194,12 @@ def stampa_valori_macchina(m):
         for lav in m.lavorazione:
             print(f' {lav}')
         print(f'Programma multiplo: \n {"Si" if m.programma_multiplo is True else "No"} \nModulo max: \n {m.modulo_max}'
-              f'\nAltezza fascia max: \n {m.altezza_fascia_max} \nInterasse min: \n {m.interasse_min} \n'
-              f'Inclinazione elica dx max: \n {m.incl_elica_max_dx} \nInclinazione elica sx max: \n '
-              f'{m.incl_elica_max_sx} \nInclinazione tavola: \n '
-              f'{m.inclinazione_tavola} \nAltezza attrezzatura max: \n {m.altezza_attrezzatura_max} ')
+              f'\nAltezza fascia max: \n {m.altezza_fascia_max} '
+              f'\nInterasse min: \n {"-----" if m.interasse_min == 0 else m.interasse_min} \n'
+              f'Inclinazione elica dx max: \n {"-----" if m.incl_elica_max_dx == 0 else m.incl_elica_max_dx} '
+              f'\nInclinazione elica sx max: \n {"-----" if m.incl_elica_max_sx == 0 else m.incl_elica_max_sx} '
+              f'\nInclinazione tavola: \n {"-----" if m.inclinazione_tavola ==0 else m.inclinazione_tavola} '
+              f'\nAltezza attrezzatura max: \n {m.altezza_attrezzatura_max} ')
     except TypeError:
         print("Codice macchina errato")
     except AttributeError:
@@ -1206,11 +1249,11 @@ def valuta_input_testo(scelta, lista):
 
 
 # Usa macchine compatibili per verificare su quali macchine è possibile lavorare il particolare.
-def verifica_compatibilita():
+def verifica_compatibilita(debug=False):
     codice = input("Inserire codice particolare (inserire codice completo o ultime 3 o 4 cifre): ")
     mini_lista = lista_particolari(codice, Particolari)
     if len(mini_lista) == 1:
-        macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia)
+        macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fs=None, debug=debug)
     elif len(mini_lista) > 1:
         print("Il codice presenta più fasi. Quale intendi scegliere?")
         li_fa = lista_fasi(mini_lista)
@@ -1218,7 +1261,7 @@ def verifica_compatibilita():
             print("   " + index)
         fase = check_inserimento_stringhe(li_fa, "fase")
         if fase != li_fa:
-            macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fase)
+            macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fase, debug)
     else:
         print("Particolare non presente nel database.")
 
