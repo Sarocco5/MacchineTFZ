@@ -687,33 +687,13 @@ def insert_database(cod, tipo, fs=None):
                 print(f'Il particolare "{cod}" è presente nel database.')
             else:
                 print(f'Inserire valori particolare "{cod}"')
+                print("-----   Dati pezzo   -----")
                 d = float(sostituzione_virgola(input("Inserire diametro pezzo: ")))
-                scelta = int(input("Quanti utensili devi associare al particolare?: "))
-                ls_ut = []
-                for i in range(scelta):
-                    u = get_utensile(input("Inserire codice utensile: "))
-                    count = 0
-                    while u is None:
-                        u = get_utensile(input("Codice errato.Inserire codice utensile: "))
-                        count += 1
-                        if count == 3:
-                            print("Codice errato. Probabile che l' utensile non sia presente nel database.")
-                            quit()
-                    ls_ut.append(u.codice)
-                fs = check_inserimento_stringhe(lista_fasi_pezzo, "fase")
-                stampa_etichetta(indice_lavorazioni)
-                lav = check_inserimento_indice(indice_lavorazioni, "lavorazione")
-                stampa_etichetta(indice_attrezzatura)
-                ta = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
-                ta = crea_dizionario_attrezzatura(ta, lav)
-                p_m = input("Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
-                while p_m != "si" and p_m != "no":
-                    p_m = input("Scelta errata! Ripetere la scelta. "
-                                "Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
-                p_m = True if p_m == "si" else False
                 mod = float(sostituzione_virgola(input("Inserire modulo: ")))
                 h = float(sostituzione_virgola(input("Inserire fascia: ")))
                 fascia_multi = int(input("Quanti particolari vanno lavorati insieme?: "))
+                stampa_etichetta(indice_lavorazioni)
+                lav = check_inserimento_indice(indice_lavorazioni, "lavorazione")
                 inc_el_dx = 0.0
                 inc_el_sx = 0.0
                 inc = 0.0
@@ -737,6 +717,28 @@ def insert_database(cod, tipo, fs=None):
                         inc_el_dx = elica[1]
                     else:
                         inc_el_sx = elica[1]
+                p_m = input("Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
+                while p_m != "si" and p_m != "no":
+                    p_m = input("Scelta errata! Ripetere la scelta. "
+                                "Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
+                p_m = True if p_m == "si" else False
+                print("-----   Dati utensile   -----")
+                scelta = int(input("Quanti utensili devi associare al particolare?: "))
+                ls_ut = []
+                for i in range(scelta):
+                    u = get_utensile(input("Inserire codice utensile: "))
+                    count = 0
+                    while u is None:
+                        u = get_utensile(input("Codice errato.Inserire codice utensile: "))
+                        count += 1
+                        if count == 3:
+                            print("Codice errato. Probabile che l' utensile non sia presente nel database.")
+                            quit()
+                    ls_ut.append(u.codice)
+                print("-----   Dati attrezzatura   -----")
+                stampa_etichetta(indice_attrezzatura)
+                ta = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
+                ta = crea_dizionario_attrezzatura(ta, lav)
                 p = Particolare(cod, d, ls_ut, ta, fs, lav, p_m, mod, h, fascia_multi, inc_el_dx, inc_el_sx, inc)
                 stampa_valori_particolare(p)
                 scelta = input("I valori inseriti sono corretti?(si, no): ")
@@ -1085,21 +1087,10 @@ def scelta_tipo_inserimento(scelta):
     if scelta == "Inserimento":
         print("Vuoi inserire una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
-        scelta_fase = 0
         if scelta_tipo == "particolare":
-            scelta_particolare = input("Inserire codice particolare (inserire codice completo o ultime 4 cifre): ")
-            scelta_fase = input("Inserire fase: ")
-            scelta_particolare = lista_particolari(scelta_particolare, Particolari)
-            scelta_codice = None
-            if len(scelta_particolare) == 1:
-                scelta_codice = scelta_particolare[0]
-            else:
-                for part in scelta_particolare:
-                    if part.fase == scelta_fase:
-                        scelta_codice = part
-        else:
-            scelta_codice = input("Inserire codice: ")
-        insert_database(scelta_codice, scelta_tipo, scelta_fase)
+            scelta_codice = input("Inserire codice particolare: ")
+            scelta_fase = check_inserimento_stringhe(lista_fasi_pezzo, "fase")
+            insert_database(scelta_codice, scelta_tipo, scelta_fase)
     elif scelta == "Modifica":
         print("Vuoi modificare una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
