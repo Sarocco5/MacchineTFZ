@@ -1,6 +1,7 @@
 import pickle
 import bisect
 import datetime
+import time
 
 
 class Macchina:
@@ -944,6 +945,7 @@ def menu():
                 save_db("macchine")
                 save_db("particolari")
                 save_db("utensili")
+            time.sleep(5)
             quit()
         print("")
 
