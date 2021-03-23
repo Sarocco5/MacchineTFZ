@@ -945,7 +945,9 @@ def menu():
                 save_db("macchine")
                 save_db("particolari")
                 save_db("utensili")
-            time.sleep(5)
+            else:
+                print("Database non salvati!")
+            time.sleep(3)
             quit()
         print("")
 
