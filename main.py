@@ -1,5 +1,6 @@
 import pickle
 import bisect
+import datetime
 
 
 class Macchina:
@@ -197,17 +198,20 @@ Indice_attributi_utensile = {0: "codice", 1: "tipo", 2: "diametro utensile", 3: 
                              4: "inclinazione elica"}
 
 
+def attrezzatura_altezza_compatibile(p_dict_att, m_alt_att_max):
+    for a in list(p_dict_att.values()):
+        if minore_uguale(a, m_alt_att_max):
+            return True
+    return False
+
+
 # Scorro il dizionario "lista tipo attrezzatura" del particolare, con il metodo .keys() prendo l' indice del
 # dizionario, che in questo caso è l' attrezzatura, e con la funzione "oggetto compatibile" verifico se l' indice
 # è nella lista "tipo attrezzatura" della macchina. Dopodiché scorro nuovamente il dizionario e, con il metodo . values,
 # prendo l' altezza dell' attrezzatura e con la funzione "minore uguale" la confronto con l' altezza massima
 # della macchina. Ritorna True o False.
-def attrezzatura_compatibile(p_dict_att, m_ls_att, m_alt_att_max):
-    if oggetto_compatibile(list(p_dict_att.keys()), m_ls_att):
-        for a in list(p_dict_att.values()):
-            if minore_uguale(a, m_alt_att_max):
-                return True
-    return False
+def attrezzatura_compatibile(p_dict_att, m_ls_att):
+    return oggetto_compatibile(list(p_dict_att.keys()), m_ls_att)
 
 
 # Prende il tipo di lavorazione, se è stozza passa, se invece è una dentatura prende il verso dell' elica sia del pezzo
@@ -313,7 +317,8 @@ def check_scelta_menu(lista, domanda=None):
 # Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
 def compatibilita_generale(p, m, debug=False):
     if not debug:
-        return attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura, m.altezza_attrezzatura_max) and \
+        return attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura) and \
+            attrezzatura_altezza_compatibile(p.tipo_attrezzatura, m.altezza_attrezzatura_max) and \
             calcolo_interasse(p.lista_utensili, p.diametro, p.lavorazione, m.interasse_min) and \
             diametro_compatibile(p.diametro, m.diametro_range) and \
             diametro_utensile_compatibile(p.lista_utensili, m.diametro_max_utensile) and \
@@ -326,8 +331,10 @@ def compatibilita_generale(p, m, debug=False):
             verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo)
     else:
         risultati_incompatibili = []
-        if not attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura, m.altezza_attrezzatura_max):
+        if not attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura):
             risultati_incompatibili.append("Attrezzatura")
+        if not attrezzatura_altezza_compatibile(p.tipo_attrezzatura, m.altezza_attrezzatura_max):
+            risultati_incompatibili.append("Altezza attrezzatura")
         if not calcolo_interasse(p.lista_utensili, p.diametro, p.lavorazione, m.interasse_min):
             risultati_incompatibili.append("Interasse")
         if not diametro_compatibile(p.diametro, m.diametro_range):
@@ -884,7 +891,7 @@ def menu():
     lista_modifica = ["Inserimento", "Modifica", "Rimozione", "Torna indietro"]
     scelta = None
     while scelta != "Uscita":
-        print("Cosa si desidera fare?")
+        print("Cosa desideri fare?")
         scelta = check_scelta_menu(lista_opzioni)
         if "Verifica compatibilità" == scelta:
             scelta = check_scelta_menu(lista_verifica)
@@ -902,7 +909,7 @@ def menu():
         elif "Stampa database" == scelta:
             scelta = check_scelta_menu(lista_stampa_db)
             if scelta == "Stampa attributi macchina":
-                scelta = input("Inserire codice macchina: ")
+                scelta = input("Inserire codice macchina: ").replace("-", "_")
                 m = get_macchina(scelta)
                 stampa_valori_macchina(m)
             elif scelta == "Stampa attributi particolare":
@@ -1087,10 +1094,13 @@ def scelta_tipo_inserimento(scelta):
     if scelta == "Inserimento":
         print("Vuoi inserire una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
+        scelta_fase = 0
         if scelta_tipo == "particolare":
             scelta_codice = input("Inserire codice particolare: ")
             scelta_fase = check_inserimento_stringhe(lista_fasi_pezzo, "fase")
-            insert_database(scelta_codice, scelta_tipo, scelta_fase)
+        else:
+            scelta_codice = input("Inserire codice: ").replace("-", "_")
+        insert_database(scelta_codice, scelta_tipo, scelta_fase)
     elif scelta == "Modifica":
         print("Vuoi modificare una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
@@ -1107,7 +1117,7 @@ def scelta_tipo_inserimento(scelta):
                     if part.fase == scelta_fase:
                         scelta_codice = part
         else:
-            scelta_codice = input("Inserire codice: ")
+            scelta_codice = input("Inserire codice: ").replace("-", "_")
         edit(scelta_codice, scelta_tipo, scelta_fase)
     elif scelta == "Rimozione":
         print("Vuoi rimuovere una macchina, un utensile o un particolare?")
@@ -1125,7 +1135,7 @@ def scelta_tipo_inserimento(scelta):
                     if part.fase == scelta_fase:
                         scelta_codice = part
         else:
-            scelta_codice = input("Inserire codice: ")
+            scelta_codice = input("Inserire codice: ").replace("-", "_")
         remove(scelta_codice, scelta_tipo, scelta_fase)
 
 
@@ -1296,5 +1306,16 @@ def verifica_programma_multiplo(p_pm, m_pm):
 
 
 if __name__ == '__main__':
+    utente = input("Inserire nome utente: ")
     load_db()
+    data = datetime.datetime.now()
+    if data.hour in range(6, 12):
+        print(f'   Buon giorno {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
+              f'{data.hour}:{data.minute}')
+    elif data.hour > 12:
+        print(f'   Buon pomeriggio {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
+              f'{data.hour}:{data.minute}')
+    elif data.hour >= 17:
+        print(f'   Buonasera {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
+              f'{data.hour}:{data.minute}')
     menu()
