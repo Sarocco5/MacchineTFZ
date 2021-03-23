@@ -1,6 +1,6 @@
 # MacchineTFZ
 
-qui scrivi la descrizione del programma
+Con questo programma è possibile gestire il db (inserire, modificare o rimuovere) e verificare la compatibilità tra particolari e macchine.
 
 ## Descrizione classi
 
