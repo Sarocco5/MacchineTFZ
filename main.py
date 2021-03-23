@@ -208,9 +208,7 @@ def attrezzatura_altezza_compatibile(p_dict_att, m_alt_att_max):
 
 # Scorro il dizionario "lista tipo attrezzatura" del particolare, con il metodo .keys() prendo l' indice del
 # dizionario, che in questo caso è l' attrezzatura, e con la funzione "oggetto compatibile" verifico se l' indice
-# è nella lista "tipo attrezzatura" della macchina. Dopodiché scorro nuovamente il dizionario e, con il metodo . values,
-# prendo l' altezza dell' attrezzatura e con la funzione "minore uguale" la confronto con l' altezza massima
-# della macchina. Ritorna True o False.
+# è nella lista "tipo attrezzatura" della macchina.
 def attrezzatura_compatibile(p_dict_att, m_ls_att):
     return oggetto_compatibile(list(p_dict_att.keys()), m_ls_att)
 
