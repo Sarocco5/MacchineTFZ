@@ -20,7 +20,7 @@ interasse min | float | interasse minimo supportato dalla macchina
 inclinazione max dx | float | inclinazione massima supportata dalla macchina
 inclinazione max sx | float | inclinazione massima supportata dalla macchina
 inclinazione tavola | float | inclinazione massima supportata dalla macchina
-altezza attrezzatura max | float |
+altezza attrezzatura max | float | altezza attrezzatura supportata dalla macchina
 
 ### Utensile
 **Attributo** | **Tipo** | **Descrizione**
