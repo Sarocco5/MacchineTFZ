@@ -198,6 +198,7 @@ Indice_attributi_utensile = {0: "codice", 1: "tipo", 2: "diametro utensile", 3: 
                              4: "inclinazione elica"}
 
 
+# Controlla l' altezza attrezzatura del pezzo con l' altezza attrezzatura supportata dalla macchina.
 def attrezzatura_altezza_compatibile(p_dict_att, m_alt_att_max):
     for a in list(p_dict_att.values()):
         if minore_uguale(a, m_alt_att_max):
