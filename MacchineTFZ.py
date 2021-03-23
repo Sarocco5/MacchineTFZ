@@ -306,11 +306,8 @@ def check_scelta_menu(lista, domanda=None):
             while scelta not in range(len(lista)):
                 scelta = int(input("Scelta errata! Ripetere scelta: "))
             return lista[scelta]
-    except ValueError:
-        print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu. \n")
-        menu()
-    except AttributeError:
-        print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu. \n")
+    except (ValueError, AttributeError):
+        print("Codice errato o inesistente. \n")
         menu()
 
 
@@ -785,8 +782,8 @@ def insert_database(cod, tipo, fs=None):
                     print("Inserimento errato. Programma interrotto")
                 else:
                     print("Scelta sbagliata")
-    except ValueError:
-        print("Valore errato. Hai inserito un carattere invece che un numero.")
+    except (TypeError, AttributeError):
+        print("Codice errato o inesistente")
 
 
 # Crea una lista dove mette i diametri degli utensili presenti nel particolare.
@@ -1204,10 +1201,8 @@ def stampa_valori_macchina(m):
               f'\nInclinazione elica sx max: \n {"-----" if m.incl_elica_max_sx == 0 else m.incl_elica_max_sx} '
               f'\nInclinazione tavola: \n {"-----" if m.inclinazione_tavola ==0 else m.inclinazione_tavola} '
               f'\nAltezza attrezzatura max: \n {m.altezza_attrezzatura_max} ')
-    except TypeError:
-        print("Codice macchina errato")
-    except AttributeError:
-        print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu.")
+    except (TypeError, AttributeError):
+        print("Codice errato o inesistente")
 
 
 # Stampa gli attributi del particolare.
@@ -1227,10 +1222,8 @@ def stampa_valori_particolare(p):
               f' \nInclinazione elica dx: \n {"-----" if p.incl_elica_dx == 0.0 else p.incl_elica_dx} \n'
               f'Inclinazione elica sx: \n {"-----" if p.incl_elica_sx == 0.0 else p.incl_elica_sx} \n'
               f'Inclinazione conica: \n {"-----" if p.inclinazione == 0.0 else p.inclinazione}')
-    except TypeError:
-        print("Codice particolare errato")
-    except AttributeError:
-        print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu.")
+    except (TypeError, AttributeError):
+        print("Codice errato o inesistente")
 
 
 # Stampa gli attributi dell' utensile.
@@ -1238,10 +1231,8 @@ def stampa_valori_utensile(u):
     try:
         print(f'Codice: \n {u.codice} \nTipo: \n {u.tipo} \nDiametro: \n {u.diametro_utensile} \nSenso elica: \n'
               f' {u.senso_elica} \nInclinazione elica: \n {u.inclinazione_elica}')
-    except TypeError:
-        print("Codice utensile errato")
-    except AttributeError:
-        print("Scelta errata! Hai inserito un carattere invece che un numero! Ritorno al menu.")
+    except (TypeError, AttributeError):
+        print("Codice errato o inesistente")
 
 
 # Prima toglie lo spazio dalla scelta e poi lo spezza in lista per ogni virgola,
