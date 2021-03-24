@@ -426,7 +426,7 @@ def edit(cod, tipo, fs=None):
             stampa_valori_macchina(m)
             print("Modifica completata con successo!")
         else:
-            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
+            print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
     elif tipo == "particolare":
         cod = lista_particolari(cod, Particolari)
         print(cod)
@@ -1024,14 +1024,14 @@ def remove(cod, tipo, fs=None):
             Macchine_TFZ_Aprilia.remove(x)
             print("Macchina eliminata con successo")
         else:
-            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
+            print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
     elif tipo == "particolare":
         x = get_particolare(cod, fs)
         if isinstance(x, Particolare):
             Particolari.remove(x)
             print("Codice eliminato con successo")
         else:
-            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
+            print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
     elif tipo == "utensile":
         verifica_particolari_lavorati_da_utensile(cod)
         u = get_utensile(cod)
@@ -1052,7 +1052,7 @@ def remove(cod, tipo, fs=None):
         elif scelta == "no":
             print("Modifica annullata.")
         else:
-            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
+            print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
 
 
 # Funzione per il salvataggio del database.
@@ -1300,7 +1300,7 @@ def verifica_programma_multiplo(p_pm, m_pm):
 
 
 if __name__ == '__main__':
-    utente = input("Inserire nome utente: ")
+    utente = input(f'Inserire nome utente: ')
     load_db()
     data = datetime.datetime.now()
     if data.hour in range(6, 12):
