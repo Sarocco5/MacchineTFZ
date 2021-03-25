@@ -453,13 +453,18 @@ def edit(cod, tipo, fs=None):
                 if scelta in [3]:
                     edit_dizionario_attrezzatura_particolare(p)
                 # Controllo se la modifica riguarda una lista.
-                elif scelta in [2, 8]:
+                elif scelta in [2, 7]:
                     edit_lista(p, scelta)
-                # Altrimenti la modifica è di tipo stringa o numero.
-                elif scelta in [0, 1, 6, 7, 8, 9, 10]:
+                # Controllo se la modifica è di tipo int.
+                elif scelta in [1, 8, 9, 10]:
                     scelta_utente = int(input("Inserire la modifica: "))
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
-                    getattr(p, "set_" + Indice_attributi_macchina[scelta].replace(" ", "_"))(scelta_utente)
+                    getattr(p, "set_" + Indice_attributi_particolare[scelta].replace(" ", "_"))(scelta_utente)
+                # Controllo se la modifica è di tipo str.
+                elif scelta in [0, 6]:
+                    scelta_utente = input("Inserire la modifica: ")
+                    # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
+                    getattr(p, "set_" + Indice_attributi_particolare[scelta].replace(" ", "_"))(scelta_utente)
                 elif scelta == 14:
                     print(" ")
                     menu()
@@ -499,7 +504,8 @@ def edit(cod, tipo, fs=None):
             else:
                 print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
     except (ValueError, AttributeError):
-        print("Scelta errata o inesistente!")
+        print("Codice errato o inesistente. \n")
+        menu()
 
 
 # Modifica il dizionario "tipo attrezzatura" del particolare.
@@ -586,7 +592,7 @@ def edit_lista(oggetto, choice):
                         quit()
                 ls_ut.append(u.codice)
             oggetto.set_lista_utensili(ls_ut)
-        if choice == 8:
+        if choice == 7:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_lavorazioni)
                 valore = check_inserimento_indice(indice_lavorazioni, "lavorazioni")[0]
