@@ -178,8 +178,9 @@ indice_attrezzatura = {1: "palo", 2: "pinza", 3: "corpo porta pinza", 4: "manual
 
 indice_utensili = {1: "creatore", 2: "coltello", 3: "tazza", 4: "gambo"}
 
-indice_lavorazioni = {1: "dentatura", 2: "dentatura conica", 3: "stozza", 4: "interna", 5: "stozza elicoidale",
-                      6: "stozza elicoidale bombata"}
+indice_lavorazioni = {0: "dentatura finita", 1: "dentatura pre sbarbata", 2: "dentatura pre rettifica",
+                      3: "dentatura scanalata", 4: "dentatura conica", 5: "stozza", 6: "interna",
+                      7: "stozza elicoidale", 8: "stozza elicoidale bombata"}
 
 lista_fasi_pezzo = ["080", "081", "082", "083", "084", "085", "120", "121", "122", "123", "124", "125", "130",
                     "131", "132", "133", "134", "135"]
@@ -188,15 +189,16 @@ Indice_attributi_macchina = {0: "codice", 1: "diametro range", 2: "interasse min
                              4: "tipo utensile", 5: "diametro max utensile", 6: "lavorazione", 7: "modulo max",
                              8: "altezza fascia max", 9: "inclinazione elica max dx",
                              10: "inclinazione elica max sx", 11: "inclinazione tavola",
-                             12: "altezza attrezzatura massima"}
+                             12: "altezza attrezzatura massima", 13: "torna indietro"}
 
 Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "lista codici utensile",
                                 3: "lista tipo attrezzatura", 4: "lista tipo utensile", 5: "diametro utensile",
                                 6: "fase", 7: "lavorazione", 8: "modulo", 9: "fascia", 10: "fascia multipla",
-                                11: "inclinazione elica dx", 12: "inclinazione elica sx", 13: "inclinazione"}
+                                11: "inclinazione elica dx", 12: "inclinazione elica sx", 13: "inclinazione",
+                                14: "torna indietro"}
 
 Indice_attributi_utensile = {0: "codice", 1: "tipo", 2: "diametro utensile", 3: "senso elica",
-                             4: "inclinazione elica"}
+                             4: "inclinazione elica", 5: "torna indietro"}
 
 
 # Controlla l' altezza attrezzatura del pezzo con l' altezza attrezzatura supportata dalla macchina.
@@ -277,7 +279,6 @@ def check_inserimento_indice(indice, tipo):
         q = indice.get(int(scelta))
         if q is not None:
             lista_tipo.append(q)
-    print(lista_tipo)
     return lista_tipo
 
 
@@ -404,79 +405,101 @@ def edit(cod, tipo, fs=None):
     global indice_utensili
     global indice_lavorazioni
     global lista_fasi_pezzo
-    if tipo == "macchina":
-        m = get_macchina(cod)
-        if isinstance(m, Macchina):
-            stampa_etichetta(Indice_attributi_macchina)
-            choice = int(input("Quale voce vuoi modificare?: "))
-            # Controllo se la modifica riguarda una lista.
-            if choice in [3, 4, 6]:
-                edit_lista(m, choice)
-            # Controllo se la modifica riguarda una tupla.
-            elif choice == 1:
-                minimo = int(input("Inserire valore minimo:"))
-                massimo = int(input("Inserire valore massimo: "))
-                m.set_diametro((minimo, massimo))
-            # Altrimenti la modifica è di tipo stringa o numero.
+    try:
+        if tipo == "macchina":
+            m = get_macchina(cod)
+            if isinstance(m, Macchina):
+                stampa_etichetta(Indice_attributi_macchina)
+                choice = int(input("Quale voce vuoi modificare?: "))
+                # Controllo se la modifica riguarda una lista.
+                if choice in [3, 4, 6]:
+                    edit_lista(m, choice)
+                # Controllo se la modifica riguarda una tupla.
+                elif choice == 1:
+                    minimo = int(input("Inserire valore minimo:"))
+                    massimo = int(input("Inserire valore massimo: "))
+                    m.set_diametro((minimo, massimo))
+                # Altrimenti la modifica è di tipo stringa o numero.
+                elif choice in [0, 2, 5, 7, 8, 9, 10, 11, 12]:
+                    scelta_utente = int(input("Inserire la modifica: "))
+                    # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
+                    getattr(m, "set_" + Indice_attributi_macchina[choice].replace(" ", "_"))(scelta_utente)
+                    print(m.incl_elica_max_sx)
+                elif choice == 13:
+                    print(" ")
+                    menu()
+                else:
+                    print(f'Scelta [{choice}] inesistente! Ritorno al menu. ')
+                    print(" ")
+                    menu()
+                stampa_valori_macchina(m)
+                print("Modifica completata con successo!")
             else:
-                scelta_utente = int(input("Inserire la modifica: "))
-                # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
-                getattr(m, "set_" + Indice_attributi_macchina[choice].replace(" ", "_"))(scelta_utente)
-                print(m.incl_elica_max_sx)
-            stampa_valori_macchina(m)
-            print("Modifica completata con successo!")
-        else:
-            print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
-    elif tipo == "particolare":
-        cod = lista_particolari(cod, Particolari)
-        print(cod)
-        p = get_particolare(cod, fs)
-        if isinstance(p, Particolare):
-            # Stampo l' indice attributi particolare rimuovendo le voci che riguardano l' utensile. Con la funzione
-            # .pop rimuovo quello che non mi serve.
-            i_a_p_temp = Indice_attributi_particolare
-            i_a_p_temp.pop(4)
-            i_a_p_temp.pop(5)
-            i_a_p_temp.pop(11)
-            i_a_p_temp.pop(12)
-            i_a_p_temp.pop(13)
-            stampa_etichetta(i_a_p_temp)
-            scelta = int(input("Quale voce vuoi modificare?: "))
-            # Controllo se la modifica riguarda un dizionario.
-            if scelta in [4]:
-                edit_dizionario_attrezzatura_particolare(p)
-            # Controllo se la modifica riguarda una lista.
-            elif scelta in [2, 8]:
-                edit_lista(p, scelta)
-            # Altrimenti la modifica è di tipo stringa o numero.
+                print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
+        elif tipo == "particolare":
+            p = get_particolare(cod.codice, fs)
+            if isinstance(p, Particolare):
+                # Stampo l' indice attributi particolare rimuovendo le voci che riguardano l' utensile. Con la funzione
+                # .pop rimuovo quello che non mi serve.
+                i_a_p_temp = Indice_attributi_particolare
+                i_a_p_temp.pop(4)
+                i_a_p_temp.pop(5)
+                i_a_p_temp.pop(11)
+                i_a_p_temp.pop(12)
+                i_a_p_temp.pop(13)
+                stampa_etichetta(i_a_p_temp)
+                scelta = int(input("Quale voce vuoi modificare?: "))
+                # Controllo se la modifica riguarda un dizionario.
+                if scelta in [3]:
+                    edit_dizionario_attrezzatura_particolare(p)
+                # Controllo se la modifica riguarda una lista.
+                elif scelta in [2, 8]:
+                    edit_lista(p, scelta)
+                # Altrimenti la modifica è di tipo stringa o numero.
+                elif scelta in [0, 1, 6, 7, 8, 9, 10]:
+                    scelta_utente = int(input("Inserire la modifica: "))
+                    # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
+                    getattr(p, "set_" + Indice_attributi_macchina[scelta].replace(" ", "_"))(scelta_utente)
+                elif scelta == 14:
+                    print(" ")
+                    menu()
+                else:
+                    print(f'Scelta [{scelta}] inesistente! Ritorno al menu.')
+                    print(" ")
+                    menu()
+                stampa_valori_particolare(p)
+                print("Modifica completata con successo!")
             else:
-                scelta_utente = int(input("Inserire la modifica: "))
-                # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
-                getattr(p, "set_" + Indice_attributi_macchina[scelta].replace(" ", "_"))(scelta_utente)
-            stampa_valori_particolare(p)
-            print("Modifica completata con successo!")
-        else:
-            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
-    elif tipo == "utensile":
-        u = get_utensile(cod)
-        if isinstance(u, Utensile):
-            stampa_etichetta(Indice_attributi_utensile)
-            scelta = int(input("Quale voce vuoi modificare?: "))
-            if scelta == 1:
-                stampa_etichetta(indice_utensili)
-                scelta_utente = check_inserimento_indice(indice_utensili, "utensile")
-                getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
-            elif scelta == 3:
-                print(f'Senso elica attuale: {u.senso_elica}')
-                scelta_utente = input("Inserire senso elica(dx o sx): ")
-                getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
+                print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
+        elif tipo == "utensile":
+            u = get_utensile(cod)
+            if isinstance(u, Utensile):
+                stampa_etichetta(Indice_attributi_utensile)
+                scelta = int(input("Quale voce vuoi modificare?: "))
+                if scelta == 1:
+                    stampa_etichetta(indice_utensili)
+                    scelta_utente = check_inserimento_indice(indice_utensili, "utensile")
+                    getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
+                elif scelta == 3:
+                    print(f'Senso elica attuale: {u.senso_elica}')
+                    scelta_utente = input("Inserire senso elica(dx o sx): ")
+                    getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
+                elif scelta in [0, 2, 4]:
+                    scelta_utente = int(input("Inserire la modifica: "))
+                    getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
+                elif scelta == 5:
+                    print(" ")
+                    menu()
+                else:
+                    print(f'Scelta [{scelta}] inesistente! Ritorno al menu.')
+                    print(" ")
+                    menu()
+                stampa_valori_utensile(u)
+                print("Modifica completata con successo!")
             else:
-                scelta_utente = int(input("Inserire la modifica: "))
-                getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
-            stampa_valori_utensile(u)
-            print("Modifica completata con successo!")
-        else:
-            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
+                print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
+    except (ValueError, AttributeError):
+        print("Scelta errata o inesistente!")
 
 
 # Modifica il dizionario "tipo attrezzatura" del particolare.
@@ -910,7 +933,8 @@ def menu():
                 m = get_macchina(scelta)
                 stampa_valori_macchina(m)
             elif scelta == "Stampa attributi particolare":
-                scelta_particolare = input("Inserire codice particolare (inserire codice completo o ultime 4 cifre): ")
+                scelta_particolare = input("Inserire codice particolare ( inserire codice completo o "
+                                           "ultime 3 o 4 cifre): ")
                 scelta_fase_particolare = input("Inserire fase particolare: ")
                 scelta_particolare = lista_particolari(scelta_particolare, Particolari)
                 p = None
@@ -1104,27 +1128,26 @@ def scelta_tipo_inserimento(scelta):
     elif scelta == "Modifica":
         print("Vuoi modificare una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
-        scelta_fase = 0
         if scelta_tipo == "particolare":
-            scelta_particolare = input("Inserire codice particolare (inserire codice completo o ultime 4 cifre): ")
+            scelta_particolare = input("Inserire codice particolare (inserire codice completo o ultime 3 o 4 cifre): ")
             scelta_fase = input("Inserire fase: ")
             scelta_particolare = lista_particolari(scelta_particolare, Particolari)
-            scelta_codice = None
             if len(scelta_particolare) == 1:
-                scelta_codice = scelta_particolare[0]
+                scelta_particolare = scelta_particolare[0]
             else:
                 for part in scelta_particolare:
                     if part.fase == scelta_fase:
-                        scelta_codice = part
+                        scelta_particolare = part
+            edit(scelta_particolare, scelta_tipo, scelta_fase)
         else:
             scelta_codice = input("Inserire codice: ").replace("-", "_")
-        edit(scelta_codice, scelta_tipo, scelta_fase)
+            edit(scelta_codice, scelta_tipo)
     elif scelta == "Rimozione":
         print("Vuoi rimuovere una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
         scelta_fase = 0
         if scelta_tipo == "particolare":
-            scelta_particolare = input("Inserire codice particolare (inserire codice completo o ultime 4 cifre): ")
+            scelta_particolare = input("Inserire codice particolare (inserire codice completo o ultime  3 o 4 cifre): ")
             scelta_fase = input("Inserire fase: ")
             scelta_particolare = lista_particolari(scelta_particolare, Particolari)
             scelta_codice = None
@@ -1263,12 +1286,12 @@ def verifica_compatibilita(debug=False):
 
 # Verifica se il particolare può essere lavorato su una determinata macchina.
 def verifica_se_macchina_lavora_particolare():
-    scelta_macchina = input("Inserire codice macchina: ")
-    scelta_macchina = lista_particolari(scelta_macchina, Particolari)
+    scelta_macchina = input("Inserire codice macchina: ").replace("-", "_")
     m = get_macchina(scelta_macchina)
     if isinstance(m, Macchina):
-        scelta_particolare = input("Inserire codice particolare: ")
+        scelta_particolare = input("Inserire codice particolare ( inserire codice completo o ultime 3 o 4 cifre): ")
         scelta_fase_particolare = input("Inserire fase particolare: ")
+        scelta_particolare = lista_particolari(scelta_particolare, Particolari)
         p = get_particolare(scelta_particolare, scelta_fase_particolare)
         if isinstance(p, Particolare):
             x = compatibilita_generale(p, m)
@@ -1300,16 +1323,16 @@ def verifica_programma_multiplo(p_pm, m_pm):
 
 
 if __name__ == '__main__':
-    utente = input(f'Inserire nome utente: ')
+    utente = input("Inserire nome utente: ")
     load_db()
     data = datetime.datetime.now()
-    if data.hour in range(6, 12):
+    if data.hour in range(1, 12):
         print(f'   Buon giorno {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
               f'{data.hour}:{data.minute}')
-    elif data.hour > 12:
+    elif data.hour in range(12, 16):
         print(f'   Buon pomeriggio {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
               f'{data.hour}:{data.minute}')
-    elif data.hour >= 17:
+    elif data.hour in range(17, 24):
         print(f'   Buonasera {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
               f'{data.hour}:{data.minute}')
     menu()
