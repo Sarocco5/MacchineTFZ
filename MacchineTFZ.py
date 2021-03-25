@@ -308,7 +308,7 @@ def check_scelta_menu(lista, domanda=None):
                 scelta = int(input("Scelta errata! Ripetere scelta: "))
             return lista[scelta]
     except (ValueError, AttributeError):
-        print("Codice errato o inesistente. \n")
+        print("Scelta errata o inesistente. \n")
         menu()
 
 
@@ -504,7 +504,7 @@ def edit(cod, tipo, fs=None):
             else:
                 print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
     except (ValueError, AttributeError):
-        print("Codice errato o inesistente. \n")
+        print("Scelta errata o inesistente. \n")
         menu()
 
 
@@ -538,41 +538,47 @@ def edit_lista(oggetto, choice):
         if choice == 3:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_attrezzatura)
-                valore = check_inserimento_indice(indice_attrezzatura, "attrezzatura")[0]
-                oggetto.tipo_attrezzatura.append(valore)
+                valore = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
+                for i in valore:
+                    oggetto.lavorazione.append(i)
             elif operazione == "rimuovere":
                 dict_att = {}
                 for i, k in enumerate(oggetto.tipo_attrezzatura):
                     dict_att[i] = k
                 stampa_etichetta(dict_att)
-                valore = check_inserimento_indice(dict_att, "attrezzatura")[0]
-                oggetto.tipo_attrezzatura.remove(valore)
+                valore = check_inserimento_indice(dict_att, "attrezzatura")
+                for i in valore:
+                    oggetto.lavorazione.remove(i)
         # Scelta tipo utensile per la macchina
         elif choice == 4:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_utensili)
-                valore = check_inserimento_indice(indice_utensili, "utensile")[0]
-                oggetto.tipo_utensile.append(valore)
+                valore = check_inserimento_indice(indice_utensili, "utensile")
+                for i in valore:
+                    oggetto.lavorazione.append(i)
             elif operazione == "rimuovere":
                 dict_ut = {}
                 for i, k in enumerate(oggetto.tipo_utensile):
                     dict_ut[i] = k
                 stampa_etichetta(dict_ut)
-                valore = check_inserimento_indice(dict_ut, "utensile")[0]
-                oggetto.tipo_utensile.remove(valore)
+                valore = check_inserimento_indice(dict_ut, "utensile")
+                for i in valore:
+                    oggetto.lavorazione.remove(i)
         # Scelta tipo lavorazione per la macchina.
         elif choice == 6:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_lavorazioni)
-                valore = check_inserimento_indice(indice_lavorazioni, "lavorazioni")[0]
-                oggetto.lavorazione.append(valore)
+                valore = check_inserimento_indice(indice_lavorazioni, "lavorazioni")
+                for i in valore:
+                    oggetto.lavorazione.append(i)
             elif operazione == "rimuovere":
                 dict_lav = {}
                 for i, k in enumerate(oggetto.lavorazione):
                     dict_lav[i] = k
                 stampa_etichetta(dict_lav)
-                valore = check_inserimento_indice(dict_lav, "lavorazioni")[0]
-                oggetto.lavorazione.remove(valore)
+                valore = check_inserimento_indice(dict_lav, "lavorazioni")
+                for i in valore:
+                    oggetto.lavorazione.remove(i)
     elif isinstance(oggetto, Particolare):
         operazione = input("Vuoi aggiungere o rimuovere?: ")
         while operazione != "aggiungere" and operazione != "rimuovere":
@@ -595,15 +601,17 @@ def edit_lista(oggetto, choice):
         if choice == 7:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_lavorazioni)
-                valore = check_inserimento_indice(indice_lavorazioni, "lavorazioni")[0]
-                oggetto.lavorazione.append(valore)
+                valore = check_inserimento_indice(indice_lavorazioni, "lavorazioni")
+                for i in valore:
+                    oggetto.lavorazione.append(i)
             elif operazione == "rimuovere":
                 dict_lav = {}
                 for i, k in enumerate(oggetto.lavorazione):
                     dict_lav[i] = k
                 stampa_etichetta(dict_lav)
-                valore = check_inserimento_indice(dict_lav, "lavorazioni")[0]
-                oggetto.lavorazione.remove(valore)
+                valore = check_inserimento_indice(dict_lav, "lavorazioni")
+                for i in valore:
+                    oggetto.lavorazione.remove(i)
 
 
 # Controlla se il valore fase(int) nella macchina è uguale anche nel particolare.
@@ -720,6 +728,20 @@ def insert_database(cod, tipo, fs=None):
                 print(f'Il particolare "{cod}" è presente nel database.')
             else:
                 print(f'Inserire valori particolare "{cod}"')
+                print("-----   Dati utensile   -----")
+                scelta = int(input("Quanti utensili devi associare al particolare?: "))
+                ls_ut = []
+                for i in range(scelta):
+                    u = get_utensile(input("Inserire codice utensile: "))
+                    count = 0
+                    while u is None:
+                        u = get_utensile(input("Codice errato.Inserire codice utensile: "))
+                        count += 1
+                        if count == 3:
+                            print("Codice errato. Probabile che l' utensile non sia presente nel database. Inserire"
+                                  " prima l' utensile e poi il particolare.")
+                            quit()
+                    ls_ut.append(u.codice)
                 print("-----   Dati pezzo   -----")
                 d = float(sostituzione_virgola(input("Inserire diametro pezzo: ")))
                 mod = float(sostituzione_virgola(input("Inserire modulo: ")))
@@ -755,19 +777,6 @@ def insert_database(cod, tipo, fs=None):
                     p_m = input("Scelta errata! Ripetere la scelta. "
                                 "Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
                 p_m = True if p_m == "si" else False
-                print("-----   Dati utensile   -----")
-                scelta = int(input("Quanti utensili devi associare al particolare?: "))
-                ls_ut = []
-                for i in range(scelta):
-                    u = get_utensile(input("Inserire codice utensile: "))
-                    count = 0
-                    while u is None:
-                        u = get_utensile(input("Codice errato.Inserire codice utensile: "))
-                        count += 1
-                        if count == 3:
-                            print("Codice errato. Probabile che l' utensile non sia presente nel database.")
-                            quit()
-                    ls_ut.append(u.codice)
                 print("-----   Dati attrezzatura   -----")
                 stampa_etichetta(indice_attrezzatura)
                 ta = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
