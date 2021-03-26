@@ -174,13 +174,13 @@ Utensili = []
 Particolari = []
 
 indice_attrezzatura = {1: "palo", 2: "pinza", 3: "corpo porta pinza", 4: "manuale",
-                       5: "contropunta", 6: "slitta elicoidale"}
+                       5: "contropunta", 6: "slitta elicoidale", 7: "robot"}
 
 indice_utensili = {1: "creatore", 2: "coltello", 3: "tazza", 4: "gambo"}
 
 indice_lavorazioni = {0: "dentatura finita", 1: "dentatura pre sbarbata", 2: "dentatura pre rettifica",
-                      3: "dentatura scanalata", 4: "dentatura conica", 5: "stozza", 6: "interna",
-                      7: "stozza elicoidale", 8: "stozza elicoidale bombata"}
+                      3: "dentatura scanalata", 4: "dentatura conica", 5: "dentatura conica scanalata", 6: "stozza",
+                      7: "interna", 8: "stozza elicoidale", 9: "stozza elicoidale bombata"}
 
 lista_fasi_pezzo = ["080", "081", "082", "083", "084", "085", "120", "121", "122", "123", "124", "125", "130",
                     "131", "132", "133", "134", "135"]
@@ -416,15 +416,21 @@ def edit(cod, tipo, fs=None):
                     edit_lista(m, choice)
                 # Controllo se la modifica riguarda una tupla.
                 elif choice == 1:
+                    print(f'Valore attuale: {m.diametro_range}')
                     minimo = int(input("Inserire valore minimo:"))
                     massimo = int(input("Inserire valore massimo: "))
                     m.set_diametro((minimo, massimo))
-                # Altrimenti la modifica è di tipo stringa o numero.
-                elif choice in [0, 2, 5, 7, 8, 9, 10, 11, 12]:
+                # Controllo se la modifica è di tipo str.
+                elif choice == 0:
+                    print(f'Valore attuale: {m.codice}')
                     scelta_utente = int(input("Inserire la modifica: "))
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                     getattr(m, "set_" + Indice_attributi_macchina[choice].replace(" ", "_"))(scelta_utente)
-                    print(m.incl_elica_max_sx)
+                # Controllo se la modifica è di tipo int.
+                elif choice in [2, 5, 7, 8, 9, 10, 11, 12]:
+                    scelta_utente = int(input("Inserire la modifica: "))
+                    # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
+                    getattr(m, "set_" + Indice_attributi_macchina[choice].replace(" ", "_"))(scelta_utente)
                 elif choice == 13:
                     print(" ")
                     menu()
@@ -441,7 +447,7 @@ def edit(cod, tipo, fs=None):
             if isinstance(p, Particolare):
                 # Stampo l' indice attributi particolare rimuovendo le voci che riguardano l' utensile. Con la funzione
                 # .pop rimuovo quello che non mi serve.
-                i_a_p_temp = Indice_attributi_particolare
+                i_a_p_temp = Indice_attributi_particolare.copy()
                 i_a_p_temp.pop(4)
                 i_a_p_temp.pop(5)
                 i_a_p_temp.pop(11)
@@ -515,6 +521,7 @@ def edit_dizionario_attrezzatura_particolare(particolare):
         operazione = input("Scelta errata!Vuoi aggiungere o rimuovere?: ")
     if operazione == "aggiungere":
         stampa_etichetta(indice_attrezzatura)
+        print(f'Attrezzatura attuale: {particolare.tipo_attrezzatura}')
         valore = check_inserimento_indice(indice_attrezzatura, "attrezzatura")[0]
         alt_att = float(sostituzione_virgola(input(f'Inserire altezza attrezzatura ({valore}): ')))
         particolare.tipo_attrezzatura[valore] = alt_att
@@ -538,9 +545,10 @@ def edit_lista(oggetto, choice):
         if choice == 3:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_attrezzatura)
+                print(f'Attrezzatura attuale: {oggetto.tipo_attrezzatura}')
                 valore = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
                 for i in valore:
-                    oggetto.lavorazione.append(i)
+                    oggetto.tipo_attrezzatura.append(i)
             elif operazione == "rimuovere":
                 dict_att = {}
                 for i, k in enumerate(oggetto.tipo_attrezzatura):
@@ -548,14 +556,15 @@ def edit_lista(oggetto, choice):
                 stampa_etichetta(dict_att)
                 valore = check_inserimento_indice(dict_att, "attrezzatura")
                 for i in valore:
-                    oggetto.lavorazione.remove(i)
+                    oggetto.tipo_attrezzatura.remove(i)
         # Scelta tipo utensile per la macchina
         elif choice == 4:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_utensili)
+                print(f'Tipo utensili attuali: {oggetto.tipo_utensile}')
                 valore = check_inserimento_indice(indice_utensili, "utensile")
                 for i in valore:
-                    oggetto.lavorazione.append(i)
+                    oggetto.tipo_utensile.append(i)
             elif operazione == "rimuovere":
                 dict_ut = {}
                 for i, k in enumerate(oggetto.tipo_utensile):
@@ -563,11 +572,12 @@ def edit_lista(oggetto, choice):
                 stampa_etichetta(dict_ut)
                 valore = check_inserimento_indice(dict_ut, "utensile")
                 for i in valore:
-                    oggetto.lavorazione.remove(i)
+                    oggetto.tipo_utensile.remove(i)
         # Scelta tipo lavorazione per la macchina.
         elif choice == 6:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_lavorazioni)
+                print(f'Lavorazioni attuali: {oggetto.lavorazione}')
                 valore = check_inserimento_indice(indice_lavorazioni, "lavorazioni")
                 for i in valore:
                     oggetto.lavorazione.append(i)
@@ -583,7 +593,7 @@ def edit_lista(oggetto, choice):
         operazione = input("Vuoi aggiungere o rimuovere?: ")
         while operazione != "aggiungere" and operazione != "rimuovere":
             operazione = input("Scelta errata!Vuoi aggiungere o rimuovere?: ")
-        # Scelta lista lavorazione per il particolare.
+        # Scelta lista tipo utensili del particolare.
         if choice == 2:
             scelta = int(input("Quanti utensili devi associare al particolare?: "))
             ls_ut = []
@@ -598,9 +608,11 @@ def edit_lista(oggetto, choice):
                         quit()
                 ls_ut.append(u.codice)
             oggetto.set_lista_utensili(ls_ut)
+        # Scelta tipo lavorazione per il particolare.
         if choice == 7:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_lavorazioni)
+                print(f'Lavorazioni attuali: {oggetto.lavorazione}')
                 valore = check_inserimento_indice(indice_lavorazioni, "lavorazioni")
                 for i in valore:
                     oggetto.lavorazione.append(i)
@@ -1094,6 +1106,13 @@ def remove(cod, tipo, fs=None):
             print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
 
 
+# Verifica se il pezzo ha l' attrezzatura per essere lavorato con il robot. WIP.
+def robot_compatibile(lista_attrezzatura):
+    for att in lista_attrezzatura:
+        if att == "corpo porta pinza" and "palo":
+            return True
+
+
 # Funzione per il salvataggio del database.
 def save_db(tipo):
     print(f'   ... salvataggio database {tipo}.')
@@ -1144,19 +1163,25 @@ def scelta_tipo_inserimento(scelta):
         print("Vuoi modificare una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
         if scelta_tipo == "particolare":
-            scelta_particolare = input("Inserire codice particolare (inserire codice completo o ultime 3 o 4 cifre): ")
+            scelta_codice = input("Inserire codice particolare (inserire codice completo o ultime 3 o 4 cifre): ")
             scelta_fase = input("Inserire fase: ")
-            scelta_particolare = lista_particolari(scelta_particolare, Particolari)
-            if len(scelta_particolare) == 1:
-                scelta_particolare = scelta_particolare[0]
+            scelta_codice = lista_particolari(scelta_codice, Particolari)
+            if len(scelta_codice) == 1:
+                scelta_codice = scelta_codice[0]
             else:
-                for part in scelta_particolare:
+                for part in scelta_codice:
                     if part.fase == scelta_fase:
-                        scelta_particolare = part
-            edit(scelta_particolare, scelta_tipo, scelta_fase)
+                        scelta_codice = part
+            edit(scelta_codice, scelta_tipo, scelta_fase)
+            continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
+            if continua == "si":
+                edit(scelta_codice, scelta_tipo, scelta_fase)
         else:
             scelta_codice = input("Inserire codice: ").replace("-", "_")
             edit(scelta_codice, scelta_tipo)
+            continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
+            if continua == "si":
+                edit(scelta_codice, scelta_tipo)
     elif scelta == "Rimozione":
         print("Vuoi rimuovere una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
@@ -1172,9 +1197,15 @@ def scelta_tipo_inserimento(scelta):
                 for part in scelta_particolare:
                     if part.fase == scelta_fase:
                         scelta_codice = part
+            continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
+            if continua == "si":
+                remove(scelta_codice, scelta_tipo, scelta_fase)
         else:
             scelta_codice = input("Inserire codice: ").replace("-", "_")
-        remove(scelta_codice, scelta_tipo, scelta_fase)
+            remove(scelta_codice, scelta_tipo, scelta_fase)
+            continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
+            if continua == "si":
+                remove(scelta_codice, scelta_tipo)
 
 
 # Funzione per numeri decimali, elimina la virgola e la sostituisce con il punto.
