@@ -1,6 +1,11 @@
+# Modulo che salva il database in file "pickle".
 import pickle
+# Modulo che mantiene una lista ordinata senza dover chiamare una operazione di ordinamento ogni volta che un elemento
+# viene aggiunto alla lista.
 import bisect
+# Modulo per data e ora.
 import datetime
+# Modulo per la manipolazione del tempo.
 import time
 
 
@@ -300,6 +305,14 @@ def check_scelta_menu(lista, domanda=None):
             while scelta != "si" and scelta != "no":
                 scelta = input(f'Scelta errata! Ripetere scelta. {domanda}[si/no]: ').strip()
             return scelta
+        elif lista == ["aggiungere", "rimuovere"]:
+            print("Vuoi aggiungere o rimuovere?")
+            for numero, opzione in enumerate(lista):
+                print(f'[{numero}] - {opzione}')
+            scelta = int(input("Inserire scelta: "))
+            while scelta not in range(len(lista)):
+                scelta = int(input("Scelta errata! Inserire scelta: "))
+            return lista[scelta]
         else:
             for i, k in enumerate(lista):
                 print(f'[{i}] - {k}')
@@ -422,12 +435,28 @@ def edit(cod, tipo, fs=None):
                     m.set_diametro((minimo, massimo))
                 # Controllo se la modifica è di tipo str.
                 elif choice == 0:
-                    print(f'Valore attuale: {m.codice}')
-                    scelta_utente = int(input("Inserire la modifica: "))
+                    print(f'Codice attuale: {m.codice}')
+                    scelta_utente = input("Inserire la modifica: ")
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                     getattr(m, "set_" + Indice_attributi_macchina[choice].replace(" ", "_"))(scelta_utente)
                 # Controllo se la modifica è di tipo int.
                 elif choice in [2, 5, 7, 8, 9, 10, 11, 12]:
+                    if choice == 2:
+                        print(f'Interasse minimo attuale: {m.interasse_min}')
+                    elif choice == 5:
+                        print(f'Diametro max utensile attuale: {m.diametro_max_utensile}')
+                    elif choice == 7:
+                        print(f'Modulo max attuale: {m.modulo_max}')
+                    elif choice == 8:
+                        print(f'Altezza fascia attuale: {m.altezza_fascia_max}')
+                    elif choice == 9:
+                        print(f'Inclinazione elica max dx attuale: {m.incl_elica_max_dx}')
+                    elif choice == 10:
+                        print(f'Inclinazione elica max sx attuale: {m.incl_elica_max_sx}')
+                    elif choice == 11:
+                        print(f'Inclinazione tavola attuale: {m.inclinazione_tavola}')
+                    elif choice == 12:
+                        print(f'Altezza max attrezzatura attuale: {m.altezza_attrezzatura_max}')
                     scelta_utente = int(input("Inserire la modifica: "))
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                     getattr(m, "set_" + Indice_attributi_macchina[choice].replace(" ", "_"))(scelta_utente)
@@ -442,6 +471,8 @@ def edit(cod, tipo, fs=None):
                 print("Modifica completata con successo!")
             else:
                 print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
+                print("")
+                menu()
         elif tipo == "particolare":
             p = get_particolare(cod.codice, fs)
             if isinstance(p, Particolare):
@@ -463,11 +494,23 @@ def edit(cod, tipo, fs=None):
                     edit_lista(p, scelta)
                 # Controllo se la modifica è di tipo int.
                 elif scelta in [1, 8, 9, 10]:
+                    if scelta == 1:
+                        print(f'Diametro attuale: {p.diametro}')
+                    elif scelta == 8:
+                        print(f'Modulo attuale: {p.modulo}')
+                    elif scelta == 9:
+                        print(f'Fascia attuale: {p.fascia}')
+                    elif scelta == 10:
+                        print(f'Pezzi accoppiati attualmente: {p.fascia_multipla}')
                     scelta_utente = int(input("Inserire la modifica: "))
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                     getattr(p, "set_" + Indice_attributi_particolare[scelta].replace(" ", "_"))(scelta_utente)
                 # Controllo se la modifica è di tipo str.
                 elif scelta in [0, 6]:
+                    if scelta == 0:
+                        print(f'Codice attuale: {p.codice}')
+                    elif scelta == 6:
+                        print(f'Fase attuale: {p.fase}')
                     scelta_utente = input("Inserire la modifica: ")
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                     getattr(p, "set_" + Indice_attributi_particolare[scelta].replace(" ", "_"))(scelta_utente)
@@ -482,6 +525,8 @@ def edit(cod, tipo, fs=None):
                 print("Modifica completata con successo!")
             else:
                 print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
+                print("")
+                menu()
         elif tipo == "utensile":
             u = get_utensile(cod)
             if isinstance(u, Utensile):
@@ -496,6 +541,12 @@ def edit(cod, tipo, fs=None):
                     scelta_utente = input("Inserire senso elica(dx o sx): ")
                     getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
                 elif scelta in [0, 2, 4]:
+                    if scelta == 0:
+                        print(f'Codice attuale: {u.codice}')
+                    elif scelta == 2:
+                        print(f'Diametro attuale: {u.diametro_utensile}')
+                    elif scelta == 4:
+                        print(f'Inclinazione attuale: {u.inclinazione_elica}')
                     scelta_utente = int(input("Inserire la modifica: "))
                     getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
                 elif scelta == 5:
@@ -509,6 +560,8 @@ def edit(cod, tipo, fs=None):
                 print("Modifica completata con successo!")
             else:
                 print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
+                print("")
+                menu()
     except (ValueError, AttributeError):
         print("Scelta errata o inesistente. \n")
         menu()
@@ -516,12 +569,12 @@ def edit(cod, tipo, fs=None):
 
 # Modifica il dizionario "tipo attrezzatura" del particolare.
 def edit_dizionario_attrezzatura_particolare(particolare):
-    operazione = input("Vuoi aggiungere o rimuovere?: ")
-    while operazione != "aggiungere" and operazione != "rimuovere":
-        operazione = input("Scelta errata!Vuoi aggiungere o rimuovere?: ")
+    operazione = check_scelta_menu(["aggiungere", "rimuovere"])
     if operazione == "aggiungere":
         stampa_etichetta(indice_attrezzatura)
-        print(f'Attrezzatura attuale: {particolare.tipo_attrezzatura}')
+        print(f'Attrezzatura attuale')
+        for att in particolare.tipo_attrezzatura:
+            print(f' -  {att}')
         valore = check_inserimento_indice(indice_attrezzatura, "attrezzatura")[0]
         alt_att = float(sostituzione_virgola(input(f'Inserire altezza attrezzatura ({valore}): ')))
         particolare.tipo_attrezzatura[valore] = alt_att
@@ -538,14 +591,14 @@ def edit_dizionario_attrezzatura_particolare(particolare):
 # Funzione che modifica gli attributi di tipo lista per macchina e particolare.
 def edit_lista(oggetto, choice):
     if isinstance(oggetto, Macchina):
-        operazione = input("Vuoi aggiungere o rimuovere?: ")
-        while operazione != "aggiungere" and operazione != "rimuovere":
-            operazione = input("Scelta errata!Vuoi aggiungere o rimuovere?: ")
+        operazione = check_scelta_menu(["aggiungere", "rimuovere"])
         # Scelta lista attrezzatura per la macchina.
         if choice == 3:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_attrezzatura)
-                print(f'Attrezzatura attuale: {oggetto.tipo_attrezzatura}')
+                print(f'Attrezzatura attuale')
+                for att in oggetto.tipo_attrezzatura:
+                    print(f' -  {att}')
                 valore = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
                 for i in valore:
                     oggetto.tipo_attrezzatura.append(i)
@@ -561,7 +614,9 @@ def edit_lista(oggetto, choice):
         elif choice == 4:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_utensili)
-                print(f'Tipo utensili attuali: {oggetto.tipo_utensile}')
+                print(f'Tipo utensili attuali')
+                for ut in oggetto.tipo_utensile:
+                    print(f' -  {ut}')
                 valore = check_inserimento_indice(indice_utensili, "utensile")
                 for i in valore:
                     oggetto.tipo_utensile.append(i)
@@ -577,7 +632,9 @@ def edit_lista(oggetto, choice):
         elif choice == 6:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_lavorazioni)
-                print(f'Lavorazioni attuali: {oggetto.lavorazione}')
+                print(f'Lavorazioni attuali')
+                for lav in oggetto.lavorazione:
+                    print(f' -  {lav}')
                 valore = check_inserimento_indice(indice_lavorazioni, "lavorazioni")
                 for i in valore:
                     oggetto.lavorazione.append(i)
@@ -590,9 +647,7 @@ def edit_lista(oggetto, choice):
                 for i in valore:
                     oggetto.lavorazione.remove(i)
     elif isinstance(oggetto, Particolare):
-        operazione = input("Vuoi aggiungere o rimuovere?: ")
-        while operazione != "aggiungere" and operazione != "rimuovere":
-            operazione = input("Scelta errata!Vuoi aggiungere o rimuovere?: ")
+        operazione = check_scelta_menu(["aggiungere", "rimuovere"])
         # Scelta lista tipo utensili del particolare.
         if choice == 2:
             scelta = int(input("Quanti utensili devi associare al particolare?: "))
@@ -612,7 +667,9 @@ def edit_lista(oggetto, choice):
         if choice == 7:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_lavorazioni)
-                print(f'Lavorazioni attuali: {oggetto.lavorazione}')
+                print(f'Lavorazioni attuali')
+                for lav in oggetto.lavorazione:
+                    print(f' -  {lav}')
                 valore = check_inserimento_indice(indice_lavorazioni, "lavorazioni")
                 for i in valore:
                     oggetto.lavorazione.append(i)
@@ -1107,10 +1164,13 @@ def remove(cod, tipo, fs=None):
 
 
 # Verifica se il pezzo ha l' attrezzatura per essere lavorato con il robot. WIP.
-def robot_compatibile(lista_attrezzatura):
-    for att in lista_attrezzatura:
-        if att == "corpo porta pinza" and "palo":
-            return True
+def robot_compatibile(m_lista_attrezzatura, p_lista_attrezzatura):
+    for m_att in m_lista_attrezzatura:
+        for p_att in p_lista_attrezzatura:
+            if m_att == "robot":
+                if p_att == "corpo porta pinza" and "palo" and "pinza":
+                    print("Utilizzo robot disponibile")
+    print("Utilizzo robot non disponibile")
 
 
 # Funzione per il salvataggio del database.
@@ -1172,16 +1232,16 @@ def scelta_tipo_inserimento(scelta):
                 for part in scelta_codice:
                     if part.fase == scelta_fase:
                         scelta_codice = part
-            edit(scelta_codice, scelta_tipo, scelta_fase)
-            continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
-            if continua == "si":
+            continua = "si"
+            while continua == "si":
                 edit(scelta_codice, scelta_tipo, scelta_fase)
+                continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
         else:
             scelta_codice = input("Inserire codice: ").replace("-", "_")
-            edit(scelta_codice, scelta_tipo)
-            continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
-            if continua == "si":
+            continua = "si"
+            while continua == "si":
                 edit(scelta_codice, scelta_tipo)
+                continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
     elif scelta == "Rimozione":
         print("Vuoi rimuovere una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
@@ -1197,15 +1257,16 @@ def scelta_tipo_inserimento(scelta):
                 for part in scelta_particolare:
                     if part.fase == scelta_fase:
                         scelta_codice = part
-            continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
-            if continua == "si":
-                remove(scelta_codice, scelta_tipo, scelta_fase)
+            continua = "si"
+            while continua == "si":
+                remove(scelta_codice, scelta_tipo)
+                continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
         else:
             scelta_codice = input("Inserire codice: ").replace("-", "_")
-            remove(scelta_codice, scelta_tipo, scelta_fase)
-            continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
-            if continua == "si":
+            continua = "si"
+            while continua == "si":
                 remove(scelta_codice, scelta_tipo)
+                continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
 
 
 # Funzione per numeri decimali, elimina la virgola e la sostituisce con il punto.
@@ -1263,6 +1324,7 @@ def stampa_valori_macchina(m):
         print(f'Diametro utensile max: \n {m.diametro_max_utensile} \nLavorazione: ')
         for lav in m.lavorazione:
             print(f' {lav}')
+# Utilizzo il for on line.
         print(f'Programma multiplo: \n {"Si" if m.programma_multiplo is True else "No"} \nModulo max: \n {m.modulo_max}'
               f'\nAltezza fascia max: \n {m.altezza_fascia_max} '
               f'\nInterasse min: \n {"-----" if m.interasse_min == 0 else m.interasse_min} \n'
@@ -1374,11 +1436,11 @@ if __name__ == '__main__':
     data = datetime.datetime.now()
     if data.hour in range(1, 12):
         print(f'   Buon giorno {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
-              f'{data.hour}:{data.minute}')
+              f'{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
     elif data.hour in range(12, 16):
         print(f'   Buon pomeriggio {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
-              f'{data.hour}:{data.minute}')
+              f'{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
     elif data.hour in range(17, 24):
         print(f'   Buonasera {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
-              f'{data.hour}:{data.minute}')
+              f'{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
     menu()
