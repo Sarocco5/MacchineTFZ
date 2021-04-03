@@ -194,7 +194,7 @@ Indice_attributi_macchina = {0: "codice", 1: "diametro range", 2: "interasse min
                              4: "tipo utensile", 5: "diametro max utensile", 6: "lavorazione", 7: "modulo max",
                              8: "altezza fascia max", 9: "inclinazione elica max dx",
                              10: "inclinazione elica max sx", 11: "inclinazione tavola",
-                             12: "altezza attrezzatura massima", 13: "torna indietro"}
+                             12: "altezza attrezzatura max", 13: "torna indietro"}
 
 Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "lista codici utensile",
                                 3: "lista tipo attrezzatura", 4: "lista tipo utensile", 5: "diametro utensile",
@@ -301,9 +301,9 @@ def check_inserimento_stringhe(lista, tipo):
 def check_scelta_menu(lista, domanda=None):
     try:
         if lista == ["si", "no"]:
-            scelta = input(f'{domanda}[si/no]: ').strip()
+            scelta = input(f'{domanda}[si/no]: ').strip().lower()
             while scelta != "si" and scelta != "no":
-                scelta = input(f'Scelta errata! Ripetere scelta. {domanda}[si/no]: ').strip()
+                scelta = input(f'Scelta errata! Ripetere scelta. {domanda}[si/no]: ').strip().lower()
             return scelta
         elif lista == ["aggiungere", "rimuovere"]:
             print("Vuoi aggiungere o rimuovere?")
@@ -456,7 +456,7 @@ def edit(cod, tipo, fs=None):
                     elif choice == 11:
                         print(f'Inclinazione tavola attuale: {m.inclinazione_tavola}')
                     elif choice == 12:
-                        print(f'Altezza max attrezzatura attuale: {m.altezza_attrezzatura_max}')
+                        print(f'Altezza attrezzatura max attuale: {m.altezza_attrezzatura_max}')
                     scelta_utente = int(input("Inserire la modifica: "))
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                     getattr(m, "set_" + Indice_attributi_macchina[choice].replace(" ", "_"))(scelta_utente)
@@ -1130,14 +1130,14 @@ def remove(cod, tipo, fs=None):
         x = get_macchina(cod)
         if isinstance(x, Macchina):
             Macchine_TFZ_Aprilia.remove(x)
-            print("Macchina eliminata con successo")
+            print(f'Macchina [{x.codice}] eliminata con successo')
         else:
             print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
     elif tipo == "particolare":
-        x = get_particolare(cod, fs)
+        x = get_particolare(cod.codice, fs)
         if isinstance(x, Particolare):
             Particolari.remove(x)
-            print("Codice eliminato con successo")
+            print(f'Codice [{x.codice}] eliminato con successo.')
         else:
             print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
     elif tipo == "utensile":
@@ -1156,7 +1156,7 @@ def remove(cod, tipo, fs=None):
                 if scelta == "si":
                     edit(p.codice, "p", p.fase)
             Utensili.remove(u)
-            print("Utensile eliminato con successo.")
+            print(f'Utensile [{u.codice}] eliminato con successo')
         elif scelta == "no":
             print("Modifica annullata.")
         else:
@@ -1245,28 +1245,20 @@ def scelta_tipo_inserimento(scelta):
     elif scelta == "Rimozione":
         print("Vuoi rimuovere una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
-        scelta_fase = 0
         if scelta_tipo == "particolare":
-            scelta_particolare = input("Inserire codice particolare (inserire codice completo o ultime  3 o 4 cifre): ")
+            scelta_codice = input("Inserire codice particolare (inserire codice completo o ultime  3 o 4 cifre): ")
             scelta_fase = input("Inserire fase: ")
-            scelta_particolare = lista_particolari(scelta_particolare, Particolari)
-            scelta_codice = None
-            if len(scelta_particolare) == 1:
-                scelta_codice = scelta_particolare[0]
+            scelta_codice = lista_particolari(scelta_codice, Particolari)
+            if len(scelta_codice) == 1:
+                scelta_codice = scelta_codice[0]
             else:
-                for part in scelta_particolare:
+                for part in scelta_codice:
                     if part.fase == scelta_fase:
                         scelta_codice = part
-            continua = "si"
-            while continua == "si":
-                remove(scelta_codice, scelta_tipo)
-                continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
+            remove(scelta_codice, scelta_tipo, scelta_fase)
         else:
             scelta_codice = input("Inserire codice: ").replace("-", "_")
-            continua = "si"
-            while continua == "si":
-                remove(scelta_codice, scelta_tipo)
-                continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
+            remove(scelta_codice, scelta_tipo)
 
 
 # Funzione per numeri decimali, elimina la virgola e la sostituisce con il punto.
@@ -1436,11 +1428,11 @@ if __name__ == '__main__':
     data = datetime.datetime.now()
     if data.hour in range(1, 12):
         print(f'   Buon giorno {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
-              f'{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
+              f'{0 if data.hour < 10 else ""}{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
     elif data.hour in range(12, 16):
         print(f'   Buon pomeriggio {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
-              f'{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
+              f'{0 if data.hour < 10 else ""}{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
     elif data.hour in range(17, 24):
         print(f'   Buonasera {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
-              f'{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
+              f'{0 if data.hour < 10 else ""}{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
     menu()
