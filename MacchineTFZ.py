@@ -178,8 +178,8 @@ Macchine_TFZ_Aprilia = []
 Utensili = []
 Particolari = []
 
-indice_attrezzatura = {1: "palo", 2: "pinza", 3: "corpo porta pinza", 4: "manuale",
-                       5: "contropunta", 6: "slitta elicoidale", 7: "robot"}
+indice_attrezzatura = {1: "palo", 2: "pinza", 3: "pinza alberi", 4: "corpo porta pinza", 5: "manuale",
+                       6: "contropunta", 7: "slitta elicoidale", 8: "robot"}
 
 indice_utensili = {1: "creatore", 2: "coltello", 3: "tazza", 4: "gambo"}
 
@@ -1410,7 +1410,7 @@ def verifica_particolari_lavorati_da_utensile(cod):
             print(f'Utensile utilizzato da {len(ls_p)} {"particolare" if len(ls_p) == 1 else "particolari"}.')
             [print(f' - {i.codice}') for i in ls_p]
     else:
-        print(f'Il codice {cod} non è nel db')
+        print(f'Il codice [{cod}] non è nel db')
 
 
 # Verifica se il particolare richiede un programma multiplo e ritorna True o False.
