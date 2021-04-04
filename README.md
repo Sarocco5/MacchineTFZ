@@ -47,3 +47,7 @@ fascia multipla | float | indica quanti particolari vengono lavorati contemporan
 inclinazione dx | float | inclinazione elica destra del particolare
 inclinazione sx | float | inclinazione elica sinistra del particolare
 inclinazione | float | inclinazione del particolare
+
+
+### Licenza
+Per info licenza, leggi [LICENSE](LICENSE.md)
