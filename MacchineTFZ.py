@@ -297,7 +297,7 @@ def check_inserimento_stringhe(lista, tipo):
     return scelta
 
 
-# Funzione che gestisce le scelte con liste numerate.
+# Funzione che gestisce le scelte con liste.
 def check_scelta_menu(lista, domanda=None):
     try:
         if lista == ["si", "no"]:
@@ -683,11 +683,6 @@ def edit_lista(oggetto, choice):
                     oggetto.lavorazione.remove(i)
 
 
-# Controlla se il valore fase(int) nella macchina è uguale anche nel particolare.
-def fase_compatibile(fs_macchina, fs_pezzo):
-    return fs_macchina == fs_pezzo
-
-
 # Scorre la lista macchine e mi ritorna la macchina.
 def get_macchina(codice_macchina):
     for m in Macchine_TFZ_Aprilia:
@@ -966,15 +961,22 @@ def load_db():
 # mi stampa su quali macchine il particolare in questione è lavorabile. In questa funzione è presente anche la verifica
 # della fase del pezzo.
 def macchine_compatibili(ls_part, ls_macc, fs=None, debug=False):
+    lista_risultati = []
     for p in ls_part:
         for m in ls_macc:
             if fs is None:
                 if compatibilita_generale(p, m, debug):
-                    print("   " + m.codice)
+                    lista_risultati.append(m)
             else:
                 if p.fase == fs:
                     if compatibilita_generale(p, m, debug):
-                        print("   " + m.codice)
+                        lista_risultati.append(m)
+        for macchina in lista_risultati:
+            risultato_robot = robot_compatibile(macchina.tipo_attrezzatura, p.tipo_attrezzatura.keys())
+            if risultato_robot is not None:
+                print(f'   {macchina.codice} - {risultato_robot}')
+            else:
+                print(f'   {macchina.codice}')
 
 
 # Valore (a) maggiore o uguale a (b).
@@ -1163,14 +1165,15 @@ def remove(cod, tipo, fs=None):
             print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
 
 
-# Verifica se il pezzo ha l' attrezzatura per essere lavorato con il robot. WIP.
+# Verifica se il pezzo ha l' attrezzatura per essere lavorato con il robot.
 def robot_compatibile(m_lista_attrezzatura, p_lista_attrezzatura):
     for m_att in m_lista_attrezzatura:
-        for p_att in p_lista_attrezzatura:
-            if m_att == "robot":
-                if p_att == "corpo porta pinza" and "palo" and "pinza":
-                    print("Utilizzo robot disponibile")
-    print("Utilizzo robot non disponibile")
+        if m_att == "robot":
+            for p_att in p_lista_attrezzatura:
+                if p_att == "corpo porta pinza" or "palo" or "pinza":
+                    return f'Utilizzo robot disponibile'
+                elif p_att != "corpo porta pinza" or "palo" or "pinza":
+                    return f'Utilizzo robot non disponibile'
 
 
 # Funzione per il salvataggio del database.
@@ -1316,7 +1319,7 @@ def stampa_valori_macchina(m):
         print(f'Diametro utensile max: \n {m.diametro_max_utensile} \nLavorazione: ')
         for lav in m.lavorazione:
             print(f' {lav}')
-# Utilizzo il for on line.
+# Utilizzo il if one line.
         print(f'Programma multiplo: \n {"Si" if m.programma_multiplo is True else "No"} \nModulo max: \n {m.modulo_max}'
               f'\nAltezza fascia max: \n {m.altezza_fascia_max} '
               f'\nInterasse min: \n {"-----" if m.interasse_min == 0 else m.interasse_min} \n'
@@ -1375,11 +1378,13 @@ def verifica_compatibilita(debug=False):
     elif len(mini_lista) > 1:
         print("Il codice presenta più fasi. Quale intendi scegliere?")
         li_fa = lista_fasi(mini_lista)
-        for index in li_fa:
-            print("   " + index)
+        for fs in li_fa:
+            print("   " + fs)
         fase = check_inserimento_stringhe(li_fa, "fase")
-        if fase != li_fa:
-            macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fase, debug)
+        if fase in li_fa:
+            for particolare in mini_lista:
+                if particolare.fase == fase:
+                    macchine_compatibili([particolare], Macchine_TFZ_Aprilia, fase, debug)
     else:
         print("Particolare non presente nel database.")
 
@@ -1427,7 +1432,7 @@ if __name__ == '__main__':
     load_db()
     data = datetime.datetime.now()
     if data.hour in range(1, 12):
-        print(f'   Buon giorno {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
+        print(f'   Buongiorno {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
               f'{0 if data.hour < 10 else ""}{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
     elif data.hour in range(12, 16):
         print(f'   Buon pomeriggio {utente.capitalize()}! Oggi è {data.day}/{data.month}/{data.year} e sono le ore '
