@@ -1024,12 +1024,9 @@ def menu():
                 scelta_fase_particolare = input("Inserire fase particolare: ")
                 scelta_particolare = lista_particolari(scelta_particolare, Particolari)
                 p = None
-                if len(scelta_particolare) == 1:
-                    p = scelta_particolare[0]
-                else:
-                    for part in scelta_particolare:
-                        if part.fase == scelta_fase_particolare:
-                            p = part
+                for part in scelta_particolare:
+                    if part.fase == scelta_fase_particolare:
+                        p = part
                 stampa_valori_particolare(p)
             elif scelta == "Stampa attributi utensile":
                 scelta = input("Inserire codice utensile: ")
