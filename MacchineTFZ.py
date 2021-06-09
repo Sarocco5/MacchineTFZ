@@ -820,9 +820,21 @@ def insert_database(cod, tipo, fs=None):
                 inc_el_sx = 0.0
                 inc = 0.0
                 # Lavorazione è sempre una lista da 1 elemento.
-                if lav[0] == "stozza" or lav[0] == "interna" or lav[0] == "dentatura conica":
+                if lav[0] == "stozza" or lav[0] == "interna":
                     inc = float(sostituzione_virgola(
                         input("Inserire inclinazione pezzo (inserire gradi in centesimi): ")))
+                elif lav[0] == "dentatura conica" or lav[0] == "dentatura conica scanalata":
+                    inc = float(sostituzione_virgola(
+                        input("Inserire inclinazione pezzo (inserire gradi in centesimi): ")))
+                    scelta = input("Dentatura dritta o elicoidale?: ").strip()
+                    while scelta != "dritta" and scelta != "elicoidale":
+                        scelta = input("Scelta errata! Ripetere la scelta. Dritta o elicoidale?:").strip()
+                    if scelta != "dritta":
+                        elica = scelta_elica()
+                        if elica[0] == "dx":
+                            inc_el_dx = elica[1]
+                        else:
+                            inc_el_sx = elica[1]
                 elif lav[0] == "stozza elicoidale" or lav[0] == "stozza elicoidale bombata":
                     elica = scelta_elica()
                     if elica[0] == "dx":
