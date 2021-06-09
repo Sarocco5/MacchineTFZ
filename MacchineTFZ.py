@@ -820,7 +820,13 @@ def insert_database(cod, tipo, fs=None):
                 if lav[0] == "stozza" or lav[0] == "interna" or lav[0] == "dentatura conica":
                     inc = float(sostituzione_virgola(
                         input("Inserire inclinazione pezzo (inserire gradi in centesimi): ")))
-                elif lav[0] == "dentatura" or lav[0] == "dentatura conica":
+                elif lav[0] == "stozza elicoidale" or lav[0] == "stozza elicoidale bombata":
+                    elica = scelta_elica()
+                    if elica[0] == "dx":
+                        inc_el_dx = elica[1]
+                    else:
+                        inc_el_sx = elica[1]
+                else:
                     scelta = input("Dentatura dritta o elicoidale?: ").strip()
                     while scelta != "dritta" and scelta != "elicoidale":
                         scelta = input("Scelta errata! Ripetere la scelta. Dritta o elicoidale?:").strip()
@@ -830,12 +836,6 @@ def insert_database(cod, tipo, fs=None):
                             inc_el_dx = elica[1]
                         else:
                             inc_el_sx = elica[1]
-                elif lav[0] == "stozza elicoidale" or lav[0] == "stozza elicoidale bombata":
-                    elica = scelta_elica()
-                    if elica[0] == "dx":
-                        inc_el_dx = elica[1]
-                    else:
-                        inc_el_sx = elica[1]
                 p_m = input("Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
                 while p_m != "si" and p_m != "no":
                     p_m = input("Scelta errata! Ripetere la scelta. "
