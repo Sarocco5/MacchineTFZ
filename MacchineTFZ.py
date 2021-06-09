@@ -280,12 +280,15 @@ def check_inserimento_indice(indice, tipo):
     scelta = input(f'Inserire {tipo} (inserire il numero corrispondente ed utilizzare virgola per scelte multiple): ')
     scelte = crea_lista_da_stringa(scelta)
     lista_tipo = []
-    for scelta in scelte:
-        q = indice.get(int(scelta))
-        if q is not None:
-            lista_tipo.append(q)
-    return lista_tipo
-
+    try:
+        for scelta in scelte:
+            q = indice.get(int(scelta))
+            if q is not None:
+                lista_tipo.append(q)
+        return lista_tipo
+    except ValueError:
+        print("Input errato. \n")
+        menu()
 
 # Verifica se l' input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
 # l' inserimento dell' input finché non riceve un input riconosciuto. Ritorna una stringa.Il metodo .strip() elimina gli
@@ -884,8 +887,8 @@ def insert_database(cod, tipo, fs=None):
                     print("Inserimento errato. Programma interrotto")
                 else:
                     print("Scelta sbagliata")
-    except (TypeError, AttributeError):
-        print("Codice errato o inesistente")
+    except (TypeError, AttributeError, ValueError):
+        print("Input errato o inesistente")
 
 
 # Crea una lista dove mette i diametri degli utensili presenti nel particolare.
