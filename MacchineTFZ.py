@@ -804,7 +804,7 @@ def insert_database(cod, tipo, fs=None):
                         if count == 3:
                             print("Codice errato. Probabile che l' utensile non sia presente nel database. Inserire"
                                   " prima l' utensile e poi il particolare.")
-                            quit()
+                            menu()
                     ls_ut.append(u.codice)
                 print("-----   Dati pezzo   -----")
                 d = float(sostituzione_virgola(input("Inserire diametro pezzo: ")))
