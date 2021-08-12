@@ -1444,12 +1444,12 @@ if __name__ == '__main__':
     load_db()
     data = datetime.datetime.now()
     if data.hour in range(1, 12):
-        print(f'   Buongiorno {utente.capitalize()}! Oggi è {0 if data.day <10 else ""}{data.day}/{0 if data.month <10 else ""}{data.month}/{data.year} e sono le ore '
+        print(f'   Buongiorno {utente.capitalize()}! Oggi è {0 if data.day < 10 else ""}{data.day}/{0 if data.month <10 else ""}{data.month}/{data.year} e sono le ore '
               f'{0 if data.hour < 10 else ""}{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
     elif data.hour in range(12, 16):
-        print(f'   Buon pomeriggio {utente.capitalize()}! Oggi è {0 if data.day <10 else ""}{data.day}/{0 if data.month <10 else ""}{data.month}/{data.year} e sono le ore '
+        print(f'   Buon pomeriggio {utente.capitalize()}! Oggi è {0 if data.day < 10 else ""}{data.day}/{0 if data.month <10 else ""}{data.month}/{data.year} e sono le ore '
               f'{0 if data.hour < 10 else ""}{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
     elif data.hour in range(17, 24):
-        print(f'   Buonasera {utente.capitalize()}! Oggi è {0 if data.day <10 else ""}{data.day}/{0 if data.month <10 else ""}{data.month}/{data.year} e sono le ore '
+        print(f'   Buonasera {utente.capitalize()}! Oggi è {0 if data.day < 10 else ""}{data.day}/{0 if data.month <10 else ""}{data.month}/{data.year} e sono le ore '
               f'{0 if data.hour < 10 else ""}{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
     menu()
