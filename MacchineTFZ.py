@@ -403,12 +403,13 @@ def crea_lista_da_stringa(scelta):
 # Print data e ora all'avvio dello script
 def data():
     data = datetime.datetime.now()
-    if data.hour in range(1, 12):
-        print(f'   Buongiorno {utente.capitalize()}! Oggi è {data.strftime("%d/%m/%Y")} e sono le ore {data.strftime("%H:%M:%S")}')
+    stringa = (f'{utente.capitalize()}! Oggi è {data.strftime("%d/%m/%Y")} e sono le ore {data.strftime("%H:%M:%S")}')
+    if data.hour in range(5, 12):
+        print(f'   Buongiorno {stringa}')
     elif data.hour in range(12, 16):
-        print(f'   Buon pomeriggio {utente.capitalize()}! Oggi è {data.strftime("%d/%m/%Y")} e sono le ore {data.strftime("%H:%M:%S")}')
-    elif data.hour in range(17, 24):
-        print(f'   Buonasera {utente.capitalize()}! Oggi è {data.strftime("%d/%m/%Y")} e sono le ore {data.strftime("%H:%M:%S")}')
+        print(f'   Buon pomeriggio {stringa}')
+    else:
+        print(f'   Buonasera {stringa}')
               
 
 # Ritorna true, se il valore del diametro è contenuto nella tupla (min, max).
