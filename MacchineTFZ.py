@@ -400,6 +400,16 @@ def crea_lista_da_stringa(scelta):
     scelta = scelta.split(',')
     return scelta
 
+# Print data e ora all'avvio dello script
+def data():
+    data = datetime.datetime.now()
+    if data.hour in range(1, 12):
+        print(f'   Buongiorno {utente.capitalize()}! Oggi è {data.strftime("%d/%m/%Y")} e sono le ore {data.strftime("%H:%M:%S")}')
+    elif data.hour in range(12, 16):
+        print(f'   Buon pomeriggio {utente.capitalize()}! Oggi è {data.strftime("%d/%m/%Y")} e sono le ore {data.strftime("%H:%M:%S")}')
+    elif data.hour in range(17, 24):
+        print(f'   Buonasera {utente.capitalize()}! Oggi è {data.strftime("%d/%m/%Y")} e sono le ore {data.strftime("%H:%M:%S")}')
+              
 
 # Ritorna true, se il valore del diametro è contenuto nella tupla (min, max).
 def diametro_compatibile(valore, tupla):
@@ -1442,14 +1452,5 @@ def verifica_programma_multiplo(p_pm, m_pm):
 if __name__ == '__main__':
     utente = input("Inserire nome utente: ")
     load_db()
-    data = datetime.datetime.now()
-    if data.hour in range(1, 12):
-        print(f'   Buongiorno {utente.capitalize()}! Oggi è {0 if data.day < 10 else ""}{data.day}/{0 if data.month <10 else ""}{data.month}/{data.year} e sono le ore '
-              f'{0 if data.hour < 10 else ""}{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
-    elif data.hour in range(12, 16):
-        print(f'   Buon pomeriggio {utente.capitalize()}! Oggi è {0 if data.day < 10 else ""}{data.day}/{0 if data.month <10 else ""}{data.month}/{data.year} e sono le ore '
-              f'{0 if data.hour < 10 else ""}{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
-    elif data.hour in range(17, 24):
-        print(f'   Buonasera {utente.capitalize()}! Oggi è {0 if data.day < 10 else ""}{data.day}/{0 if data.month <10 else ""}{data.month}/{data.year} e sono le ore '
-              f'{0 if data.hour < 10 else ""}{data.hour}:{0 if data.minute < 10 else ""}{data.minute}')
+    data()
     menu()
