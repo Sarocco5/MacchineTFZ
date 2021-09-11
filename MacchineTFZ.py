@@ -177,6 +177,7 @@ class Particolare:
 Macchine_TFZ_Aprilia = []
 Utensili = []
 Particolari = []
+modalità_lettura = False
 
 indice_attrezzatura = {1: "palo", 2: "pinza", 3: "pinza alberi", 4: "corpo porta pinza", 5: "manuale",
                        6: "contropunta", 7: "slitta elicoidale", 8: "robot"}
@@ -963,26 +964,34 @@ def load_db():
     global Macchine_TFZ_Aprilia
     global Particolari
     global Utensili
+    global modalità_lettura
     try:
         with open(f'db_macchine.pickle', 'rb') as handle:
             print('Database macchine caricato')
             Macchine_TFZ_Aprilia = pickle.load(handle)
-    except FileNotFoundError:
-        print("...db macchine non trovato")
-    try:
         with open(f'db_particolari.pickle', 'rb') as handle:
             print('Database particolari caricato')
             Particolari = pickle.load(handle)
-    except FileNotFoundError:
-        print("...db particolari non trovato")
-    try:
         with open(f'db_utensili.pickle', 'rb') as handle:
             print('Database utensili caricato')
             Utensili = pickle.load(handle)
     except FileNotFoundError:
-        print("...db utensili non trovato")
+        try:
+            print("Accesso in modalità lettura tramite rete. Non sarà possibile modificare.")
+            with open(f'indirizzo rete', 'rb') as handle:
+                print('Database macchine caricato')
+                Macchine_TFZ_Aprilia = pickle.load(handle)
+            with open(f'indirizzo rete', 'rb') as handle:
+                print('Database particolari caricato')
+                Particolari = pickle.load(handle)
+            with open(f'indirizzo rete', 'rb') as handle:
+                print('Database utensili caricato')
+                Utensili = pickle.load(handle)
+            modalità_lettura = True
+        except FileNotFoundError as e:
+            print(f'...db non trovato nel percorso: {e.filename}')
 
-
+    
 # Funzione che scorre le 2 liste del database (macchine e particolari), e ,usando la funzione "compatibilità_generale",
 # mi stampa su quali macchine il particolare in questione è lavorabile. In questa funzione è presente anche la verifica
 # della fase del pezzo.
@@ -1201,16 +1210,20 @@ def robot_compatibile(m_lista_attrezzatura, p_lista_attrezzatura):
 
 # Funzione per il salvataggio del database.
 def save_db(tipo):
-    print(f'   ... salvataggio database {tipo}.')
-    with open(f'db_{tipo}.pickle', 'wb') as handle:
-        if tipo == "macchine":
-            pickle.dump(Macchine_TFZ_Aprilia, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        elif tipo == "particolari":
-            pickle.dump(Particolari, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        elif tipo == "utensili":
-            pickle.dump(Utensili, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        else:
-            print(f'Errore! Valore {tipo} non valido!')
+    global modalità_lettura
+    if modalità_lettura is True:
+        print(f'   ... salvataggio database {tipo}.')
+        with open(f'db_{tipo}.pickle', 'wb') as handle:
+            if tipo == "macchine":
+                pickle.dump(Macchine_TFZ_Aprilia, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            elif tipo == "particolari":
+                pickle.dump(Particolari, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            elif tipo == "utensili":
+                pickle.dump(Utensili, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            else:
+                print(f'Errore! Valore {tipo} non valido!')
+    else:
+        print(f'Salvataggio db_{tipo}.pickle non consentito, esegutito accesso in solo lettura!')
 
 
 # Se il particolare, in fase di inserimento, presenta una dentatura/stozza elicoidale, con questa funzione posso
