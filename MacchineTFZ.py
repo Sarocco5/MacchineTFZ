@@ -993,8 +993,9 @@ def load_db():
                 Utensili = pickle.load(handle)
             modalità_lettura = True
         except FileNotFoundError as e:
-            print(f'...db non trovato nel percorso: {e.filename}')
-            modalità_lettura = True
+            print(f'...db non trovato nel percorso: {e.filename}.\nIl programma si chiuderà tra 3 secondi.')
+            time.sleep(3)
+            quit()
 
 
 # Funzione che scorre le 2 liste del database (macchine e particolari), e ,usando la funzione "compatibilità_generale",
