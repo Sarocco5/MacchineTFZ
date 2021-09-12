@@ -7,7 +7,8 @@ import bisect
 import datetime
 # Modulo per la manipolazione del tempo.
 import time
-
+# Modulo per gestire percorsi di filesystem.
+from pathlib import PureWindowsPath
 
 class Macchina:
     codice = None
@@ -965,6 +966,9 @@ def load_db():
     global Particolari
     global Utensili
     global modalità_lettura
+    db_macchine_locale = PureWindowsPath("C:/Users/db_macchine.pickle")
+    db_particolari_locale = PureWindowsPath("C:/Users/db_particolari.pickle")
+    db_utensili_locale = PureWindowsPath("C:/Users/db_utensili.pickle")
     try:
         with open(f'db_macchine.pickle', 'rb') as handle:
             print('Database macchine caricato')
@@ -978,20 +982,21 @@ def load_db():
     except FileNotFoundError:
         try:
             print("Accesso in modalità lettura tramite rete. Non sarà possibile modificare.")
-            with open(f'indirizzo rete', 'rb') as handle:
+            with open(db_macchine_locale, 'rb') as handle:
                 print('Database macchine caricato')
                 Macchine_TFZ_Aprilia = pickle.load(handle)
-            with open(f'indirizzo rete', 'rb') as handle:
+            with open(db_particolari_locale, 'rb') as handle:
                 print('Database particolari caricato')
                 Particolari = pickle.load(handle)
-            with open(f'indirizzo rete', 'rb') as handle:
+            with open(db_utensili_locale, 'rb') as handle:
                 print('Database utensili caricato')
                 Utensili = pickle.load(handle)
             modalità_lettura = True
         except FileNotFoundError as e:
             print(f'...db non trovato nel percorso: {e.filename}')
+            modalità_lettura = True
 
-    
+
 # Funzione che scorre le 2 liste del database (macchine e particolari), e ,usando la funzione "compatibilità_generale",
 # mi stampa su quali macchine il particolare in questione è lavorabile. In questa funzione è presente anche la verifica
 # della fase del pezzo.
@@ -1211,7 +1216,7 @@ def robot_compatibile(m_lista_attrezzatura, p_lista_attrezzatura):
 # Funzione per il salvataggio del database.
 def save_db(tipo):
     global modalità_lettura
-    if modalità_lettura is True:
+    if modalità_lettura is False:
         print(f'   ... salvataggio database {tipo}.')
         with open(f'db_{tipo}.pickle', 'wb') as handle:
             if tipo == "macchine":
