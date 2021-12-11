@@ -1438,15 +1438,18 @@ def verifica_se_macchina_lavora_particolare():
     if isinstance(m, Macchina):
         scelta_particolare = input("Inserire codice particolare ( inserire codice completo o ultime 3 o 4 cifre): ")
         scelta_fase_particolare = input("Inserire fase particolare: ")
-        scelta_particolare = lista_particolari(scelta_particolare, Particolari)
-        p = get_particolare(scelta_particolare, scelta_fase_particolare)
+        particolare = lista_particolari(scelta_particolare, Particolari)
+        for part in particolare:
+            particolare = part.codice
+        p = get_particolare(particolare, scelta_fase_particolare)
         if isinstance(p, Particolare):
             x = compatibilita_generale(p, m)
             if x is True:
                 return print(f'La {m.codice} può lavorare il particolare {p.codice}')
             else:
                 print(f'La {m.codice} non può lavorare il particolare {p.codice}')
-
+    else:
+        print(f'Macchina [{scelta_macchina}] non presente nel db!')
 
 # Stampa una lista di particolari che usano l' utensile selezionato.
 def verifica_particolari_lavorati_da_utensile(cod):
