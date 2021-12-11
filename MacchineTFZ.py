@@ -330,6 +330,22 @@ def check_scelta_menu(lista, domanda=None):
         menu()
 
 
+def check_utensile(utensile):
+    count = 0
+    utensile = get_utensile(utensile)
+    while utensile is None:
+        codice_utensile = input("Codice errato.Inserire codice utensile: ")
+        utensile = get_utensile(codice_utensile)
+        count += 1
+        if count == 3:
+            risposta = input("Codice errato. Probabile che l' utensile non sia presente nel database. "
+                                "Vuoi inserire un nuovo utensile?(si, no): ")
+            if risposta == "si":
+                utensile = inserimento_utensile(codice_utensile)
+            else:
+                menu()
+    return utensile
+
 # Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
 def compatibilita_generale(p, m, debug=False):
     if not debug:
@@ -401,6 +417,7 @@ def crea_lista_da_stringa(scelta):
     scelta = scelta.replace(' ', '')
     scelta = scelta.split(',')
     return scelta
+
 
 # Print data e ora all'avvio dello script
 def data():
@@ -762,158 +779,166 @@ def insert_database(cod, tipo, fs=None):
     global lista_fasi_pezzo
     try:
         if tipo == "macchina":
-            x = get_macchina(cod)
-            if isinstance(x, Macchina):
-                print(f'La macchina "{cod}" è presente nel database.')
-            else:
-                print(f'Inserire valori macchina "{cod}"')
-                d_min = int(input("Inserire diametro minimo: "))
-                d_max = int(input("Inserire diametro massimo: "))
-                d = (d_min, d_max)
-                stampa_etichetta(indice_attrezzatura)
-                att = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
-                stampa_etichetta(indice_utensili)
-                t_u = check_inserimento_indice(indice_utensili, "utensile")
-                d_max_u = int(input("Inserire il diametro massimo dell' utensile: "))
-                stampa_etichetta(indice_lavorazioni)
-                lav = check_inserimento_indice(indice_lavorazioni, "lavorazione")
-                p_m = input("La macchina può eseguire più lavorazioni con lo stesso ciclo?(si o no)").strip()
-                while p_m != "si" and p_m != "no":
-                    p_m = input("Scelta errata! Ripetere la scelta. "
-                                "Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
-                p_m = True if p_m == "si" else False
-                mod_max = int(input("Inserire modulo massimo: "))
-                h_max = int(input("Inserire altezza fascia massima: "))
-                int_min = int(input("Inserire interasse minimo (inserire 0 se non necessario): "))
-                inc_el_max_dx = int(input("Inserire inclinazione elica dx massima (inserire 30 "
-                                          "(per le dentatrici) o 0 (per le stozze) se non necessario): "))
-                inc_el_max_sx = int(input("Inserire inclinazione elica dx massima (inserire 30 "
-                                          "(per le dentatrici) o 0 (per le stozze) se non necessario): "))
-                inc_tav = int(input("Inserire inclinazione tavola (inserire 0 se non necessario): "))
-                alt_att_max = int(input("Inserire altezza attrezzatura massima(inserire 300 se non necessario): "))
-                m = Macchina(cod, d, att, t_u, d_max_u, lav, p_m,  mod_max, h_max,
-                             int_min, inc_el_max_dx, inc_el_max_sx, inc_tav, alt_att_max)
-                stampa_valori_macchina(m)
-                scelta = input("I valori inseriti sono corretti?(si, no): ")
-                if scelta == "si":
-                    Macchine_TFZ_Aprilia.append(m)
-                    print("Inserimento completato con successo")
-                elif scelta == "no":
-                    print("Inserimento errato. Programma interrotto")
-                else:
-                    print("Scelta sbagliata")
+            inserimento_macchina(cod)
         if tipo == "particolare":
-            y = get_particolare(cod, fs)
-            if isinstance(y, Particolare):
-                print(f'Il particolare "{cod}" è presente nel database.')
-            else:
-                print(f'Inserire valori particolare "{cod}"')
-                print("-----   Dati utensile   -----")
-                scelta = int(input("Quanti utensili devi associare al particolare?: "))
-                ls_ut = []
-                for i in range(scelta):
-                    u = get_utensile(input("Inserire codice utensile: "))
-                    count = 0
-                    while u is None:
-                        u = get_utensile(input("Codice errato.Inserire codice utensile: "))
-                        count += 1
-                        if count == 3:
-                            print("Codice errato. Probabile che l' utensile non sia presente nel database. Inserire"
-                                  " prima l' utensile e poi il particolare.")
-                            menu()
-                    ls_ut.append(u.codice)
-                print("-----   Dati pezzo   -----")
-                d = float(sostituzione_virgola(input("Inserire diametro pezzo: ")))
-                mod = float(sostituzione_virgola(input("Inserire modulo: ")))
-                h = float(sostituzione_virgola(input("Inserire fascia: ")))
-                fascia_multi = int(input("Quanti particolari vanno lavorati insieme?: "))
-                stampa_etichetta(indice_lavorazioni)
-                lav = check_inserimento_indice(indice_lavorazioni, "lavorazione")
-                inc_el_dx = 0.0
-                inc_el_sx = 0.0
-                inc = 0.0
-                # Lavorazione è sempre una lista da 1 elemento.
-                if lav[0] == "stozza" or lav[0] == "interna":
-                    inc = float(sostituzione_virgola(
-                        input("Inserire inclinazione pezzo (inserire gradi in centesimi): ")))
-                elif lav[0] == "dentatura conica" or lav[0] == "dentatura conica scanalata":
-                    inc = float(sostituzione_virgola(
-                        input("Inserire inclinazione pezzo (inserire gradi in centesimi): ")))
-                    scelta = input("Dentatura dritta o elicoidale?: ").strip()
-                    while scelta != "dritta" and scelta != "elicoidale":
-                        scelta = input("Scelta errata! Ripetere la scelta. Dritta o elicoidale?:").strip()
-                    if scelta != "dritta":
-                        elica = scelta_elica()
-                        if elica[0] == "dx":
-                            inc_el_dx = elica[1]
-                        else:
-                            inc_el_sx = elica[1]
-                elif lav[0] == "stozza elicoidale" or lav[0] == "stozza elicoidale bombata":
-                    elica = scelta_elica()
-                    if elica[0] == "dx":
-                        inc_el_dx = elica[1]
-                    else:
-                        inc_el_sx = elica[1]
-                else:
-                    scelta = input("Dentatura dritta o elicoidale?: ").strip()
-                    while scelta != "dritta" and scelta != "elicoidale":
-                        scelta = input("Scelta errata! Ripetere la scelta. Dritta o elicoidale?:").strip()
-                    if scelta != "dritta":
-                        elica = scelta_elica()
-                        if elica[0] == "dx":
-                            inc_el_dx = elica[1]
-                        else:
-                            inc_el_sx = elica[1]
-                p_m = input("Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
-                while p_m != "si" and p_m != "no":
-                    p_m = input("Scelta errata! Ripetere la scelta. "
-                                "Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
-                p_m = True if p_m == "si" else False
-                print("-----   Dati attrezzatura   -----")
-                stampa_etichetta(indice_attrezzatura)
-                ta = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
-                ta = crea_dizionario_attrezzatura(ta, lav)
-                p = Particolare(cod, d, ls_ut, ta, fs, lav, p_m, mod, h, fascia_multi, inc_el_dx, inc_el_sx, inc)
-                stampa_valori_particolare(p)
-                scelta = input("I valori inseriti sono corretti?(si, no): ")
-                if scelta == "si":
-                    Particolari.append(p)
-                    print("Inserimento completato con successo")
-                elif scelta == "no":
-                    print("Inserimento errato. Programma interrotto")
-                else:
-                    print("Scelta sbagliata")
+            inserimento_particolare(cod, fs)
         if tipo == "utensile":
-            z = get_utensile(cod)
-            if isinstance(z, Utensile):
-                print(f'Utensile "{cod}" presente nel database.')
-            else:
-                print(f'Inserire valori utensile "{cod}"')
-                d = float(sostituzione_virgola(input("Inserire diametro: ")))
-                stampa_etichetta(indice_utensili)
-                t = check_inserimento_indice(indice_utensili, "utensile")
-                sens_el = input("Inserisci senso elica(Inserire 'dx', 'sx' o 'dritto'): ").strip()
-                inc_el = 0
-                while sens_el != "dx" and sens_el != "sx" and sens_el != "dritto":
-                    sens_el = input("Valore errato, inserisci nuovamente il verso: ")
-                if sens_el == "dx":
-                    inc_el = float(sostituzione_virgola(
-                        input("Inserisci gradi inclinazione elica dx (inserire gradi in centesimi): ")))
-                elif sens_el == "sx":
-                    inc_el = float(sostituzione_virgola(
-                        input("Inserisci gradi inclinazione elica sx (inserire gradi in centesimi): ")))
-                u = Utensile(cod, t, d, sens_el, inc_el)
-                stampa_valori_utensile(u)
-                scelta = input("I valori inseriti sono corretti?(si, no): ")
-                if scelta == "si":
-                    Utensili.append(u)
-                    print("Inserimento completato con successo")
-                elif scelta == "no":
-                    print("Inserimento errato. Programma interrotto")
-                else:
-                    print("Scelta sbagliata")
+            inserimento_utensile(cod)
     except (TypeError, AttributeError, ValueError):
         print("Input errato o inesistente")
+
+
+# Chiede i dati necessari per inserire una macchina
+def inserimento_macchina(cod):
+    x = get_macchina(cod)
+    if isinstance(x, Macchina):
+        print(f'La macchina "{cod}" è presente nel database.')
+    else:
+        print(f'Inserire valori macchina "{cod}"')
+        d_min = int(input("Inserire diametro minimo: "))
+        d_max = int(input("Inserire diametro massimo: "))
+        d = (d_min, d_max)
+        stampa_etichetta(indice_attrezzatura)
+        att = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
+        stampa_etichetta(indice_utensili)
+        t_u = check_inserimento_indice(indice_utensili, "utensile")
+        d_max_u = int(input("Inserire il diametro massimo dell' utensile: "))
+        stampa_etichetta(indice_lavorazioni)
+        lav = check_inserimento_indice(indice_lavorazioni, "lavorazione")
+        p_m = input("La macchina può eseguire più lavorazioni con lo stesso ciclo?(si o no)").strip()
+        while p_m != "si" and p_m != "no":
+            p_m = input("Scelta errata! Ripetere la scelta. "
+                        "Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
+        p_m = True if p_m == "si" else False
+        mod_max = int(input("Inserire modulo massimo: "))
+        h_max = int(input("Inserire altezza fascia massima: "))
+        int_min = int(input("Inserire interasse minimo (inserire 0 se non necessario): "))
+        inc_el_max_dx = int(input("Inserire inclinazione elica dx massima (inserire 30 "
+                                    "(per le dentatrici) o 0 (per le stozze) se non necessario): "))
+        inc_el_max_sx = int(input("Inserire inclinazione elica dx massima (inserire 30 "
+                                    "(per le dentatrici) o 0 (per le stozze) se non necessario): "))
+        inc_tav = int(input("Inserire inclinazione tavola (inserire 0 se non necessario): "))
+        alt_att_max = int(input("Inserire altezza attrezzatura massima(inserire 300 se non necessario): "))
+        m = Macchina(cod, d, att, t_u, d_max_u, lav, p_m,  mod_max, h_max,
+                        int_min, inc_el_max_dx, inc_el_max_sx, inc_tav, alt_att_max)
+        stampa_valori_macchina(m)
+        scelta = input("I valori inseriti sono corretti?(si, no): ")
+        if scelta == "si":
+            Macchine_TFZ_Aprilia.append(m)
+            print("Inserimento completato con successo")
+        elif scelta == "no":
+            print("Inserimento errato. Programma interrotto")
+        else:
+            print("Scelta sbagliata")   
+
+
+# Chiede i dati necessari per inserire un particolare
+def inserimento_particolare(cod, fs):
+    y = get_particolare(cod, fs)
+    if isinstance(y, Particolare):
+        print(f'Il particolare "{cod}" è presente nel database.')
+    else:
+        print(f'Inserire valori particolare "{cod}"')
+        print("-----   Dati utensile   -----")
+        scelta = int(input("Quanti utensili devi associare al particolare?: "))
+        ls_ut = []
+        for u in range(scelta):
+            u = input("Inserire codice utensile: ")
+            ut = check_utensile(u)
+            ls_ut.append(ut.codice)
+        print("-----   Dati pezzo   -----")
+        d = float(sostituzione_virgola(input("Inserire diametro pezzo: ")))
+        mod = float(sostituzione_virgola(input("Inserire modulo: ")))
+        h = float(sostituzione_virgola(input("Inserire fascia: ")))
+        fascia_multi = int(input("Quanti particolari vanno lavorati insieme?: "))
+        stampa_etichetta(indice_lavorazioni)
+        lav = check_inserimento_indice(indice_lavorazioni, "lavorazione")
+        inc_el_dx = 0.0
+        inc_el_sx = 0.0
+        inc = 0.0
+        # Lavorazione è sempre una lista da 1 elemento.
+        if lav[0] == "stozza" or lav[0] == "interna":
+            inc = float(sostituzione_virgola(
+                input("Inserire inclinazione pezzo (inserire gradi in centesimi): ")))
+        elif lav[0] == "dentatura conica" or lav[0] == "dentatura conica scanalata":
+            inc = float(sostituzione_virgola(
+                input("Inserire inclinazione pezzo (inserire gradi in centesimi): ")))
+            scelta = input("Dentatura dritta o elicoidale?: ").strip()
+            while scelta != "dritta" and scelta != "elicoidale":
+                scelta = input("Scelta errata! Ripetere la scelta. Dritta o elicoidale?:").strip()
+            if scelta != "dritta":
+                elica = scelta_elica()
+                if elica[0] == "dx":
+                    inc_el_dx = elica[1]
+                else:
+                    inc_el_sx = elica[1]
+        elif lav[0] == "stozza elicoidale" or lav[0] == "stozza elicoidale bombata":
+            elica = scelta_elica()
+            if elica[0] == "dx":
+                inc_el_dx = elica[1]
+            else:
+                inc_el_sx = elica[1]
+        else:
+            scelta = input("Dentatura dritta o elicoidale?: ").strip()
+            while scelta != "dritta" and scelta != "elicoidale":
+                scelta = input("Scelta errata! Ripetere la scelta. Dritta o elicoidale?:").strip()
+            if scelta != "dritta":
+                elica = scelta_elica()
+                if elica[0] == "dx":
+                    inc_el_dx = elica[1]
+                else:
+                    inc_el_sx = elica[1]
+        p_m = input("Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
+        while p_m != "si" and p_m != "no":
+            p_m = input("Scelta errata! Ripetere la scelta. "
+                        "Il particolare ha più dentature da lavorare con lo stesso ciclo?(si,no): ").strip()
+        p_m = True if p_m == "si" else False
+        print("-----   Dati attrezzatura   -----")
+        stampa_etichetta(indice_attrezzatura)
+        ta = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
+        ta = crea_dizionario_attrezzatura(ta, lav)
+        p = Particolare(cod, d, ls_ut, ta, fs, lav, p_m, mod, h, fascia_multi, inc_el_dx, inc_el_sx, inc)
+        stampa_valori_particolare(p)
+        scelta = input("I valori inseriti sono corretti?(si, no): ")
+        if scelta == "si":
+            Particolari.append(p)
+            print("Inserimento completato con successo")
+        elif scelta == "no":
+            print("Inserimento errato. Programma interrotto")
+        else:
+            print("Scelta sbagliata")
+
+
+# Chiede i dati necessari per inserire un utensile
+def inserimento_utensile(cod):
+    z = get_utensile(cod)
+    if isinstance(z, Utensile):
+        print(f'Utensile "{cod}" presente nel database.')
+    else:
+        print(f'Inserire valori utensile "{cod}"')
+        d = float(sostituzione_virgola(input("Inserire diametro: ")))
+        stampa_etichetta(indice_utensili)
+        t = check_inserimento_indice(indice_utensili, "utensile")
+        sens_el = input("Inserisci senso elica(Inserire 'dx', 'sx' o 'dritto'): ").strip()
+        inc_el = 0
+        while sens_el != "dx" and sens_el != "sx" and sens_el != "dritto":
+            sens_el = input("Valore errato, inserisci nuovamente il verso: ")
+        if sens_el == "dx":
+            inc_el = float(sostituzione_virgola(
+                input("Inserisci gradi inclinazione elica dx (inserire gradi in centesimi): ")))
+        elif sens_el == "sx":
+            inc_el = float(sostituzione_virgola(
+                input("Inserisci gradi inclinazione elica sx (inserire gradi in centesimi): ")))
+        u = Utensile(cod, t, d, sens_el, inc_el)
+        stampa_valori_utensile(u)
+        scelta = input("I valori inseriti sono corretti?(si, no): ")
+        if scelta == "si":
+            print("Inserimento completato con successo")
+            return u
+        elif scelta == "no":
+            print("Inserimento errato. Programma interrotto")
+        else:
+            print("Scelta sbagliata")
 
 
 # Crea una lista dove mette i diametri degli utensili presenti nel particolare.
