@@ -503,6 +503,7 @@ def edit(cod, tipo, fs=None):
                     menu()
                 stampa_valori_macchina(m)
                 print("Modifica completata con successo!")
+                save_db("macchine")
             else:
                 print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
                 print("")
@@ -557,6 +558,7 @@ def edit(cod, tipo, fs=None):
                     menu()
                 stampa_valori_particolare(p)
                 print("Modifica completata con successo!")
+                save_db("particolari")
             else:
                 print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
                 print("")
@@ -581,7 +583,7 @@ def edit(cod, tipo, fs=None):
                         print(f'Diametro attuale: {u.diametro_utensile}')
                     elif scelta == 4:
                         print(f'Inclinazione attuale: {u.inclinazione_elica}')
-                    scelta_utente = int(input("Inserire la modifica: "))
+                    scelta_utente = float(input("Inserire la modifica: "))
                     getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
                 elif scelta == 5:
                     print(" ")
@@ -592,6 +594,7 @@ def edit(cod, tipo, fs=None):
                     menu()
                 stampa_valori_utensile(u)
                 print("Modifica completata con successo!")
+                save_db("utensili")
             else:
                 print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
                 print("")
@@ -949,7 +952,7 @@ def inserimento_utensile(cod):
 def lista_dati_necessari(tipo):
     if tipo == "macchina":
         print("""
-        -----   Lista dati necessari per inserimento macchina:   -----
+----   Lista dati necessari per inserimento macchina:   -----
                 
                 Codice macchina;
                 Diametro range;
@@ -970,7 +973,7 @@ def lista_dati_necessari(tipo):
             """)
     if tipo == "particolare":
         print("""
-        -----   Lista dati necessari per inserimento particolare:   -----
+-----  Lista dati necessari per inserimento particolare:   -----
 
                 Codice;
                 Diametro;
@@ -990,7 +993,7 @@ def lista_dati_necessari(tipo):
               """)
     if tipo == "utensile":
         print("""
-        -----   Lista dati necessari per inserimento utensile:   -----
+-----  Lista dati necessari per inserimento utensile:   -----
         
                  Codice;
                  Tipo utensile;
@@ -1250,6 +1253,7 @@ def remove(cod, tipo, fs=None):
         if isinstance(x, Macchina):
             Macchine_TFZ_Aprilia.remove(x)
             print(f'Macchina [{x.codice}] eliminata con successo')
+            save_db("macchine")
         else:
             print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
     elif tipo == "particolare":
@@ -1257,6 +1261,7 @@ def remove(cod, tipo, fs=None):
         if isinstance(x, Particolare):
             Particolari.remove(x)
             print(f'Codice [{x.codice}] eliminato con successo.')
+            save_db("particolari")
         else:
             print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
     elif tipo == "utensile":
@@ -1276,6 +1281,7 @@ def remove(cod, tipo, fs=None):
                     edit(p.codice, "p", p.fase)
             Utensili.remove(u)
             print(f'Utensile [{u.codice}] eliminato con successo')
+            save_db("utensili")
         elif scelta == "no":
             print("Modifica annullata.")
         else:
@@ -1531,7 +1537,7 @@ def verifica_se_macchina_lavora_particolare():
     else:
         print(f'Macchina [{scelta_macchina}] non presente nel db!')
 
-# Stampa una lista di particolari che usano l' utensile selezionato.
+# Verifica quali particolari l'utensile lavora e stampa una lista di particolari che usano l' utensile selezionato.
 def verifica_particolari_lavorati_da_utensile(cod):
     u = get_utensile(cod)
     if isinstance(u, Utensile):
@@ -1539,6 +1545,8 @@ def verifica_particolari_lavorati_da_utensile(cod):
         if len(ls_p) > 0:
             print(f'Utensile utilizzato da {len(ls_p)} {"particolare" if len(ls_p) == 1 else "particolari"}.')
             [print(f' - {i.codice}') for i in ls_p]
+        elif len(ls_p) == 0:
+            print(f'Utensile {u.codice} non utilizzato da nessun particolare!')
     else:
         print(f'Il codice [{cod}] non è nel db')
 
