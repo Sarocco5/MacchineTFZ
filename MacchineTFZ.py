@@ -330,6 +330,7 @@ def check_scelta_menu(lista, domanda=None):
         menu()
 
 
+# Controlla se l'utensile esiste nel db.
 def check_utensile(utensile):
     count = 0
     utensile = get_utensile(utensile)
@@ -419,7 +420,7 @@ def crea_lista_da_stringa(scelta):
     return scelta
 
 
-# Print data e ora all'avvio dello script
+# Print data e ora all'avvio dello script.
 def data():
     data = datetime.datetime.now()
     stringa = (f'{utente.capitalize()}! Oggi è {data.strftime("%d/%m/%Y")} e sono le ore {data.strftime("%H:%M:%S")}')
@@ -788,7 +789,7 @@ def insert_database(cod, tipo, fs=None):
         print("Input errato o inesistente")
 
 
-# Chiede i dati necessari per inserire una macchina
+# Chiede i dati necessari per inserire una macchina.
 def inserimento_macchina(cod):
     x = get_macchina(cod)
     if isinstance(x, Macchina):
@@ -825,6 +826,7 @@ def inserimento_macchina(cod):
         scelta = input("I valori inseriti sono corretti?(si, no): ")
         if scelta == "si":
             Macchine_TFZ_Aprilia.append(m)
+            save_db("macchine")
             print("Inserimento completato con successo")
         elif scelta == "no":
             print("Inserimento errato. Programma interrotto")
@@ -832,7 +834,7 @@ def inserimento_macchina(cod):
             print("Scelta sbagliata")   
 
 
-# Chiede i dati necessari per inserire un particolare
+# Chiede i dati necessari per inserire un particolare.
 def inserimento_particolare(cod, fs):
     y = get_particolare(cod, fs)
     if isinstance(y, Particolare):
@@ -902,6 +904,7 @@ def inserimento_particolare(cod, fs):
         scelta = input("I valori inseriti sono corretti?(si, no): ")
         if scelta == "si":
             Particolari.append(p)
+            save_db("particolari")
             print("Inserimento completato con successo")
         elif scelta == "no":
             print("Inserimento errato. Programma interrotto")
@@ -909,7 +912,7 @@ def inserimento_particolare(cod, fs):
             print("Scelta sbagliata")
 
 
-# Chiede i dati necessari per inserire un utensile
+# Chiede i dati necessari per inserire un utensile.
 def inserimento_utensile(cod):
     z = get_utensile(cod)
     if isinstance(z, Utensile):
@@ -934,11 +937,69 @@ def inserimento_utensile(cod):
         scelta = input("I valori inseriti sono corretti?(si, no): ")
         if scelta == "si":
             print("Inserimento completato con successo")
+            save_db("utensili")
             return u
         elif scelta == "no":
             print("Inserimento errato. Programma interrotto")
         else:
             print("Scelta sbagliata")
+
+
+# Lista dei dati necessari all'inserimento del tipo di oggetto.
+def lista_dati_necessari(tipo):
+    if tipo == "macchina":
+        print("""
+        -----   Lista dati necessari per inserimento macchina:   -----
+                
+                Codice macchina;
+                Diametro range;
+                Attrezzatura compatibile;
+                Utensili compatibili;
+                Diametro max utensile;
+                Lavorazioni supportate;
+                Supporto programma multiplo;
+                Modulo max;
+                Altezza fascia max;
+                Interasse min;
+                Inclinazione elica max dx;
+                Inclinazione elica max sx;
+                Inclinazione tavola;
+                Altezza max attrezzatura;
+            
+        -----                           -----
+            """)
+    if tipo == "particolare":
+        print("""
+        -----   Lista dati necessari per inserimento particolare:   -----
+
+                Codice;
+                Diametro;
+                Lista utensili;
+                Lista attrezzatura compatibile;
+                Fase;
+                Lavorazione;
+                Necessità di programma multiplo;
+                Modulo;
+                Fascia;
+                Necessità di lavorare più pezzi contemporaneamente;
+                Inclinazione elica dx;
+                Incinazione elica sx;
+                Inclinazione;
+                
+       -----                           -----
+              """)
+    if tipo == "utensile":
+        print("""
+        -----   Lista dati necessari per inserimento utensile:   -----
+        
+                 Codice;
+                 Tipo utensile;
+                 Diametro utensile;
+                 Senso elica utensile;
+                 Inclinazione elica utensile;
+                 
+       -----                           -----
+              """)
 
 
 # Crea una lista dove mette i diametri degli utensili presenti nel particolare.
@@ -996,14 +1057,12 @@ def load_db():
     db_utensili_locale = PureWindowsPath("C:/Users/db_utensili.pickle")
     try:
         with open(f'db_macchine.pickle', 'rb') as handle:
-            print('Database macchine caricato')
             Macchine_TFZ_Aprilia = pickle.load(handle)
         with open(f'db_particolari.pickle', 'rb') as handle:
-            print('Database particolari caricato')
             Particolari = pickle.load(handle)
         with open(f'db_utensili.pickle', 'rb') as handle:
-            print('Database utensili caricato')
             Utensili = pickle.load(handle)
+        print('-----   Database caricati   -----')
     except FileNotFoundError:
         try:
             print("Accesso in modalità lettura tramite rete. Non sarà possibile modificare.")
@@ -1064,6 +1123,7 @@ def menu():
     scelta = None
     while scelta != "Uscita":
         print("Cosa desideri fare?")
+        load_db()
         scelta = check_scelta_menu(lista_opzioni)
         if "Verifica compatibilità" == scelta:
             scelta = check_scelta_menu(lista_verifica)
@@ -1110,13 +1170,7 @@ def menu():
             scelta = check_scelta_menu(lista_modifica)
             scelta_tipo_inserimento(scelta)
         elif "Uscita" == scelta:
-            scelta = check_scelta_menu(["si", "no"], "Vuoi salvare?")
-            if scelta == "si":
-                save_db("macchine")
-                save_db("particolari")
-                save_db("utensili")
-            else:
-                print("Database non salvati!")
+            print("Il programma si chiuderà a breve!")
             time.sleep(3)
             quit()
         print("")
@@ -1282,6 +1336,7 @@ def scelta_tipo_inserimento(scelta):
     if scelta == "Inserimento":
         print("Vuoi inserire una macchina, un utensile o un particolare?")
         scelta_tipo = check_scelta_menu(lista_tipo)
+        lista_dati_necessari(scelta_tipo)
         scelta_fase = 0
         if scelta_tipo == "particolare":
             scelta_codice = input("Inserire codice particolare: ")
@@ -1499,6 +1554,5 @@ def verifica_programma_multiplo(p_pm, m_pm):
 
 if __name__ == '__main__':
     utente = input("Inserire nome utente: ")
-    load_db()
     data()
     menu()
