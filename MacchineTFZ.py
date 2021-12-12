@@ -595,8 +595,8 @@ def edit(cod, tipo, fs=None):
                     print(" ")
                     menu()
                 stampa_valori_utensile(u)
-                print("Modifica completata con successo!")
                 save_db("utensili")
+                print("Modifica completata con successo!")
             else:
                 print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
                 print("")
@@ -1080,6 +1080,7 @@ def load_db():
                 Utensili = pickle.load(handle)
             print('-----   Database caricati in solo lettura   -----')
             modalità_lettura = True
+            return 0
         except FileNotFoundError as e:
             print(f'...db non trovato nel percorso: {e.filename}.\nIl programma si chiuderà tra 3 secondi.')
             time.sleep(3)
@@ -1171,8 +1172,12 @@ def menu():
             elif scelta == "Torna indietro":
                 menu()
         elif "Modifica database" == scelta:
-            scelta = check_scelta_menu(lista_modifica)
-            scelta_tipo_inserimento(scelta)
+            if load_db() != 0:
+                scelta = check_scelta_menu(lista_modifica)
+                scelta_tipo_inserimento(scelta)
+            else:
+                print("Modifiche non consentite in modalità 'solo lettura'!")
+                menu()
         elif "Uscita" == scelta:
             print("Il programma si chiuderà a breve!")
             time.sleep(3)
@@ -1319,7 +1324,6 @@ def save_db(tipo):
                 print(f'Errore! Valore {tipo} non valido!')
     else:
         print(f'Salvataggio db_{tipo}.pickle non consentito, esegutito accesso in solo lettura!')
-
 
 # Se il particolare, in fase di inserimento, presenta una dentatura/stozza elicoidale, con questa funzione posso
 # selezionare il verso dell' elica e poi inserire il valore.
