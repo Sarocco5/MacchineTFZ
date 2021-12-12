@@ -576,10 +576,12 @@ def edit(cod, tipo, fs=None):
                     print(f'Senso elica attuale: {u.senso_elica}')
                     scelta_utente = input("Inserire senso elica(dx o sx): ")
                     getattr(u, "set_" + Indice_attributi_utensile[scelta].replace(" ", "_"))(scelta_utente)
+                elif scelta == 0:
+                    print(f'Codice attuale: {u.codice}')
+                    scelta_utente = input("Inserire la modifica: ")
+                    getattr(u, "set_" + Indice_attributi_utensile[scelta])(scelta_utente)
                 elif scelta in [0, 2, 4]:
-                    if scelta == 0:
-                        print(f'Codice attuale: {u.codice}')
-                    elif scelta == 2:
+                    if scelta == 2:
                         print(f'Diametro attuale: {u.diametro_utensile}')
                     elif scelta == 4:
                         print(f'Inclinazione attuale: {u.inclinazione_elica}')
@@ -940,6 +942,7 @@ def inserimento_utensile(cod):
         scelta = input("I valori inseriti sono corretti?(si, no): ")
         if scelta == "si":
             print("Inserimento completato con successo")
+            Utensili.append(u)
             save_db("utensili")
             return u
         elif scelta == "no":
@@ -1263,27 +1266,30 @@ def remove(cod, tipo, fs=None):
         else:
             print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
     elif tipo == "utensile":
-        verifica_particolari_lavorati_da_utensile(cod)
-        u = get_utensile(cod)
-        scelta = check_scelta_menu(["si", "no"], "Vuoi procedere alla rimozione?")
-        if scelta == "si":
-            ls_p = particolari_usati_da_utensile(u.codice)
-            for p in ls_p:
-                p.rimuovi_utensile(cod)
-                if len(p.lista_utensili) == 0:
-                    print(f'{p.codice} - [{p.fase}] non ha più utensili associati.')
-                scelta = input("Vuoi aggiungere un utensile?(si o no): ")
-                while scelta != "si" and scelta != "no":
-                    scelta = input("Scelta errata. Vuoi aggiungere un utensile?(si o no):")
-                if scelta == "si":
-                    edit(p.codice, "p", p.fase)
-            Utensili.remove(u)
-            print(f'Utensile [{u.codice}] eliminato con successo')
-            save_db("utensili")
-        elif scelta == "no":
-            print("Modifica annullata.")
+        v = verifica_particolari_lavorati_da_utensile(cod)
+        if v is None:
+            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
         else:
-            print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
+            u = get_utensile(cod)
+            scelta = check_scelta_menu(["si", "no"], "Vuoi procedere alla rimozione?")
+            if scelta == "si":
+                ls_p = particolari_usati_da_utensile(u.codice)
+                for p in ls_p:
+                    p.rimuovi_utensile(cod)
+                    if len(p.lista_utensili) == 0:
+                        print(f'{p.codice} - [{p.fase}] non ha più utensili associati.')
+                    scelta = input("Vuoi aggiungere un utensile?(si o no): ")
+                    while scelta != "si" and scelta != "no":
+                        scelta = input("Scelta errata. Vuoi aggiungere un utensile?(si o no):")
+                    if scelta == "si":
+                        edit(p.codice, "p", p.fase)
+                Utensili.remove(u)
+                print(f'Utensile [{u.codice}] eliminato con successo')
+                save_db("utensili")
+            elif scelta == "no":
+                print("Modifica annullata.")
+            else:
+                print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
 
 
 # Verifica se il pezzo ha l' attrezzatura per essere lavorato con il robot.
@@ -1547,6 +1553,7 @@ def verifica_particolari_lavorati_da_utensile(cod):
             print(f'Utensile {u.codice} non utilizzato da nessun particolare!')
     else:
         print(f'Il codice [{cod}] non è nel db')
+        return None
 
 
 # Verifica se il particolare richiede un programma multiplo e ritorna True o False.
