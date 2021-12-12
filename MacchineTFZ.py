@@ -1070,14 +1070,12 @@ def load_db():
         try:
             print("Accesso in modalità lettura tramite rete. Non sarà possibile modificare.")
             with open(db_macchine_locale, 'rb') as handle:
-                print('Database macchine caricato')
                 Macchine_TFZ_Aprilia = pickle.load(handle)
             with open(db_particolari_locale, 'rb') as handle:
-                print('Database particolari caricato')
                 Particolari = pickle.load(handle)
             with open(db_utensili_locale, 'rb') as handle:
-                print('Database utensili caricato')
                 Utensili = pickle.load(handle)
+            print('-----   Database caricati in solo lettura   -----')
             modalità_lettura = True
         except FileNotFoundError as e:
             print(f'...db non trovato nel percorso: {e.filename}.\nIl programma si chiuderà tra 3 secondi.')
