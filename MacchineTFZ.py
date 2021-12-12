@@ -179,6 +179,9 @@ Macchine_TFZ_Aprilia = []
 Utensili = []
 Particolari = []
 modalità_lettura = False
+db_macchine_locale = PureWindowsPath("C:/Users/db_macchine.pickle")
+db_particolari_locale = PureWindowsPath("C:/Users/db_particolari.pickle")
+db_utensili_locale = PureWindowsPath("C:/Users/db_utensili.pickle")
 
 indice_attrezzatura = {1: "palo", 2: "pinza", 3: "pinza alberi", 4: "corpo porta pinza", 5: "manuale",
                        6: "contropunta", 7: "slitta elicoidale", 8: "robot"}
@@ -265,6 +268,13 @@ def calcolo_interasse(p_lista_utensile, diam_pezzo, p_lav, m_int_min):
         return False
     return True
 
+
+# Cambio il percoso dei file pickle.
+def cambio_percorso_db():
+    global db_macchine_locale
+    global db_particolari_locale
+    global db_utensili_locale
+    
 
 # Verifica se l' input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
 # l' inserimento dell' input finché non riceve un input riconosciuto. Ritorna una lista. Il metodo .strip() elimina gli
@@ -1058,9 +1068,10 @@ def load_db():
     global Particolari
     global Utensili
     global modalità_lettura
-    db_macchine_locale = PureWindowsPath("C:/Users/db_macchine.pickle")
-    db_particolari_locale = PureWindowsPath("C:/Users/db_particolari.pickle")
-    db_utensili_locale = PureWindowsPath("C:/Users/db_utensili.pickle")
+    global db_macchine_locale
+    global db_particolari_locale
+    global db_utensili_locale
+
     try:
         with open(f'db_macchine.pickle', 'rb') as handle:
             Macchine_TFZ_Aprilia = pickle.load(handle)
