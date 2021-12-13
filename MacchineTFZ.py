@@ -181,9 +181,7 @@ Macchine_TFZ_Aprilia = []
 Utensili = []
 Particolari = []
 modalità_lettura = False
-db_macchine_locale = PureWindowsPath("db_macchine.yaml")
-db_particolari_locale = PureWindowsPath("db_particolari.yaml")
-db_utensili_locale = PureWindowsPath("db_utensili.pickle.yaml")
+
 
 indice_attrezzatura = {1: "palo", 2: "pinza", 3: "pinza alberi", 4: "corpo porta pinza", 5: "manuale",
                        6: "contropunta", 7: "slitta elicoidale", 8: "robot"}
@@ -271,16 +269,6 @@ def calcolo_interasse(p_lista_utensile, diam_pezzo, p_lav, m_int_min):
     return True
 
 
-# Cambio il percoso dei file pickle.
-def load_percorso_db():
-    with open('db_macchine_locale.yaml', 'r') as path_pickle:
-        print(yaml.safe_load(path_pickle))
-    with open('db_particolari_locale.yaml', 'r') as path_pickle:
-        print(yaml.safe_load(path_pickle))
-    with open('db_utensili_locale.yaml', 'r') as path_pickle:
-        print(yaml.safe_load(path_pickle))
-
-
 # Verifica se l' input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
 # l' inserimento dell' input finché non riceve un input riconosciuto. Ritorna una lista. Il metodo .strip() elimina gli
 # spazi.
@@ -322,8 +310,13 @@ def check_scelta_menu(lista, domanda=None):
     try:
         if lista == ["si", "no"]:
             scelta = input(f'{domanda}[si/no]: ').strip().lower()
+            count = 0
             while scelta != "si" and scelta != "no":
+                count +=1
                 scelta = input(f'Scelta errata! Ripetere scelta. {domanda}[si/no]: ').strip().lower()
+                if count == 3:
+                    print("Scelta errata. Stai tornando al menu principale")
+                    menu()
             return scelta
         elif lista == ["aggiungere", "rimuovere"]:
             print("Vuoi aggiungere o rimuovere?")
@@ -331,14 +324,14 @@ def check_scelta_menu(lista, domanda=None):
                 print(f'[{numero}] - {opzione}')
             scelta = int(input("Inserire scelta: "))
             while scelta not in range(len(lista)):
-                scelta = int(input("Scelta errata! Inserire scelta: "))
+                scelta = int(input("Scelta errata! Inserire scelta o premere 'invio' per uscire: "))
             return lista[scelta]
         else:
             for i, k in enumerate(lista):
                 print(f'[{i}] - {k}')
             scelta = int((input("Inserire scelta: ")))
             while scelta not in range(len(lista)):
-                scelta = int(input("Scelta errata! Ripetere scelta: "))
+                scelta = int(input("Scelta errata! Ripetere scelta o premere 'invio' per uscire: "))
             return lista[scelta]
     except (ValueError, AttributeError):
         print("Scelta errata o inesistente. \n")
@@ -361,6 +354,7 @@ def check_utensile(utensile):
             else:
                 menu()
     return utensile
+
 
 # Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
 def compatibilita_generale(p, m, debug=False):
@@ -737,6 +731,38 @@ def edit_lista(oggetto, choice):
                     oggetto.lavorazione.remove(i)
 
 
+# Funzione per modificare il percorso dei file pickle tramite la modifica dei file yaml.
+def edit_percorso_pickle():
+    lista_scelte = ["percorso db macchine", "percorso db particolari", "percorso db utensili"]
+    percorso_db = load_percorso_db()
+    macchine = percorso_db[0]
+    particolari = percorso_db[1]
+    utensili = percorso_db[2]
+    print("Cosa vuoi modificare?")
+    scelta = check_scelta_menu(lista_scelte)
+    if "percorso db macchine" == scelta:
+        macchine = input("Scrivere nuovo percorso pickle per il db delle macchine(scrivere 'uscire' per abbandonare): ").replace("\\", "/")
+        if macchine != "uscire":
+             with open('db_macchine_locale.yaml', 'w') as db_macchine_locale_new:
+                yaml.dump(macchine, db_macchine_locale_new)
+        else:
+            print("Stai tornando al menu principale!")
+    elif "percorso db particolari" == scelta:
+        particolari = input("Scrivere nuovo percorso pickle per il db dei particolari(scrivere 'uscire' per abbandonare): ").replace("\\", "/")
+        if particolari !="uscire":
+            with open('db_particolari_locale.yaml', 'w') as db_particolari_locale_new:
+                yaml.dump(particolari, db_particolari_locale_new)
+        else:
+            print("Stai tornando al menu principale!")
+    else:
+        utensili = input("Scrivere nuovo percorso pickle per il db degli utensili(scrivere 'uscire' per abbandonare): ").replace("\\", "/")
+        if utensili != "uscire":
+            with open('db_utensili_locale.yaml', 'w') as db_utensili_locale_new:
+                yaml.dump(utensili, db_utensili_locale_new)
+        else:
+            print("Stai tornando al menu principale!")
+
+
 # Scorre la lista macchine e mi ritorna la macchina.
 def get_macchina(codice_macchina):
     for m in Macchine_TFZ_Aprilia:
@@ -1073,9 +1099,11 @@ def load_db():
     global Particolari
     global Utensili
     global modalità_lettura
-    global db_macchine_locale
-    global db_particolari_locale
-    global db_utensili_locale
+    percorso_db = load_percorso_db()
+    
+    db_macchine_locale = PureWindowsPath(percorso_db[0])
+    db_particolari_locale = PureWindowsPath(percorso_db[1])
+    db_utensili_locale = PureWindowsPath(percorso_db[2])
 
     try:
         with open(f'db_macchine.pickle', 'rb') as handle:
@@ -1101,6 +1129,17 @@ def load_db():
             print(f'...db non trovato nel percorso: {e.filename}.\nIl programma si chiuderà tra 3 secondi.')
             time.sleep(3)
             quit()
+
+
+# Carico il percoso dei file pickle tramite dei file yaml.
+def load_percorso_db():
+    with open('db_macchine_locale.yaml', 'r') as path_pickle:
+        macchine = (yaml.safe_load(path_pickle))
+    with open('db_particolari_locale.yaml', 'r') as path_pickle:
+        particolari = (yaml.safe_load(path_pickle))
+    with open('db_utensili_locale.yaml', 'r') as path_pickle:
+        utensili = (yaml.safe_load(path_pickle))
+    return macchine, particolari, utensili
 
 
 # Funzione che scorre le 2 liste del database (macchine e particolari), e ,usando la funzione "compatibilità_generale",
@@ -1138,9 +1177,9 @@ def menu():
     lista_verifica = ["Compatibilità generale",  "Confronta macchina con particolare",
                       "Verifica particolari lavorati dall' utensile", "Incompatibilità generale", "Torna indietro"]
     lista_stampa_db = ["Stampa attributi macchina", "Stampa attributi particolare", "Stampa attributi utensile",
-                       "Stampa database macchine", "Stampa database particolari", "Stampa database utensili",
+                       "Stampa database macchine", "Stampa database particolari", "Stampa database utensili", "Stampa percorso db",
                        "Torna indietro"]
-    lista_modifica = ["Inserimento", "Modifica", "Rimozione", "Torna indietro"]
+    lista_modifica = ["Inserimento", "Modifica", "Rimozione", "Modifica percorso db", "Torna indietro"]
     scelta = None
     while scelta != "Uscita":
         print("Cosa desideri fare?")
@@ -1185,12 +1224,18 @@ def menu():
                 stampa_database(Particolari)
             elif scelta == "Stampa database utensili":
                 stampa_database(Utensili)
+            elif scelta == "Stampa percorso db":
+                for percorso in load_percorso_db():
+                    print(percorso)
             elif scelta == "Torna indietro":
                 menu()
         elif "Modifica database" == scelta:
             if load_db() != 0:
                 scelta = check_scelta_menu(lista_modifica)
-                scelta_tipo_inserimento(scelta)
+                if scelta == "Modifica percorso db":
+                    edit_percorso_pickle()
+                else:
+                    scelta_tipo_inserimento(scelta)
             else:
                 print("Modifiche non consentite in modalità 'solo lettura'!")
                 menu()
@@ -1586,7 +1631,6 @@ def verifica_programma_multiplo(p_pm, m_pm):
 
 
 if __name__ == '__main__':
-    load_percorso_db()
     utente = input("Inserire nome utente: ")
     data()
     menu()
