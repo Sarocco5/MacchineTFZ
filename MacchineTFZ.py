@@ -9,6 +9,8 @@ import datetime
 import time
 # Modulo per gestire percorsi di filesystem.
 from pathlib import PureWindowsPath
+# Modulo per manipolare file .yaml
+import yaml
 
 class Macchina:
     codice = None
@@ -179,9 +181,9 @@ Macchine_TFZ_Aprilia = []
 Utensili = []
 Particolari = []
 modalità_lettura = False
-db_macchine_locale = PureWindowsPath("C:/Users/db_macchine.pickle")
-db_particolari_locale = PureWindowsPath("C:/Users/db_particolari.pickle")
-db_utensili_locale = PureWindowsPath("C:/Users/db_utensili.pickle")
+db_macchine_locale = PureWindowsPath("db_macchine.yaml")
+db_particolari_locale = PureWindowsPath("db_particolari.yaml")
+db_utensili_locale = PureWindowsPath("db_utensili.pickle.yaml")
 
 indice_attrezzatura = {1: "palo", 2: "pinza", 3: "pinza alberi", 4: "corpo porta pinza", 5: "manuale",
                        6: "contropunta", 7: "slitta elicoidale", 8: "robot"}
@@ -270,11 +272,14 @@ def calcolo_interasse(p_lista_utensile, diam_pezzo, p_lav, m_int_min):
 
 
 # Cambio il percoso dei file pickle.
-def cambio_percorso_db():
-    global db_macchine_locale
-    global db_particolari_locale
-    global db_utensili_locale
-    
+def load_percorso_db():
+    with open('db_macchine_locale.yaml', 'r') as path_pickle:
+        print(yaml.safe_load(path_pickle))
+    with open('db_particolari_locale.yaml', 'r') as path_pickle:
+        print(yaml.safe_load(path_pickle))
+    with open('db_utensili_locale.yaml', 'r') as path_pickle:
+        print(yaml.safe_load(path_pickle))
+
 
 # Verifica se l' input è scritto in modo corretto, altrimenti, in caso di input errato grazie al ciclo "while", richiede
 # l' inserimento dell' input finché non riceve un input riconosciuto. Ritorna una lista. Il metodo .strip() elimina gli
@@ -1581,6 +1586,7 @@ def verifica_programma_multiplo(p_pm, m_pm):
 
 
 if __name__ == '__main__':
+    load_percorso_db()
     utente = input("Inserire nome utente: ")
     data()
     menu()
