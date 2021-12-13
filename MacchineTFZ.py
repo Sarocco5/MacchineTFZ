@@ -1332,11 +1332,8 @@ def remove(cod, tipo, fs=None):
         else:
             print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
     elif tipo == "utensile":
-        v = verifica_particolari_lavorati_da_utensile(cod)
-        if v is None:
-            print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
-        else:
-            u = get_utensile(cod)
+        u = get_utensile(cod)
+        if u is not None:
             scelta = check_scelta_menu(["si", "no"], "Vuoi procedere alla rimozione?")
             if scelta == "si":
                 ls_p = particolari_usati_da_utensile(u.codice)
@@ -1354,8 +1351,8 @@ def remove(cod, tipo, fs=None):
                 save_db("utensili")
             elif scelta == "no":
                 print("Modifica annullata.")
-            else:
-                print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
+        else:
+            print(f'{tipo.capitalize()} [{cod.codice}] inesistente. Verificare presenza nel database.')
 
 
 # Verifica se il pezzo ha l' attrezzatura per essere lavorato con il robot.
@@ -1457,9 +1454,11 @@ def scelta_tipo_inserimento(scelta):
                         scelta_codice = part
             remove(scelta_codice, scelta_tipo, scelta_fase)
         else:
-            scelta_codice = input("Inserire codice: ").replace("-", "_")
-            remove(scelta_codice, scelta_tipo)
-
+            try:
+                scelta_codice = input("Inserire codice: ").replace("-", "_")
+                remove(scelta_codice, scelta_tipo)
+            except AttributeError:
+                print("Codice errato! Stai tornando al menu principale!")
 
 # Funzione per numeri decimali, elimina la virgola e la sostituisce con il punto.
 def sostituzione_virgola(scelta):
