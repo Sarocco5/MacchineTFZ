@@ -123,9 +123,10 @@ class Particolare:
     incl_elica_dx = 0.0
     incl_elica_sx = 0.0
     inclinazione = 0.0
+    note_pezzo = None
 
     def __init__(self, c, d, ls_ut, p_ta, p_f, p_lav, p_prog_multi, mod, fascia, fascia_multi,
-                 p_incl_elica_dx, p_incl_elica_sx, incl):
+                 p_incl_elica_dx, p_incl_elica_sx, incl, n_p):
         self.codice = c
         self.diametro = d
         self.lista_utensili = ls_ut
@@ -139,6 +140,7 @@ class Particolare:
         self.incl_elica_dx = p_incl_elica_dx
         self.incl_elica_sx = p_incl_elica_sx
         self.inclinazione = incl
+        self.note_pezzo = n_p
 
     def set_codice(self, c):
         self.codice = c
@@ -175,6 +177,9 @@ class Particolare:
 
     def rimuovi_utensile(self, cod):
         self.lista_utensili.remove(cod)
+    
+    def set_note_pezzo(self, n_p):
+        self.note_pezzo = n_p
 
 
 Macchine_TFZ_Aprilia = []
@@ -205,7 +210,7 @@ Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "lista codici ute
                                 3: "lista tipo attrezzatura", 4: "lista tipo utensile", 5: "diametro utensile",
                                 6: "fase", 7: "lavorazione", 8: "modulo", 9: "fascia", 10: "fascia multipla",
                                 11: "inclinazione elica dx", 12: "inclinazione elica sx", 13: "inclinazione",
-                                14: "torna indietro"}
+                                14: "note pezzo", 15: "torna indietro"}
 
 Indice_attributi_utensile = {0: "codice", 1: "tipo", 2: "diametro utensile", 3: "senso elica",
                              4: "inclinazione elica", 5: "torna indietro"}
@@ -356,7 +361,8 @@ def check_utensile(utensile):
     return utensile
 
 
-# Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili.
+# Funzione che confronta tutti parametri macchina e particolare e controlla se sono compatibili. 
+# Ritorna True o False.
 def compatibilita_generale(p, m, debug=False):
     if not debug:
         return attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura) and \
@@ -550,15 +556,17 @@ def edit(cod, tipo, fs=None):
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                     getattr(p, "set_" + Indice_attributi_particolare[scelta].replace(" ", "_"))(scelta_utente)
                 # Controllo se la modifica è di tipo str.
-                elif scelta in [0, 6]:
+                elif scelta in [0, 6, 14]:
                     if scelta == 0:
                         print(f'Codice attuale: {p.codice}')
                     elif scelta == 6:
                         print(f'Fase attuale: {p.fase}')
+                    elif scelta == 14:
+                        print(f'Nota pezzo attuale: {p.note_pezzo}')
                     scelta_utente = input("Inserire la modifica: ")
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                     getattr(p, "set_" + Indice_attributi_particolare[scelta].replace(" ", "_"))(scelta_utente)
-                elif scelta == 14:
+                elif scelta == 15:
                     print(" ")
                     menu()
                 else:
@@ -700,15 +708,10 @@ def edit_lista(oggetto, choice):
         if choice == 2:
             scelta = int(input("Quanti utensili devi associare al particolare?: "))
             ls_ut = []
+            for utensile in oggetto.lista_utensili:
+                ls_ut.append(utensile)
             for i in range(scelta):
-                u = get_utensile(input("Inserire codice utensile: "))
-                count = 0
-                while u is None:
-                    u = get_utensile(input("Codice errato.Inserire codice utensile: "))
-                    count += 1
-                    if count == 3:
-                        print("Codice errato. Probabile che l' utensile non sia presente nel database.")
-                        quit()
+                u = check_utensile(input("Inserire codice utensile: "))
                 ls_ut.append(u.codice)
             oggetto.set_lista_utensili(ls_ut)
         # Scelta tipo lavorazione per il particolare.
@@ -790,9 +793,12 @@ def get_utensile(codice_utensile):
 # confronta con i valori della macchina ritornando True o False.
 def inclinazione_compatibile(lista_utensili, p_lav, p_inc_el_dx, p_inc_el_sx, incl_elica_max_dx, incl_elica_max_sx):
     inclinazione_utensili = {}
+    ls_ut = []
     for cod_ut in lista_utensili:
         u = get_utensile(cod_ut)
-        risultato_inclinazione = calcolo_inclinazione(u.senso_elica, u.inclinazione_elica,
+        ls_ut.append(u)
+    for utensile in ls_ut:
+        risultato_inclinazione = calcolo_inclinazione(utensile.senso_elica, utensile.inclinazione_elica,
                                                       p_lav, p_inc_el_dx, p_inc_el_sx)
         inclinazione_utensili[u.codice] = risultato_inclinazione
     # Qua controllo il risultato dell' inclinazione con l' inclinazione della macchina.
@@ -945,7 +951,8 @@ def inserimento_particolare(cod, fs):
         stampa_etichetta(indice_attrezzatura)
         ta = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
         ta = crea_dizionario_attrezzatura(ta, lav)
-        p = Particolare(cod, d, ls_ut, ta, fs, lav, p_m, mod, h, fascia_multi, inc_el_dx, inc_el_sx, inc)
+        n_p = input("Inserire eventuale note pezzo: ")
+        p = Particolare(cod, d, ls_ut, ta, fs, lav, p_m, mod, h, fascia_multi, inc_el_dx, inc_el_sx, inc, n_p)
         stampa_valori_particolare(p)
         scelta = input("I valori inseriti sono corretti?(si, no): ")
         if scelta == "si":
@@ -1159,9 +1166,9 @@ def macchine_compatibili(ls_part, ls_macc, fs=None, debug=False):
         for macchina in lista_risultati:
             risultato_robot = robot_compatibile(macchina.tipo_attrezzatura, p.tipo_attrezzatura.keys())
             if risultato_robot is not None:
-                print(f'   {macchina.codice} - {risultato_robot}')
+                print(f'   {macchina.codice} - {p.lista_utensili} - {risultato_robot}')
             else:
-                print(f'   {macchina.codice}')
+                print(f'   {macchina.codice} - {p.lista_utensili}')
 
 
 # Valore (a) maggiore o uguale a (b).
@@ -1305,10 +1312,12 @@ def reinizializza_database(db):
     if isinstance(db[0], Particolare):
         for p in db:
             print(p.codice)
-            fascia_multipla = int(input("Inserire valore: "))
+            note_pezzo = input("Inserire valore: ")
+            if note_pezzo is None:
+                note_pezzo = "   -----   "
             new_p = Particolare(p.codice, p.diametro, p.lista_utensili, p.tipo_attrezzatura, p.fase, p.lavorazione,
-                                p.programma_multiplo, p.modulo, p.fascia, fascia_multipla, p.incl_elica_dx,
-                                p.incl_elica_sx, p.inclinazione)
+                                p.programma_multiplo, p.modulo, p.fascia, p.fascia_multipla, p.incl_elica_dx,
+                                p.incl_elica_sx, p.inclinazione, note_pezzo)
             new_db.append(new_p)
         Particolari = new_db
 
@@ -1515,7 +1524,7 @@ def stampa_valori_macchina(m):
         print(f'Diametro utensile max: \n {m.diametro_max_utensile} \nLavorazione: ')
         for lav in m.lavorazione:
             print(f' {lav}')
-# Utilizzo il if one line.
+# Utilizzo l' if one line.
         print(f'Programma multiplo: \n {"Si" if m.programma_multiplo is True else "No"} \nModulo max: \n {m.modulo_max}'
               f'\nAltezza fascia max: \n {m.altezza_fascia_max} '
               f'\nInterasse min: \n {"-----" if m.interasse_min == 0 else m.interasse_min} \n'
@@ -1543,7 +1552,8 @@ def stampa_valori_particolare(p):
               f'Fascia: \n {p.fascia} \nPezzi lavorati contemporaneamente: \n {p.fascia_multipla}'
               f' \nInclinazione elica dx: \n {"-----" if p.incl_elica_dx == 0.0 else p.incl_elica_dx} \n'
               f'Inclinazione elica sx: \n {"-----" if p.incl_elica_sx == 0.0 else p.incl_elica_sx} \n'
-              f'Inclinazione conica: \n {"-----" if p.inclinazione == 0.0 else p.inclinazione}')
+              f'Inclinazione conica: \n {"-----" if p.inclinazione == 0.0 else p.inclinazione} \n'
+              f'Nota pezzo: \n {"-----" if p.note_pezzo is None else p.note_pezzo}')
     except (TypeError, AttributeError):
         print("Codice errato o inesistente")
 
