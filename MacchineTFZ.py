@@ -28,10 +28,10 @@ class Macchina:
     incl_elica_max_dx = None
     incl_elica_max_sx = None
     inclinazione_tavola = None
-    altezza_attrezzatura_max = None
+    altezza_max_start_lavorazione = None
 
     def __init__(self, c, d, m_ta, m_tu, d_max_ut, m_lav, m_prog_multi, mod_max, h_fascia_max, d_max_ing,
-                h_max_p, int_min=0, m_incl_elica_dx=30, m_incl_elica_sx=30, incl_tav=10, m_alt_att_max=300):
+                h_max_p, int_min=0, m_incl_elica_dx=30, m_incl_elica_sx=30, incl_tav=10, m_alt_max_start=300):
 
         self.codice = c
         self.diametro_range = d
@@ -48,7 +48,7 @@ class Macchina:
         self.incl_elica_max_dx = m_incl_elica_dx
         self.incl_elica_max_sx = m_incl_elica_sx
         self.inclinazione_tavola = incl_tav
-        self.altezza_attrezzatura_max = m_alt_att_max
+        self.altezza_max_start_lavorazione= m_alt_max_start
 
     def set_codice(self, c):
         self.codice = c
@@ -86,8 +86,8 @@ class Macchina:
     def set_inclinazione_tavola(self, incl_tav):
         self.inclinazione_tavola = incl_tav
 
-    def set_altezza_attrezzatura_max(self, m_alt_att_max):
-        self.altezza_attrezzatura_max = m_alt_att_max
+    def set_altezza_max_start_lavorazione(self, m_alt_max_start):
+        self.altezza_max_start_lavorazione = m_alt_max_start
 
 
 class Utensile:
@@ -225,7 +225,7 @@ Indice_attributi_macchina = {0: "codice", 1: "diametro range", 2: "interasse min
                              4: "tipo utensile", 5: "diametro max utensile", 6: "lavorazione", 7: "modulo max",
                              8: "altezza fascia max", 9: "inclinazione elica max dx",
                              10: "inclinazione elica max sx", 11: "inclinazione tavola",
-                             12: "altezza attrezzatura max", 13: "diametro max ingombro", 14: "altezza max pezzo", 15: "torna indietro"}
+                             12: "altezza max start lavorazione", 13: "diametro max ingombro", 14: "altezza max pezzo", 15: "torna indietro"}
 
 Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "lista codici utensile",
                                 3: "lista tipo attrezzatura", 4: "lista tipo utensile", 5: "fase", 
@@ -238,9 +238,9 @@ Indice_attributi_utensile = {0: "codice", 1: "tipo", 2: "diametro utensile", 3: 
 
 
 # Controlla l' altezza attrezzatura del pezzo con l' altezza attrezzatura supportata dalla macchina.
-def attrezzatura_altezza_compatibile(p_dict_att, m_alt_att_max):
+def attrezzatura_altezza_compatibile(p_dict_att, m_alt_max_start):
     for a in list(p_dict_att.values()):
-        if minore_uguale(a, m_alt_att_max):
+        if minore_uguale(a, m_alt_max_start):
             return True
     return False
 
@@ -387,7 +387,7 @@ def check_utensile(utensile):
 def compatibilita_generale(p, m, debug=False):
     if not debug:
         return attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura) and \
-            attrezzatura_altezza_compatibile(p.tipo_attrezzatura, m.altezza_attrezzatura_max) and \
+            attrezzatura_altezza_compatibile(p.tipo_attrezzatura, m.altezza_max_start_lavorazione) and \
             calcolo_interasse(p.lista_utensili, p.diametro, p.lavorazione, m.interasse_min) and \
             diametro_compatibile(p.diametro, m.diametro_range) and \
             diametro_utensile_compatibile(p.lista_utensili, m.diametro_max_utensile) and \
@@ -397,12 +397,13 @@ def compatibilita_generale(p, m, debug=False):
             minore_uguale((p.fascia * p.fascia_multipla), m.altezza_fascia_max) and \
             minore_uguale(p.inclinazione, m.inclinazione_tavola) and \
             oggetto_compatibile(p.lavorazione, m.lavorazione) and \
+            verifica_ingombro_macchina(m.diametro_max_ingombro, p.diametro_max_ingombro, p.diametro) and \
             verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo)
     else:
         risultati_incompatibili = []
         if not attrezzatura_compatibile(p.tipo_attrezzatura, m.tipo_attrezzatura):
             risultati_incompatibili.append("Attrezzatura")
-        if not attrezzatura_altezza_compatibile(p.tipo_attrezzatura, m.altezza_attrezzatura_max):
+        if not attrezzatura_altezza_compatibile(p.tipo_attrezzatura, m.altezza_max_start_lavorazione):
             risultati_incompatibili.append("Altezza attrezzatura")
         if not calcolo_interasse(p.lista_utensili, p.diametro, p.lavorazione, m.interasse_min):
             risultati_incompatibili.append("Interasse")
@@ -421,6 +422,8 @@ def compatibilita_generale(p, m, debug=False):
             risultati_incompatibili.append("Inclinazione")
         if not oggetto_compatibile(p.lavorazione, m.lavorazione):
             risultati_incompatibili.append("Lavorazione")
+        if not verifica_ingombro_macchina(m.diametro_max_ingombro, p.diametro_max_ingombro, p.diametro):
+            risultati_incompatibili.append("Ingombro")
         if not verifica_programma_multiplo(p.programma_multiplo, m.programma_multiplo):
             risultati_incompatibili.append("Programma multiplo")
         if len(risultati_incompatibili) >= 1:
@@ -526,7 +529,7 @@ def edit(cod, tipo, fs=None):
                     elif choice == 11:
                         print(f'Inclinazione tavola attuale: {m.inclinazione_tavola}')
                     elif choice == 12:
-                        print(f'Altezza attrezzatura max attuale: {m.altezza_attrezzatura_max}')
+                        print(f'Altezza attrezzatura max attuale: {m.altezza_max_start_lavorazione}')
                     elif choice == 13:
                         print(f'Diametro max ingombro attuale: {m.diametro_max_ingombro}')
                     elif choice == 14:
@@ -1050,7 +1053,9 @@ def lista_dati_necessari(tipo):
                 Inclinazione elica max dx;
                 Inclinazione elica max sx;
                 Inclinazione tavola;
-                Altezza max attrezzatura;
+                Altezza max start lavorazione;
+                Diametro max ingombro;
+                Altezza max pezzo.
 
         -----                           -----
             """)
@@ -1071,6 +1076,9 @@ def lista_dati_necessari(tipo):
                 Inclinazione elica dx;
                 Incinazione elica sx;
                 Inclinazione;
+                Diametro max ingombro;
+                Altezza totale;
+                Eventuali note.
 
        -----                           -----
               """)
@@ -1330,11 +1338,11 @@ def reinizializza_database(db):
     if isinstance(db[0], Macchina):
         for m in db:
             print(m.codice)
-            altezza_max_pezzo = float(input("Inserire valore: "))
+            altezza_max_start_lavorazione = float(input("Inserire valore: "))
             new_m = Macchina(m.codice, m.diametro_range, m.tipo_attrezzatura, m.tipo_utensile, m.diametro_max_utensile,
                              m.lavorazione, m.programma_multiplo, m.modulo_max, m.altezza_fascia_max, m.diametro_max_ingombro,
-                             altezza_max_pezzo, m.interasse_min, m.incl_elica_max_dx, m.incl_elica_max_sx, m.inclinazione_tavola,
-                             m.altezza_attrezzatura_max)
+                             m.altezza_max_pezzo, m.interasse_min, m.incl_elica_max_dx, m.incl_elica_max_sx, m.inclinazione_tavola,
+                             altezza_max_start_lavorazione)
             new_db.append(new_m)
         Macchine_TFZ_Aprilia = new_db
         save_db("macchine")
@@ -1563,7 +1571,7 @@ def stampa_valori_macchina(m):
               f'Inclinazione elica dx max: \n {"-----" if m.incl_elica_max_dx == 0 else m.incl_elica_max_dx} '
               f'\nInclinazione elica sx max: \n {"-----" if m.incl_elica_max_sx == 0 else m.incl_elica_max_sx} '
               f'\nInclinazione tavola: \n {"-----" if m.inclinazione_tavola ==0 else m.inclinazione_tavola} '
-              f'\nAltezza max start lavorazione: \n {m.altezza_attrezzatura_max} ')
+              f'\nAltezza max start lavorazione: \n {m.altezza_max_start_lavorazione} ')
     except (TypeError, AttributeError):
         print("Codice errato o inesistente")
 
@@ -1600,13 +1608,13 @@ def stampa_valori_utensile(u):
         print("Codice errato o inesistente")
 
 
-# Verifica se il particolare ha problemi con l'ingombro della macchina. Ritorna 1 in caso di errore,
-# 0 se è tutto ok.
+# Verifica se il particolare ha problemi con l'ingombro della macchina.
 def verifica_ingombro_macchina(m_ingombro, p_ingombro, p_diametro):
-    ingombro_totale = (p_ingombro/2) - (p_diametro/2)
-    if ingombro_totale > m_ingombro:
-        return 1
-    return 0
+    if p_ingombro > 0:
+        ingombro_totale = (p_ingombro/2) - (p_diametro/2)
+        if ingombro_totale > m_ingombro:
+            return False
+    return True
 
 
 # Prima toglie lo spazio dalla scelta e poi lo spezza in lista per ogni virgola,
