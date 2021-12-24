@@ -359,7 +359,7 @@ def check_scelta_menu(lista, domanda=None):
             while scelta not in range(len(lista)):
                 scelta = int(input("Scelta errata! Ripetere scelta o premere 'invio' per uscire: "))
             return lista[scelta]
-    except (ValueError, AttributeError):
+    except (ValueError, AttributeError, TypeError):
         print("Scelta errata o inesistente. \n")
         menu()
 
@@ -649,7 +649,7 @@ def edit(cod, tipo, fs=None):
                 print(f'{tipo.capitalize()} [{cod}] inesistente. Verificare presenza nel database.')
                 print("")
                 menu()
-    except (ValueError, AttributeError):
+    except (ValueError, AttributeError, TypeError):
         print("Scelta errata o inesistente. \n")
         menu()
 
@@ -868,7 +868,7 @@ def insert_database(cod, tipo, fs=None):
             inserimento_particolare(cod, fs)
         if tipo == "utensile":
             inserimento_utensile(cod)
-    except (AttributeError, ValueError):
+    except (AttributeError, ValueError, TypeError):
         print("Input errato o inesistente")
 
 
@@ -986,7 +986,7 @@ def inserimento_particolare(cod, fs):
         stampa_etichetta(indice_attrezzatura)
         ta = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
         ta = crea_dizionario_attrezzatura(ta, lav)
-        n_p = input("Inserire eventuale note pezzo: ")
+        n_p = input("Inserire eventuale note pezzo(in caso non serva, inserire 'nessuna'): ")
         p = Particolare(cod, d, d_max_ing, ls_ut, ta, fs, lav, p_m, mod, h_tot, h, fascia_multi, inc_el_dx, inc_el_sx, inc, n_p)
         stampa_valori_particolare(p)
         scelta = input("I valori inseriti sono corretti?(si, no): ")
@@ -1107,9 +1107,9 @@ def lista_diametro_utensile(codice_utensili):
 
 
 # Crea una mini lista che riempe prendendo le fasi dalla lista particolari.
-def lista_fasi(particolari):
+def lista_fasi(lista_particolari):
     l_f = []
-    for pa in particolari:
+    for pa in lista_particolari:
         l_f.append(pa.fase)
     return l_f
 
@@ -1118,26 +1118,33 @@ def lista_fasi(particolari):
 # è presente nel database_particolari. Se nella lp risultano più particolari con le cifre finali uguali, mi crea una
 # lista_codici_particolari_simili e mi stampa i codici presenti nella lista per intero, così da poter scegliere quello
 # giusto. Una volta scelto rimuove gli altri da lp.
-def lista_particolari(input_codice, db_particolari):
+def lista_particolari(input_codice, fase, db_particolari):
     lp = []
-    lista_codice_particolari_simili = []
+    ls_p_ok = []      
+    dict_part_simil = {}
+    scelta = None
+    numero = 0
     for p in db_particolari:
-        if input_codice == p.codice[-3:] or input_codice == p.codice[-4:] or input_codice == p.codice:
-            lp.append(p)
+        if input_codice in p.codice:
+            if fase in p.fase:
+                lp.append(p)
+    if len(lp) == 1:
+        return lp
     # Da qui controllo se lp contiene codici diversi con parte finale uguale.
-    if len(lp) > 1:
-        for item in lp:
-            if item.codice not in lista_codice_particolari_simili:
-                lista_codice_particolari_simili.append(item.codice)
-    if len(lista_codice_particolari_simili) > 1:
+    elif len(lp) > 1:
+        for particolare in lp:
+            if particolare.codice not in dict_part_simil:
+                dict_part_simil.update({numero: particolare.codice})
+                numero += 1
+    if len(dict_part_simil) > 1:
         print("Quale codice è quello giusto?")
-        for item in lista_codice_particolari_simili:
-            print("   " + item)
-        scelta = check_inserimento_stringhe(lista_codice_particolari_simili, "codice per intero")
-        for item in lp:
-            if item.codice != scelta:
-                lp.remove(item)
-    return lp
+        stampa_etichetta(dict_part_simil)
+        scelta = check_inserimento_indice(dict_part_simil, "scelta")[0]
+    ls_p_ok = []  
+    for p in lp:
+        if p.codice == scelta:
+            ls_p_ok.append(p)
+    return ls_p_ok
 
 
 # Funzione per il caricamento del database.
@@ -1192,17 +1199,14 @@ def load_percorso_db():
 # Funzione che scorre le 2 liste del database (macchine e particolari), e ,usando la funzione "compatibilità_generale",
 # mi stampa su quali macchine il particolare in questione è lavorabile. In questa funzione è presente anche la verifica
 # della fase del pezzo.
-def macchine_compatibili(ls_part, ls_macc, fs=None, debug=False):
+def macchine_compatibili(ls_part, ls_macc, fs, debug=False):
     lista_risultati = []
     for p in ls_part:
         for m in ls_macc:
-            if fs is None:
+            if p.fase == fs:
                 if compatibilita_generale(p, m, debug):
                     lista_risultati.append(m)
-            else:
-                if p.fase == fs:
-                    if compatibilita_generale(p, m, debug):
-                        lista_risultati.append(m)
+        print(f'----- {p.codice} -----')
         for macchina in lista_risultati:
             risultato_robot = robot_compatibile(macchina.tipo_attrezzatura, p.tipo_attrezzatura.keys())
             if risultato_robot is not None:
@@ -1255,12 +1259,9 @@ def menu():
                 scelta_particolare = input("Inserire codice particolare ( inserire codice completo o "
                                            "ultime 3 o 4 cifre): ")
                 scelta_fase_particolare = input("Inserire fase particolare: ")
-                scelta_particolare = lista_particolari(scelta_particolare, Particolari)
-                p = None
+                scelta_particolare = lista_particolari(scelta_particolare, scelta_fase_particolare, Particolari)
                 for part in scelta_particolare:
-                    if part.fase == scelta_fase_particolare:
-                        p = part
-                stampa_valori_particolare(p)
+                    stampa_valori_particolare(part)
             elif scelta == "Stampa attributi utensile":
                 scelta = input("Inserire codice utensile: ")
                 u = get_utensile(scelta)
@@ -1470,17 +1471,13 @@ def scelta_tipo_inserimento(scelta):
         scelta_tipo = check_scelta_menu(lista_tipo)
         if scelta_tipo == "particolare":
             scelta_codice = input("Inserire codice particolare (inserire codice completo o ultime 3 o 4 cifre): ")
-            scelta_fase = input("Inserire fase: ")
-            scelta_codice = lista_particolari(scelta_codice, Particolari)
-            if len(scelta_codice) == 1:
-                scelta_codice = scelta_codice[0]
-            else:
-                for part in scelta_codice:
-                    if part.fase == scelta_fase:
-                        scelta_codice = part
+            fase = input("Inserire fase: ")
+            scelta_codice = lista_particolari(scelta_codice, fase, Particolari)
+            for part in scelta_codice:
+                scelta_codice = part
             continua = "si"
             while continua == "si":
-                edit(scelta_codice, scelta_tipo, scelta_fase)
+                edit(scelta_codice, scelta_tipo, fase)
                 continua = check_scelta_menu(["si", "no"], "Desideri effettuare altre modifiche?")
         else:
             scelta_codice = input("Inserire codice: ").replace("-", "_")
@@ -1493,15 +1490,11 @@ def scelta_tipo_inserimento(scelta):
         scelta_tipo = check_scelta_menu(lista_tipo)
         if scelta_tipo == "particolare":
             scelta_codice = input("Inserire codice particolare (inserire codice completo o ultime  3 o 4 cifre): ")
-            scelta_fase = input("Inserire fase: ")
-            scelta_codice = lista_particolari(scelta_codice, Particolari)
-            if len(scelta_codice) == 1:
-                scelta_codice = scelta_codice[0]
-            else:
-                for part in scelta_codice:
-                    if part.fase == scelta_fase:
-                        scelta_codice = part
-            remove(scelta_codice, scelta_tipo, scelta_fase)
+            fase = input("Inserire fase: ")
+            scelta_codice = lista_particolari(scelta_codice, fase, Particolari)
+            for part in scelta_codice:
+                scelta_codice = part
+            remove(scelta_codice, scelta_tipo, fase)
         else:
             try:
                 scelta_codice = input("Inserire codice: ").replace("-", "_")
@@ -1628,19 +1621,10 @@ def valuta_input_testo(scelta, lista):
 # Usa macchine compatibili per verificare su quali macchine è possibile lavorare il particolare.
 def verifica_compatibilita(debug=False):
     codice = input("Inserire codice particolare (inserire codice completo o ultime 3 o 4 cifre): ")
-    mini_lista = lista_particolari(codice, Particolari)
+    fase = input("Inserire fase: ")
+    mini_lista = lista_particolari(codice, fase, Particolari)
     if len(mini_lista) == 1:
-        macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fs=None, debug=debug)
-    elif len(mini_lista) > 1:
-        print("Il codice presenta più fasi. Quale intendi scegliere?")
-        li_fa = lista_fasi(mini_lista)
-        for fs in li_fa:
-            print("   " + fs)
-        fase = check_inserimento_stringhe(li_fa, "fase")
-        if fase in li_fa:
-            for particolare in mini_lista:
-                if particolare.fase == fase:
-                    macchine_compatibili([particolare], Macchine_TFZ_Aprilia, fase, debug)
+        macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fase, debug=debug)
     else:
         print("Particolare non presente nel database.")
 
@@ -1651,11 +1635,11 @@ def verifica_se_macchina_lavora_particolare():
     m = get_macchina(scelta_macchina)
     if isinstance(m, Macchina):
         scelta_particolare = input("Inserire codice particolare ( inserire codice completo o ultime 3 o 4 cifre): ")
-        scelta_fase_particolare = input("Inserire fase particolare: ")
-        particolare = lista_particolari(scelta_particolare, Particolari)
+        fase = input("Inserire fase particolare: ")
+        particolare = lista_particolari(scelta_particolare, fase, Particolari)
         for part in particolare:
             particolare = part.codice
-        p = get_particolare(particolare, scelta_fase_particolare)
+        p = get_particolare(particolare, fase)
         if isinstance(p, Particolare):
             x = compatibilita_generale(p, m)
             if x is True:
@@ -1678,6 +1662,19 @@ def verifica_particolari_lavorati_da_utensile(cod):
     else:
         print(f'Il codice [{cod}] non è nel db')
         return None
+
+
+# Qualcosa@TODO
+def verifica_presenza_manine(p_ls_manine_pezzo):
+    global Macchine_TFZ_Aprilia
+    
+    WF200 = ["15_15", "15_16", "15_17"]
+    Samputensili = ["15_24", "15-25", "15_18"]
+    Liebherr = ["15_52", "15_54", "15_56", "20_52", "20_53"] 
+    
+    for macchina in Macchine_TFZ_Aprilia:
+        for manine in p_ls_manine_pezzo:
+            pass
 
 
 # Verifica se il particolare richiede un programma multiplo e ritorna True o False.
