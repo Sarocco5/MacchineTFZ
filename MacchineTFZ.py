@@ -14,6 +14,7 @@ import yaml
 
 class Macchina:
     codice = None
+    modello_macchina = None
     diametro_range = ()
     tipo_attrezzatura = []
     tipo_utensile = []
@@ -30,10 +31,11 @@ class Macchina:
     inclinazione_tavola = None
     altezza_max_start_lavorazione = None
 
-    def __init__(self, c, d, m_ta, m_tu, d_max_ut, m_lav, m_prog_multi, mod_max, h_fascia_max, d_max_ing,
+    def __init__(self, c, m_m, d, m_ta, m_tu, d_max_ut, m_lav, m_prog_multi, mod_max, h_fascia_max, d_max_ing,
                 h_max_p, int_min=0, m_incl_elica_dx=30, m_incl_elica_sx=30, incl_tav=10, m_alt_max_start=300):
 
         self.codice = c
+        self.modello_macchina = m_m
         self.diametro_range = d
         self.tipo_attrezzatura = m_ta
         self.tipo_utensile = m_tu
@@ -52,6 +54,9 @@ class Macchina:
 
     def set_codice(self, c):
         self.codice = c
+
+    def set_modello_macchina(self, m_m):
+        self.modello_macchina = m_m
 
     def set_diametro(self, d):
         self.diametro_range = d
@@ -209,6 +214,8 @@ Particolari = []
 modalità_lettura = False
 
 
+indice_modello_macchina = {1: "WF200", 2: "WF250", 3: "Samputensili", 4: "Liebherr", 5: "Cima", 6: "Gleason", 7: "Pfauter", 8: "Demm", 9: "Lorenz"}
+
 indice_attrezzatura = {1: "palo", 2: "pinza", 3: "pinza alberi", 4: "corpo porta pinza", 5: "manuale",
                        6: "contropunta", 7: "slitta elicoidale", 8: "robot"}
 
@@ -225,7 +232,7 @@ Indice_attributi_macchina = {0: "codice", 1: "diametro range", 2: "interasse min
                              4: "tipo utensile", 5: "diametro max utensile", 6: "lavorazione", 7: "modulo max",
                              8: "altezza fascia max", 9: "inclinazione elica max dx",
                              10: "inclinazione elica max sx", 11: "inclinazione tavola",
-                             12: "altezza max start lavorazione", 13: "diametro max ingombro", 14: "altezza max pezzo", 15: "torna indietro"}
+                             12: "altezza max start lavorazione", 13: "diametro max ingombro", 14: "altezza max pezzo", 15: "modello macchina", 16: "torna indietro"}
 
 Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "lista codici utensile",
                                 3: "lista tipo attrezzatura", 4: "lista tipo utensile", 5: "fase", 
@@ -507,12 +514,15 @@ def edit(cod, tipo, fs=None):
                     massimo = int(input("Inserire valore massimo: "))
                     m.set_diametro((minimo, massimo))
                 # Controllo se la modifica è di tipo str.
-                elif choice == 0:
-                    print(f'Codice attuale: {m.codice}')
+                elif choice in [0, 15]:
+                    if choice == 0:
+                        print(f'Codice attuale: {m.codice}')
+                    elif choice == 15:
+                        print(f'Modello macchina attuale: {m.modello_macchina}')
                     scelta_utente = input("Inserire la modifica: ")
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                     getattr(m, "set_" + Indice_attributi_macchina[choice].replace(" ", "_"))(scelta_utente)
-                # Controllo se la modifica è di tipo int.
+                # Controllo se la modifica è di tipo float.
                 elif choice in [2, 5, 7, 8, 9, 10, 11, 12, 13]:
                     if choice == 2:
                         print(f'Interasse minimo attuale: {m.interasse_min}')
@@ -537,7 +547,7 @@ def edit(cod, tipo, fs=None):
                     scelta_utente = float(input("Inserire la modifica: "))
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                     getattr(m, "set_" + Indice_attributi_macchina[choice].replace(" ", "_"))(scelta_utente)
-                elif choice == 15:
+                elif choice == 16:
                     print(" ")
                     menu()
                 else:
@@ -879,6 +889,13 @@ def inserimento_macchina(cod):
         print(f'La macchina "{cod}" è presente nel database.')
     else:
         print(f'Inserire valori macchina "{cod}"')
+        m_m = input("Inserire il modello della macchina: ")
+        if m_m not in indice_modello_macchina:
+            print("Il modello inserito risulta nuovo, inserirlo nella lista!")
+            print(indice_modello_macchina[-1])
+            nuova_chiave = input("Inserire nuovo indice:")
+            nuovo_valore = input("Inserire nuovo modello:")
+            indice_modello_macchina.update({nuova_chiave: nuovo_valore})
         d_min = float(input("Inserire diametro minimo: "))
         d_max = float(input("Inserire diametro massimo: "))
         d = (d_min, d_max)
@@ -905,7 +922,7 @@ def inserimento_macchina(cod):
                                     "(per le dentatrici) o 0 (per le stozze) se non necessario): "))
         inc_tav = float(input("Inserire inclinazione tavola (inserire 0 se non necessario): "))
         alt_att_max = float(input("Inserire altezza attrezzatura massima(inserire 300 se non necessario): "))
-        m = Macchina(cod, d, att, t_u, d_max_u, lav, p_m,  mod_max, h_max, d_max_ing,
+        m = Macchina(cod, m_m, d, att, t_u, d_max_u, lav, p_m,  mod_max, h_max, d_max_ing,
                      h_max_p, int_min, inc_el_max_dx, inc_el_max_sx, inc_tav, alt_att_max)
         stampa_valori_macchina(m)
         scelta = input("I valori inseriti sono corretti?(si, no): ")
@@ -1115,22 +1132,23 @@ def lista_fasi(lista_particolari):
 
 
 # Creo una lista vuota da riempire con il codice che metto tramite l' input, che mi servirà per vedere se il codice è
-# è presente nel database_particolari. Se nella lp risultano più particolari con le cifre finali uguali, mi crea una
+# è presente nel database_particolari. Se nella lp risultano più particolari con le cifre che ho inserito simili, mi crea una
 # lista_codici_particolari_simili e mi stampa i codici presenti nella lista per intero, così da poter scegliere quello
-# giusto. Una volta scelto rimuove gli altri da lp.
+# giusto.
 def lista_particolari(input_codice, fase, db_particolari):
     lp = []
     ls_p_ok = []      
     dict_part_simil = {}
     scelta = None
     numero = 0
+
     for p in db_particolari:
         if input_codice in p.codice:
             if fase in p.fase:
                 lp.append(p)
     if len(lp) == 1:
         return lp
-    # Da qui controllo se lp contiene codici diversi con parte finale uguale.
+    # Da qui controllo se lp contiene codici simili e creo un dizionario che vado a riempire con i codici simili.
     elif len(lp) > 1:
         for particolare in lp:
             if particolare.codice not in dict_part_simil:
@@ -1140,7 +1158,6 @@ def lista_particolari(input_codice, fase, db_particolari):
         print("Quale codice è quello giusto?")
         stampa_etichetta(dict_part_simil)
         scelta = check_inserimento_indice(dict_part_simil, "scelta")[0]
-    ls_p_ok = []  
     for p in lp:
         if p.codice == scelta:
             ls_p_ok.append(p)
@@ -1339,11 +1356,11 @@ def reinizializza_database(db):
     if isinstance(db[0], Macchina):
         for m in db:
             print(m.codice)
-            altezza_max_start_lavorazione = float(input("Inserire valore: "))
-            new_m = Macchina(m.codice, m.diametro_range, m.tipo_attrezzatura, m.tipo_utensile, m.diametro_max_utensile,
+            modello_macchina = input("Inserire valore: ")
+            new_m = Macchina(m.codice, modello_macchina, m.diametro_range, m.tipo_attrezzatura, m.tipo_utensile, m.diametro_max_utensile,
                              m.lavorazione, m.programma_multiplo, m.modulo_max, m.altezza_fascia_max, m.diametro_max_ingombro,
                              m.altezza_max_pezzo, m.interasse_min, m.incl_elica_max_dx, m.incl_elica_max_sx, m.inclinazione_tavola,
-                             altezza_max_start_lavorazione)
+                             m.altezza_max_start_lavorazione)
             new_db.append(new_m)
         Macchine_TFZ_Aprilia = new_db
         save_db("macchine")
@@ -1548,7 +1565,8 @@ def stampa_database(lista):
 # Stampa gli attributi della macchina.
 def stampa_valori_macchina(m):
     try:
-        print(f'Codice: \n {m.codice} \nDiametro min-max: \n{m.diametro_range} \nLista attrezzatura: ')
+        print(f'Codice: \n {m.codice} \nModello macchina: \n {m.modello_macchina} \nDiametro min-max: \n {m.diametro_range} '
+              '\nLista attrezzatura: ')
         for a in m.tipo_attrezzatura:
             print(f' {a}')
         print(f'Lista utensili: ')
@@ -1649,6 +1667,7 @@ def verifica_se_macchina_lavora_particolare():
     else:
         print(f'Macchina [{scelta_macchina}] non presente nel db!')
 
+
 # Verifica quali particolari l'utensile lavora e stampa una lista di particolari che usano l' utensile selezionato.
 def verifica_particolari_lavorati_da_utensile(cod):
     u = get_utensile(cod)
@@ -1664,17 +1683,10 @@ def verifica_particolari_lavorati_da_utensile(cod):
         return None
 
 
-# Qualcosa@TODO
-def verifica_presenza_manine(p_ls_manine_pezzo):
-    global Macchine_TFZ_Aprilia
-    
-    WF200 = ["15_15", "15_16", "15_17"]
-    Samputensili = ["15_24", "15-25", "15_18"]
-    Liebherr = ["15_52", "15_54", "15_56", "20_52", "20_53"] 
-    
-    for macchina in Macchine_TFZ_Aprilia:
-        for manine in p_ls_manine_pezzo:
-            pass
+# Controlla se il particolare ha le manine per quel tipo di macchina, perché ci possono essere particolari che possono
+# essere lavorati su una macchina ma non esistono manine per poterceli fare.
+def verifica_presenza_manine(m_tipo_macchina, p_tipo_manine):
+    return m_tipo_macchina == p_tipo_manine
 
 
 # Verifica se il particolare richiede un programma multiplo e ritorna True o False.
