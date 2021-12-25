@@ -131,6 +131,7 @@ class Particolare:
     diametro_max_ingombro = None
     lista_utensili = []
     tipo_attrezzatura = {}
+    lista_manine_attrezzatura_varia = []
     fase = None
     lavorazione = []
     programma_multiplo = None
@@ -143,13 +144,14 @@ class Particolare:
     inclinazione = 0.0
     note_pezzo = None
 
-    def __init__(self, c, d, d_max_ing, ls_ut, p_ta, p_f, p_lav, p_prog_multi, mod, h_tot, fascia, fascia_multi,
+    def __init__(self, c, d, d_max_ing, ls_ut, p_ta, p_m_att_var, p_f, p_lav, p_prog_multi, mod, h_tot, fascia, fascia_multi,
                  p_incl_elica_dx, p_incl_elica_sx, incl, n_p):
         self.codice = c
         self.diametro = d
         self.diametro_max_ingombro = d_max_ing
         self.lista_utensili = ls_ut
         self.tipo_attrezzatura = p_ta
+        self.lista_manine_attrezzatura_varia = p_m_att_var
         self.fase = p_f
         self.lavorazione = p_lav
         self.programma_multiplo = p_prog_multi
@@ -173,6 +175,9 @@ class Particolare:
 
     def set_lista_utensili(self, ls_ut):
         self.lista_utensili = ls_ut
+    
+    def set_lista_manine_attrezzatura_varia(self, p_m_att_var):
+        self.lista_manine_attrezzatura_varia = p_m_att_var
 
     def set_fase(self, fs):
         self.fase = fs
@@ -238,7 +243,8 @@ Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "lista codici ute
                                 3: "lista tipo attrezzatura", 4: "lista tipo utensile", 5: "fase", 
                                 6: "lavorazione", 7: "modulo", 8: "fascia", 9: "fascia multipla",
                                 10: "inclinazione elica dx", 11: "inclinazione elica sx", 12: "inclinazione",
-                                13: "note pezzo", 14: "diametro max ingombro", 15: "altezza totale", 16: "torna indietro"}
+                                13: "note pezzo", 14: "diametro max ingombro", 15: "altezza totale", 
+                                16: "manine attrezzatura varia", 17: "torna indietro"}
 
 Indice_attributi_utensile = {0: "codice", 1: "tipo", 2: "diametro utensile", 3: "senso elica",
                              4: "inclinazione elica", 5: "torna indietro"}
@@ -577,7 +583,7 @@ def edit(cod, tipo, fs=None):
                 if scelta in [3]:
                     edit_dizionario_attrezzatura_particolare(p)
                 # Controllo se la modifica riguarda una lista.
-                elif scelta in [2, 6]:
+                elif scelta in [2, 6, 16]:
                     edit_lista(p, scelta)
                 # Controllo se la modifica è di tipo float.
                 elif scelta in [1, 7, 8, 9, 14, 15]:
@@ -607,7 +613,7 @@ def edit(cod, tipo, fs=None):
                     scelta_utente = input("Inserire la modifica: ")
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                     getattr(p, "set_" + Indice_attributi_particolare[scelta].replace(" ", "_"))(scelta_utente)
-                elif scelta == 16:
+                elif scelta == 17:
                     print(" ")
                     menu()
                 else:
@@ -756,7 +762,7 @@ def edit_lista(oggetto, choice):
                 ls_ut.append(u.codice)
             oggetto.set_lista_utensili(ls_ut)
         # Scelta tipo lavorazione per il particolare.
-        if choice == 7:
+        elif choice == 6:
             if operazione == "aggiungere":
                 stampa_etichetta(indice_lavorazioni)
                 print(f'Lavorazioni attuali')
@@ -773,6 +779,23 @@ def edit_lista(oggetto, choice):
                 valore = check_inserimento_indice(dict_lav, "lavorazioni")
                 for i in valore:
                     oggetto.lavorazione.remove(i)
+        elif choice == 16:
+            if operazione == "aggiungere":
+                stampa_etichetta(indice_modello_macchina)
+                print("Maniene - attrezzatura attuale")
+                for att in oggetto.lista_manine_attrezzatura_varia:
+                    print(f' - {att}')
+                valore = check_inserimento_indice(indice_modello_macchina, "manine - attrezzatura varia")
+                for i in valore:
+                    oggetto.lista_manine_attrezzatura_varia.append(i)
+            elif operazione == "rimuovere":
+                dict_m_att_var = {}
+                for i, k in enumerate(oggetto.lista_manine_attrezzatura_varia):
+                    dict_m_att_var[i] = k
+                stampa_etichetta(dict_m_att_var)
+                valore = check_inserimento_indice(indice_modello_macchina, "manine - attrezzatura varia")
+                for i in valore:
+                    oggetto.lista_manine_attrezzatura_varia.remove(i)
 
 
 # Funzione per modificare il percorso dei file pickle tramite la modifica dei file yaml.
@@ -1003,8 +1026,9 @@ def inserimento_particolare(cod, fs):
         stampa_etichetta(indice_attrezzatura)
         ta = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
         ta = crea_dizionario_attrezzatura(ta, lav)
-        n_p = input("Inserire eventuale note pezzo(in caso non serva, inserire 'nessuna'): ")
-        p = Particolare(cod, d, d_max_ing, ls_ut, ta, fs, lav, p_m, mod, h_tot, h, fascia_multi, inc_el_dx, inc_el_sx, inc, n_p)
+        p_m_att_var = check_inserimento_indice(indice_modello_macchina, "manine - attrezzatura varia")
+        n_p = input("Inserire eventuale note pezzo(in caso non serve, inserire 'nessuna'): ")
+        p = Particolare(cod, d, d_max_ing, ls_ut, ta, p_m_att_var, fs, lav, p_m, mod, h_tot, h, fascia_multi, inc_el_dx, inc_el_sx, inc, n_p)
         stampa_valori_particolare(p)
         scelta = input("I valori inseriti sono corretti?(si, no): ")
         if scelta == "si":
@@ -1352,7 +1376,6 @@ def reinizializza_database(db):
     global Utensili
     global Particolari
     new_db = []
-    # Impostata per modificare in int interasse_min.
     if isinstance(db[0], Macchina):
         for m in db:
             print(m.codice)
@@ -1367,13 +1390,14 @@ def reinizializza_database(db):
     if isinstance(db[0], Utensile):
         # Funzione non ancora implementata.
         pass
-    # Impostata per aggiungere l' attributo "fascia_multipla".
     if isinstance(db[0], Particolare):
         for p in db:
             print(p.codice)
-            altezza_partenza_dentatura = float(input("Inserire valore: "))
-            new_p = Particolare(p.codice, p.diametro, p.diametro_max_ingombro, p.lista_utensili, p.tipo_attrezzatura, p.fase, p.lavorazione,
-                                p.programma_multiplo, p.modulo, p.altezza_totale, p.fascia, altezza_partenza_dentatura, p.fascia_multipla, p.incl_elica_dx,
+            lista_manine_attrezzatura_varia = []
+            manine_attrezzatura_varia = input("Inserire valore: ")
+            lista_manine_attrezzatura_varia.append(manine_attrezzatura_varia)
+            new_p = Particolare(p.codice, p.diametro, p.diametro_max_ingombro, p.lista_utensili, p.tipo_attrezzatura, lista_manine_attrezzatura_varia, p.fase, p.lavorazione,
+                                p.programma_multiplo, p.modulo, p.altezza_totale, p.fascia, p.fascia_multipla, p.incl_elica_dx,
                                 p.incl_elica_sx, p.inclinazione, p.note_pezzo)
             new_db.append(new_p)
         Particolari = new_db
@@ -1597,9 +1621,15 @@ def stampa_valori_particolare(p):
         print(f'Lista attrezzatura: \nAttrezzatura: Altezza start inizio lavorazione')
         for a in p.tipo_attrezzatura:
             print(f' {a}: {p.tipo_attrezzatura.get(a)}')
+        print("Manine:")
+        if len(p.lista_manine_attrezzatura_varia) == 0:
+            print(" -----")
+        else:
+            for a in p.lista_manine_attrezzatura_varia:
+                print(f' {a}')
         print(f'Fase: \n {p.fase} \nLavorazione: ')
         for lav in p.lavorazione:
-            print(f' {lav}')
+            print(f'{lav}')
         print(f'Programma multiplo: \n {"Si" if p.programma_multiplo is True else "No" } \nModulo: \n {p.modulo} \n'
               f'Altezza totale pezzo: \n {p.altezza_totale} \nFascia: \n {p.fascia} \nPezzi lavorati contemporaneamente: \n {p.fascia_multipla}'
               f' \nInclinazione elica dx: \n {"-----" if p.incl_elica_dx == 0.0 else p.incl_elica_dx} \n'
@@ -1683,7 +1713,7 @@ def verifica_particolari_lavorati_da_utensile(cod):
         return None
 
 
-# Controlla se il particolare ha le manine per quel tipo di macchina, perché ci possono essere particolari che possono
+# Controlla se il particolare ha le manine o altra attrezzatura per quel tipo di macchina, perché ci possono essere particolari che possono
 # essere lavorati su una macchina ma non esistono manine per poterceli fare.
 def verifica_presenza_manine(m_tipo_macchina, p_tipo_manine):
     return m_tipo_macchina == p_tipo_manine
