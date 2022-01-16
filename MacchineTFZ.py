@@ -1153,6 +1153,14 @@ def inserimento_utensile(cod):
             print("Scelta sbagliata")
 
 
+# Licenza programma
+def license():
+    print(f'''
+            L'autore di questo programma è Alessandro Ceccarelli che detiene la proprietà intellettuale del codice, protetto da licenza CCPL.
+            Link alla linceza:
+            https://github.com/Sarocco5/MacchineTFZ/blob/master/LICENSE.md 
+            ''')
+
 # Lista dei dati necessari all'inserimento del tipo di oggetto.
 def lista_dati_necessari(tipo):
     if tipo == "macchina":
@@ -1900,6 +1908,7 @@ def verifica_programma_multiplo(p_pm, m_pm):
 
 
 if __name__ == '__main__':
+    license()
     utente = input("Inserire nome utente: ")
     data()
     menu()
