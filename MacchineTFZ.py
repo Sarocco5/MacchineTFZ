@@ -927,6 +927,7 @@ def inclinazione_compatibile(lista_utensili, p_lav, p_inc_el_dx, p_inc_el_sx, in
     for cod_ut in lista_utensili:
         u = get_utensile(cod_ut)
         ls_ut.append(u)
+
     for utensile in ls_ut:
         risultato_inclinazione = calcolo_inclinazione(utensile.senso_elica, utensile.inclinazione_elica,
                                                       p_lav, p_inc_el_dx, p_inc_el_sx)
@@ -935,6 +936,7 @@ def inclinazione_compatibile(lista_utensili, p_lav, p_inc_el_dx, p_inc_el_sx, in
     for u_cod, u_incl in inclinazione_utensili.items():
         if u_incl is None:
             u_incl= 0
+            ls_ut_comp.append(u_cod)
         elif p_inc_el_dx != 0 and p_inc_el_sx == 0:
             if u_incl <= incl_elica_max_dx:
                 ls_ut_comp.append(u_cod)
