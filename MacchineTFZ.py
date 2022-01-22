@@ -945,11 +945,10 @@ def inclinazione_compatibile(lista_utensili, p_lav, p_inc_el_dx, p_inc_el_sx, in
                 ls_ut_comp.append(u_cod)
         elif p_inc_el_dx == 0 and p_inc_el_sx == 0:
             u = get_utensile(u_cod)
-            print(f'{u.cod}----{u.senso_elica}')
             if u.senso_elica == "dx" and u_incl <= incl_elica_max_dx:
-                ls_ut_comp.append(u)
+                ls_ut_comp.append(u.codice)
             if u.senso_elica == "sx" and u_incl <= incl_elica_max_sx:
-                ls_ut_comp.append(u)
+                ls_ut_comp.append(u.codice)
     if return_dettagliato == False:
         if len(ls_ut_comp) < 0:
             return False
