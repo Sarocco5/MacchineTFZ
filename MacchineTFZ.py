@@ -158,10 +158,11 @@ class Particolare:
     incl_elica_dx = 0.0
     incl_elica_sx = 0.0
     inclinazione = 0.0
+    sbavaturaMPM = None
     note_pezzo = None
 
     def __init__(self, c, d, d_max_ing, ls_ut, p_ta, p_m_att_var, p_f, p_lav, p_prog_multi, mod, h_tot, fascia, fascia_multi,
-                 p_incl_elica_dx, p_incl_elica_sx, incl, n_p):
+                 p_incl_elica_dx, p_incl_elica_sx, incl, sbav_mpm, n_p):
         self.codice = c
         self.diametro = d
         self.diametro_max_ingombro = d_max_ing
@@ -178,6 +179,7 @@ class Particolare:
         self.incl_elica_dx = p_incl_elica_dx
         self.incl_elica_sx = p_incl_elica_sx
         self.inclinazione = incl
+        self.sbavaturaMPM = sbav_mpm
         self.note_pezzo = n_p
 
     def set_codice(self, c):
@@ -224,6 +226,9 @@ class Particolare:
 
     def rimuovi_utensile(self, cod):
         self.lista_utensili.remove(cod)
+    
+    def set_sbavaturaMPM(self, sbav_mpm):
+        self.sbavaturaMPM = sbav_mpm
 
     def set_note_pezzo(self, n_p):
         self.note_pezzo = n_p
@@ -264,7 +269,7 @@ Indice_attributi_particolare = {0: "codice", 1: "diametro", 2: "lista utensili",
                                 6: "lavorazione", 7: "modulo", 8: "fascia", 9: "fascia multipla",
                                 10: "inclinazione elica dx", 11: "inclinazione elica sx", 12: "inclinazione",
                                 13: "note pezzo", 14: "diametro max ingombro", 15: "altezza totale", 
-                                16: "manine attrezzatura varia", 17: "torna indietro"}
+                                16: "manine attrezzatura varia", 17: "sbavaturaMPM", 18: "torna indietro"}
 
 Indice_attributi_utensile = {0: "codice", 1: "tipo", 2: "diametro utensile", 3: "senso elica",
                              4: "inclinazione elica", 5: "principi", 6: "torna indietro"}
@@ -659,10 +664,12 @@ def edit(cod, tipo, fs=None):
                         print(f'Fase attuale: {p.fase}')
                     elif scelta == 13:
                         print(f'Nota pezzo attuale: {p.note_pezzo}')
+                    elif scelta == 17:
+                        print(f'SbavaturaMPM: {p.sbavaturaMPM}')
                     scelta_utente = input("Inserire la modifica: ")
                     # Questa voce prende l' attributo, che scelgo tramite input [scelta], da un dizionario.
                     getattr(p, "set_" + Indice_attributi_particolare[scelta].replace(" ", "_"))(scelta_utente)
-                elif scelta == 17:
+                elif scelta == 18:
                     print(" ")
                     menu()
                 else:
@@ -1105,8 +1112,9 @@ def inserimento_particolare(cod, fs):
         ta = check_inserimento_indice(indice_attrezzatura, "attrezzatura")
         ta = crea_dizionario_attrezzatura(ta, lav)
         p_m_att_var = check_inserimento_indice(indice_modello_macchina, "manine - attrezzatura varia")
+        sbav_mpm = input("Il particolare ha la sbavaturaMPM?(si,no): ").strip()
         n_p = input("Inserire eventuale note pezzo(in caso non serve, inserire 'nessuna'): ")
-        p = Particolare(cod, d, d_max_ing, ls_ut, ta, p_m_att_var, fs, lav, p_m, mod, h_tot, h, fascia_multi, inc_el_dx, inc_el_sx, inc, n_p)
+        p = Particolare(cod, d, d_max_ing, ls_ut, ta, p_m_att_var, fs, lav, p_m, mod, h_tot, h, fascia_multi, inc_el_dx, inc_el_sx, inc, sbav_mpm, n_p)
         stampa_valori_particolare(p)
         scelta = input("I valori inseriti sono corretti?(si, no): ")
         if scelta == "si":
@@ -1536,13 +1544,11 @@ def reinizializza_database(db):
         save_db("utensili")
     if isinstance(db[0], Particolare):
         for p in db:
-            print(p.codice)
-            lista_manine_attrezzatura_varia = []
-            manine_attrezzatura_varia = input("Inserire valore: ")
-            lista_manine_attrezzatura_varia.append(manine_attrezzatura_varia)
-            new_p = Particolare(p.codice, p.diametro, p.diametro_max_ingombro, p.lista_utensili, p.tipo_attrezzatura, lista_manine_attrezzatura_varia, p.fase, p.lavorazione,
+            print(p.codice, p.fase)
+            sbavaturaMPM = input("Inserire valore: ")
+            new_p = Particolare(p.codice, p.diametro, p.diametro_max_ingombro, p.lista_utensili, p.tipo_attrezzatura, p.lista_manine_attrezzatura_varia, p.fase, p.lavorazione,
                                 p.programma_multiplo, p.modulo, p.altezza_totale, p.fascia, p.fascia_multipla, p.incl_elica_dx,
-                                p.incl_elica_sx, p.inclinazione, p.note_pezzo)
+                                p.incl_elica_sx, p.inclinazione, sbavaturaMPM, p.note_pezzo)
             new_db.append(new_p)
         Particolari = new_db
         save_db("particolari")
@@ -1796,6 +1802,7 @@ def stampa_valori_particolare(p):
               f' \nInclinazione elica dx: \n {"-----" if p.incl_elica_dx == 0.0 else p.incl_elica_dx} \n'
               f'Inclinazione elica sx: \n {"-----" if p.incl_elica_sx == 0.0 else p.incl_elica_sx} \n'
               f'Inclinazione conica: \n {"-----" if p.inclinazione == 0.0 else p.inclinazione} \n'
+              f'Sbavatura MPM: \n {p.sbavaturaMPM} \n'
               f'Nota pezzo: \n {"-----" if p.note_pezzo is None else p.note_pezzo}')
     except (TypeError, AttributeError):
         print("Codice errato o inesistente")
