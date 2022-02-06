@@ -11,8 +11,6 @@ import re
 import time
 # Modulo per gestire percorsi di filesystem.
 from pathlib import PureWindowsPath
-from tkinter import E
-from traceback import print_tb
 # Modulo per manipolare file .yaml
 import yaml
 
