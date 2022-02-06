@@ -1,4 +1,5 @@
 # Modulo che salva il database in file "pickle".
+from cmath import e
 import pickle
 # Modulo che mantiene una lista ordinata senza dover chiamare una operazione di ordinamento ogni volta che un elemento
 # viene aggiunto alla lista.
@@ -10,6 +11,8 @@ import re
 import time
 # Modulo per gestire percorsi di filesystem.
 from pathlib import PureWindowsPath
+from tkinter import E
+from traceback import print_tb
 # Modulo per manipolare file .yaml
 import yaml
 
@@ -346,18 +349,24 @@ def check_inserimento_dati(lista, tipo):
 # Funzione che lavora con i dizionari. Crea una lista con le scelte numeriche, poi crea una lista vuota che riempe con
 # le scelte se sono presenti nel dizionario. Ritorna la lista riempita con le scelte.
 def check_inserimento_indice(elenco, tipo):
-    scelta = input(f'Inserire {tipo} (inserire il numero corrispondente ed utilizzare virgola per scelte multiple): ')
+    scelta = input(f'Inserire {tipo} (inserire il numero corrispondente ed utilizzare virgola per scelte multiple): ').replace(".", ",")
     scelte = crea_lista_da_stringa(scelta)
     lista_tipo = []
     try:
         for scelta in scelte:
             if isinstance(elenco, dict):
                 q = elenco.get(int(scelta))
+                if q is not None:
+                    lista_tipo.append(q)
             else:
                 q = elenco[(int(scelta))]
-        if q is not None:
-            lista_tipo.append(q)
-        return lista_tipo
+                if q is not None:
+                    lista_tipo.append(q)
+        if len(lista_tipo) >0:
+            return lista_tipo
+        else:
+            print("Inseriti valori errati! \n")
+            menu()
     except ValueError:
         print("Input errato. \n")
         menu()
@@ -994,15 +1003,10 @@ def inserimento_macchina(cod):
         print(f'La macchina "{cod}" è presente nel database.')
     else:
         print(f'Inserire valori macchina "{cod}"')
-        m_m = input("Inserire il modello della macchina: ")
-        if m_m not in indice_modello_macchina:
-            print("Il modello inserito risulta nuovo, inserirlo nella lista!")
-            print(indice_modello_macchina[-1])
-            nuova_chiave = input("Inserire nuovo indice:")
-            nuovo_valore = input("Inserire nuovo modello:")
-            indice_modello_macchina.update({nuova_chiave: nuovo_valore})
+        stampa_etichetta(indice_modello_macchina)
+        m_m = check_inserimento_indice(indice_modello_macchina, "modello macchina")[0]
         stampa_etichetta(indice_tipo_macchina)
-        t_m = check_inserimento_indice(indice_tipo_macchina, "tipo macchina: ")
+        t_m = check_inserimento_indice(indice_tipo_macchina, "tipo macchina: ")[0]
         d_min = float(input("Inserire diametro minimo: "))
         d_max = float(input("Inserire diametro massimo: "))
         d = (d_min, d_max)
@@ -1029,7 +1033,7 @@ def inserimento_macchina(cod):
         inc_el_max_sx = float(input("Inserire inclinazione elica dx massima (inserire 30 "
                                     "(per le dentatrici) o 0 (per le stozze) se non necessario): "))
         inc_tav = float(input("Inserire inclinazione tavola (inserire 0 se non necessario): "))
-        alt_att_max = float(input("Inserire altezza attrezzatura massima(inserire 300 se non necessario): "))
+        alt_att_max = float(input("Inserire max start lavorazione (inserire 400 se non necessario): "))
         m = Macchina(cod, m_m, t_m, d, att, t_u, d_max_u, p_max_ut, lav, p_m,  mod_max, h_max, d_max_ing,
                      h_max_p, int_min, inc_el_max_dx, inc_el_max_sx, inc_tav, alt_att_max)
         stampa_valori_macchina(m)
@@ -1356,7 +1360,9 @@ def macchine_compatibili(ls_part, ls_macc, fs, debug=False):
                                         macchina.principi_max_utensile, macchina.tipo_utensile)
             if ls_ut_temp != False:
                 risultato_robot = robot_compatibile(macchina.tipo_attrezzatura, p.tipo_attrezzatura.keys())
-                print(f'   {macchina.codice} - {ls_ut_temp} {"- " + risultato_robot if risultato_robot is not None else ""}')
+                risultato_sbavatura = verifica_sbavaturaMPM(p.sbavaturaMPM)
+                print(f'   {macchina.codice} - {ls_ut_temp} {" - " + risultato_robot if risultato_robot is not None else ""} '
+                f'{"- Sbavatura MPM disponibile" if risultato_sbavatura is not False and macchina.codice == "15_56" else ""}')
         print(f'\nNote ---> {"-----" if p.note_pezzo is None else p.note_pezzo}')
 
 
@@ -1860,6 +1866,14 @@ def verifica_compatibilita(debug=False):
         macchine_compatibili(mini_lista, Macchine_TFZ_Aprilia, fase, debug=debug)
     else:
         print("Particolare non presente nel database.")
+
+
+# Controlla se il particolare ha la sbavautraMPM
+def verifica_sbavaturaMPM(p_sbavatura):
+    if p_sbavatura == "si":
+        return True
+    else:
+        return False
 
 
 # Verifica se il particolare può essere lavorato su una determinata macchina.
