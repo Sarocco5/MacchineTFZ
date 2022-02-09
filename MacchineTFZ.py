@@ -1,12 +1,11 @@
 # Modulo che salva il database in file "pickle".
-from cmath import e
 import pickle
 # Modulo che mantiene una lista ordinata senza dover chiamare una operazione di ordinamento ogni volta che un elemento
 # viene aggiunto alla lista.
 import bisect
 # Modulo per data e ora.
 import datetime
-import re
+from re import U
 # Modulo per la manipolazione del tempo.
 import time
 # Modulo per gestire percorsi di filesystem.
@@ -909,6 +908,15 @@ def edit_percorso_pickle():
             print("Stai tornando al menu principale!")
 
 
+# Funzione che gestisce i dizionari.
+def gestione_dizionari(tipo, dizionario):
+    print(f'{tipo} risulta nuovo, inserirlo nella lista!')
+    ultima_chiave = list(dizionario.keys())
+    nuova_chiave = ultima_chiave[-1] + 1
+    nuovo_valore = input("Inserire nuovo valore:")
+    dizionario.update({nuova_chiave: nuovo_valore})
+
+
 # Scorre la lista macchine e mi ritorna la macchina.
 def get_macchina(codice_macchina):
     for m in Macchine_TFZ_Aprilia:
@@ -1221,6 +1229,7 @@ def lista_dati_necessari(tipo):
                 Inclinazione;
                 Diametro max ingombro;
                 Altezza totale;
+                Sbavatura MPM;
                 Eventuali note.
 
        -----                           -----
